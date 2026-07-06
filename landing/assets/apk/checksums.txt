@@ -1,0 +1,5 @@
+# OnlyReminder APK Checksums
+# Format: SHA-256 [filename]
+
+# Placeholder for latest build
+0000000000000000000000000000000000000000000000000000000000000000 OnlyReminder-latest.apk
