@@ -18,3 +18,12 @@ della privacy.
 - **Review Obbligatoria**: Nessun invio automatico di messaggi; ogni azione richiede conferma
   dell'utente.
 - **Integrazione WhatsApp**: Supporto per modalità manuale e WhatsApp Business API avanzata.
+
+## Come Iniziare (Sviluppatori)
+
+1. Apri la cartella radice `OnlyReminder/` in Android Studio.
+2. Assicurati che l'Android SDK sia correttamente configurato (il file `local.properties` è già presente).
+3. Esegui il "Gradle Sync".
+4. Build > Build APK per generare il pacchetto di installazione.
+
+Per maggiori dettagli, consulta la cartella `docs/`.

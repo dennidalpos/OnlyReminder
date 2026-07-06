@@ -1,0 +1,51 @@
+# Android Studio / IntelliJ
+*.iml
+.gradle
+/local.properties
+/.idea/caches
+/.idea/libraries
+/.idea/modules.xml
+/.idea/workspace.xml
+/.idea/navEditor.xml
+/.idea/assetWizardSettings.xml
+.idea/shelf
+.idea/assetWizardSettings.xml
+.idea/renderAnalyzeStacktrace.xml
+.idea/deploymentTargetSelector.xml
+
+# Build folders
+/build
+/app/build
+/captures
+
+# External Native Build
+.externalNativeBuild
+.cxx
+
+# OS generated files
+.DS_Store
+Thumbs.db
+
+# Signing files
+*.jks
+*.keystore
+*.pk8
+*.p12
+keystore/*.properties
+!keystore/onlyreminder-release-key.example.properties
+
+# Log files
+*.log
+
+# Heap dumps
+*.hprof
+
+# Kotlin
+.kotlin
+
+# Android
+*.apk
+*.aab
+
+# Local configuration
+local.properties

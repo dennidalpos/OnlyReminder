@@ -5,13 +5,13 @@
 OnlyReminder is a local-first Android application for managing contacts, tasks, and birthday
 follow-ups via WhatsApp.
 
-## Roadmap
+## Roadmap (Completata)
 
-1. **Bootstrap & Architecture**: Setting up the repository and base architecture.
-2. **Security & Data**: Implementing encryption (SQLCipher) and Room database.
-3. **Core Features**: CRUD contacts, Import CSV, Template engine.
-4. **Business Logic**: Birthday scan, Task management, WhatsApp integration.
-5. **Finalization**: Backup/Restore, Release signing, Landing page.
+1. **[x] Bootstrap & Architecture**: Setting up the repository and base architecture.
+2. **[x] Security & Data**: Implementing encryption (SQLCipher) and Room database.
+3. **[x] Core Features**: CRUD contacts, Import CSV, Template engine.
+4. **[x] Business Logic**: Birthday scan, Task management, WhatsApp integration.
+5. **[x] Finalization**: Backup/Restore, Release signing, Landing page.
 
 ## Key Principles
 
