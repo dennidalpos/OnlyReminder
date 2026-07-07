@@ -1,5 +1,6 @@
 package com.onlyreminder.app.features.templates.ui
 
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -36,9 +37,12 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.navigation.NavController
+import com.onlyreminder.app.R
+import com.onlyreminder.app.core.ui.components.ConfirmationDialog
 import com.onlyreminder.app.core.ui.components.OnlyReminderTopBar
 import com.onlyreminder.app.features.templates.presentation.TemplateEditViewModel
 
@@ -51,21 +55,41 @@ fun TemplateEditScreen(
     val previewText by viewModel.previewText.collectAsState()
     val isPromotional by viewModel.isPromotional.collectAsState()
 
+    var showBackDialog by remember { mutableStateOf(false) }
+
+    val onBack = {
+        if (viewModel.hasChanges) {
+            showBackDialog = true
+        } else {
+            navController.navigateUp()
+        }
+        Unit
+    }
+
+    BackHandler(onBack = onBack)
+
     Scaffold(
         topBar = {
             OnlyReminderTopBar(
-                title = if (template?.id == 0L) "New Template" else "Edit Template",
+                title = if (template?.id == 0L) {
+                    stringResource(id = R.string.new_template)
+                } else {
+                    stringResource(id = R.string.edit_template)
+                },
                 navigationIcon = {
-                    IconButton(onClick = { navController.navigateUp() }) {
+                    IconButton(onClick = onBack) {
                         Icon(
                             imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                            contentDescription = "Back"
+                            contentDescription = stringResource(id = R.string.back)
                         )
                     }
                 },
                 actions = {
                     IconButton(onClick = { viewModel.saveTemplate { navController.navigateUp() } }) {
-                        Icon(imageVector = Icons.Default.Save, contentDescription = "Save")
+                        Icon(
+                            imageVector = Icons.Default.Save,
+                            contentDescription = stringResource(id = R.string.save)
+                        )
                     }
                 }
             )
@@ -83,7 +107,7 @@ fun TemplateEditScreen(
                 OutlinedTextField(
                     value = temp.name,
                     onValueChange = { viewModel.updateName(it) },
-                    label = { Text("Template Name") },
+                    label = { Text(stringResource(id = R.string.template_name_label)) },
                     modifier = Modifier.fillMaxWidth()
                 )
 
@@ -97,7 +121,7 @@ fun TemplateEditScreen(
                             onClick = { channelExpanded = true },
                             modifier = Modifier.fillMaxWidth()
                         ) {
-                            Text("Channel: ${temp.channel}")
+                            Text(stringResource(id = R.string.channel_label, temp.channel))
                         }
                         DropdownMenu(
                             expanded = channelExpanded,
@@ -122,7 +146,7 @@ fun TemplateEditScreen(
                             onClick = { langExpanded = true },
                             modifier = Modifier.fillMaxWidth()
                         ) {
-                            Text("Lang: ${temp.language}")
+                            Text(stringResource(id = R.string.language_label, temp.language))
                         }
                         DropdownMenu(
                             expanded = langExpanded,
@@ -142,18 +166,18 @@ fun TemplateEditScreen(
                     Checkbox(
                         checked = temp.isDefault,
                         onCheckedChange = { viewModel.updateIsDefault(it) })
-                    Text("Set as default for this channel")
+                    Text(stringResource(id = R.string.set_default_label))
                 }
 
                 OutlinedTextField(
                     value = temp.body,
                     onValueChange = { viewModel.updateBody(it) },
-                    label = { Text("Message Body") },
+                    label = { Text(stringResource(id = R.string.message_body_label)) },
                     modifier = Modifier
                         .fillMaxWidth()
                         .height(150.dp),
                     supportingText = {
-                        Text("Available: {first_name}, {last_name}, {full_name}, {company}, {birthday}, {custom.field_name}")
+                        Text(stringResource(id = R.string.available_placeholders))
                     }
                 )
 
@@ -170,7 +194,7 @@ fun TemplateEditScreen(
                             )
                             Spacer(modifier = Modifier.width(8.dp))
                             Text(
-                                "This message may be promotional. Make sure you have a proper legal basis before sending it.",
+                                stringResource(id = R.string.promotional_warning),
                                 style = MaterialTheme.typography.bodySmall,
                                 color = MaterialTheme.colorScheme.error
                             )
@@ -178,7 +202,10 @@ fun TemplateEditScreen(
                     }
                 }
 
-                Text("Preview (Sample Contact)", style = MaterialTheme.typography.titleSmall)
+                Text(
+                    stringResource(id = R.string.preview_sample),
+                    style = MaterialTheme.typography.titleSmall
+                )
                 Card(
                     modifier = Modifier.fillMaxWidth(),
                     colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)
@@ -190,6 +217,18 @@ fun TemplateEditScreen(
                     )
                 }
             }
+        }
+
+        if (showBackDialog) {
+            ConfirmationDialog(
+                title = stringResource(id = R.string.unsaved_changes_title),
+                message = stringResource(id = R.string.unsaved_changes_msg),
+                onConfirm = {
+                    showBackDialog = false
+                    navController.navigateUp()
+                },
+                onDismiss = { showBackDialog = false }
+            )
         }
     }
 }

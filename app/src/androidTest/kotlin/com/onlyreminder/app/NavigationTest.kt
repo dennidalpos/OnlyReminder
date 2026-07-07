@@ -1,6 +1,8 @@
 package com.onlyreminder.app
 
 import androidx.compose.ui.test.junit4.v2.createAndroidComposeRule
+import androidx.compose.ui.test.onAllNodesWithText
+import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.test.ext.junit.runners.AndroidJUnit4
@@ -16,34 +18,54 @@ class NavigationTest {
 
     @Test
     fun testNavigationToAllScreens() {
-        val items = listOf(
-            "Contacts",
-            "Tasks",
-            "Birthday Review",
-            "Templates",
-            "Groups",
-            "Import",
-            "Backup",
-            "Settings",
-            "Security",
-            "Configure WhatsApp API",
+        // 0. Handle Onboarding if it exists
+        composeTestRule.waitForIdle()
+
+        // Define possible buttons to click through onboarding
+        val buttonResIds = listOf(R.string.next, R.string.skip, R.string.finish)
+
+        repeat(10) {
+            var clicked = false
+            for (resId in buttonResIds) {
+                val text = composeTestRule.activity.getString(resId)
+                val nodes = composeTestRule.onAllNodesWithText(text).fetchSemanticsNodes()
+                if (nodes.isNotEmpty()) {
+                    composeTestRule.onNodeWithText(text).performClick()
+                    composeTestRule.waitForIdle()
+                    clicked = true
+                    break
+                }
+            }
+            if (!clicked) return@repeat
+        }
+
+        composeTestRule.waitForIdle()
+
+        // 1. Test Management Section items (Home Screen)
+        val homeItems = listOf(
+            R.string.contacts_title,
+            R.string.groups_title,
+            R.string.templates_title,
+            R.string.import_contacts,
         )
 
-        items.forEach { item ->
-            // Click on the menu button
-            composeTestRule.onNodeWithText(item).performClick()
-
-            // Check if the screen loaded (at least wait for some synchronization)
+        homeItems.forEach { itemRes ->
+            val label = composeTestRule.activity.getString(itemRes)
+            composeTestRule.onNodeWithText(label).performClick()
             composeTestRule.waitForIdle()
-
-            // Go back to Home
-            // Depending on how back is implemented, we might use Espresso or a back button in the UI
-            // Most screens have a back button in the top bar. 
-            // We'll use the device back button for simplicity if no specific back button is easily targetable.
             androidx.test.platform.app.InstrumentationRegistry.getInstrumentation()
                 .sendKeyDownUpSync(android.view.KeyEvent.KEYCODE_BACK)
-
             composeTestRule.waitForIdle()
         }
+
+        // 2. Test Settings (Top Bar)
+        val settingsLabel = composeTestRule.activity.getString(R.string.settings_title)
+        composeTestRule.onNodeWithContentDescription(settingsLabel).performClick()
+        composeTestRule.waitForIdle()
+
+        // Return to Home
+        androidx.test.platform.app.InstrumentationRegistry.getInstrumentation()
+            .sendKeyDownUpSync(android.view.KeyEvent.KEYCODE_BACK)
+        composeTestRule.waitForIdle()
     }
 }

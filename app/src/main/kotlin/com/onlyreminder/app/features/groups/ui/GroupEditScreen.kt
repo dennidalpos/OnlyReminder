@@ -1,5 +1,6 @@
 package com.onlyreminder.app.features.groups.ui
 
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -37,6 +38,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.onlyreminder.app.R
+import com.onlyreminder.app.core.ui.components.ConfirmationDialog
 import com.onlyreminder.app.core.ui.components.OnlyReminderTopBar
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -51,6 +53,18 @@ fun GroupEditScreen(
     val availableContacts by viewModel.availableContacts.collectAsState()
 
     var showAddMemberDialog by remember { mutableStateOf(false) }
+    var showBackDialog by remember { mutableStateOf(false) }
+
+    val onBack = {
+        if (viewModel.hasChanges) {
+            showBackDialog = true
+        } else {
+            navController.navigateUp()
+        }
+        Unit
+    }
+
+    BackHandler(onBack = onBack)
 
     Scaffold(
         topBar = {
@@ -59,7 +73,7 @@ fun GroupEditScreen(
                     id = R.string.edit_group
                 ),
                 navigationIcon = {
-                    IconButton(onClick = { navController.navigateUp() }) {
+                    IconButton(onClick = onBack) {
                         Icon(
                             imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                             contentDescription = stringResource(id = R.string.back)
@@ -137,6 +151,18 @@ fun GroupEditScreen(
                     }
                 }
             }
+        }
+
+        if (showBackDialog) {
+            ConfirmationDialog(
+                title = stringResource(id = R.string.unsaved_changes_title),
+                message = stringResource(id = R.string.unsaved_changes_msg),
+                onConfirm = {
+                    showBackDialog = false
+                    navController.navigateUp()
+                },
+                onDismiss = { showBackDialog = false }
+            )
         }
 
         if (showAddMemberDialog) {

@@ -1,9 +1,12 @@
 package com.onlyreminder.app.features.whatsapp.ui
 
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
@@ -18,6 +21,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -29,10 +33,12 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.onlyreminder.app.R
+import com.onlyreminder.app.core.ui.components.ConfirmationDialog
 import com.onlyreminder.app.core.ui.components.OnlyReminderTopBar
 import com.onlyreminder.app.features.whatsapp.presentation.WhatsAppApiViewModel
 
@@ -50,12 +56,26 @@ fun WhatsAppApiScreen(
     var tempToken by remember { mutableStateOf(token) }
     var tempTemplate by remember { mutableStateOf(template) }
 
+    var showBackDialog by remember { mutableStateOf(false) }
+    val hasChanges = tempPhoneId != phoneId || tempToken != token || tempTemplate != template
+
+    val onBack = {
+        if (hasChanges) {
+            showBackDialog = true
+        } else {
+            navController.navigateUp()
+        }
+        Unit
+    }
+
+    BackHandler(onBack = onBack)
+
     Scaffold(
         topBar = {
             OnlyReminderTopBar(
                 title = stringResource(R.string.whatsapp_api_mode),
                 navigationIcon = {
-                    IconButton(onClick = { navController.navigateUp() }) {
+                    IconButton(onClick = onBack) {
                         Icon(
                             imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                             contentDescription = stringResource(R.string.back)
@@ -107,6 +127,14 @@ fun WhatsAppApiScreen(
                 Text(stringResource(R.string.save_configuration))
             }
 
+            OutlinedButton(
+                onClick = { viewModel.testConnection() },
+                modifier = Modifier.fillMaxWidth(),
+                enabled = !isSending && tempPhoneId.isNotEmpty() && tempToken.isNotEmpty()
+            ) {
+                Text(stringResource(R.string.send_test_msg))
+            }
+
             HorizontalDivider()
 
             Text(stringResource(R.string.operations), style = MaterialTheme.typography.titleMedium)
@@ -130,12 +158,35 @@ fun WhatsAppApiScreen(
             }
 
             Card(colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)) {
-                Text(
-                    text = stringResource(R.string.wa_api_security_notice),
-                    modifier = Modifier.padding(16.dp),
-                    style = MaterialTheme.typography.bodySmall
-                )
+                Column(modifier = Modifier.padding(16.dp)) {
+                    Text(
+                        text = stringResource(R.string.wa_api_reception_note_title),
+                        style = MaterialTheme.typography.titleSmall,
+                        fontWeight = FontWeight.Bold
+                    )
+                    Text(
+                        text = stringResource(R.string.wa_api_reception_note_body),
+                        style = MaterialTheme.typography.bodySmall
+                    )
+                    Spacer(modifier = Modifier.height(8.dp))
+                    Text(
+                        text = stringResource(R.string.wa_api_security_notice),
+                        style = MaterialTheme.typography.bodySmall
+                    )
+                }
             }
+        }
+
+        if (showBackDialog) {
+            ConfirmationDialog(
+                title = stringResource(id = R.string.unsaved_changes_title),
+                message = stringResource(id = R.string.unsaved_changes_msg),
+                onConfirm = {
+                    showBackDialog = false
+                    navController.navigateUp()
+                },
+                onDismiss = { showBackDialog = false }
+            )
         }
     }
 }

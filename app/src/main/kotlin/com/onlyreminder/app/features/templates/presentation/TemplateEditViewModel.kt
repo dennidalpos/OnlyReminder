@@ -36,12 +36,17 @@ class TemplateEditViewModel @Inject constructor(
     private val _isPromotional = MutableStateFlow(false)
     val isPromotional: StateFlow<Boolean> = _isPromotional.asStateFlow()
 
+    private var initialState: TemplateEntity? = null
+
+    val hasChanges: Boolean
+        get() = _template.value != initialState
+
     init {
         viewModelScope.launch {
-            if (templateId != null) {
-                _template.value = mainRepository.getTemplateById(templateId)
+            val entity = if (templateId != null) {
+                mainRepository.getTemplateById(templateId)
             } else {
-                _template.value = TemplateEntity(
+                TemplateEntity(
                     name = "",
                     language = "EN",
                     channel = "WHATSAPP_MANUAL",
@@ -51,6 +56,8 @@ class TemplateEditViewModel @Inject constructor(
                     whatsappApprovedTemplateName = null
                 )
             }
+            _template.value = entity
+            initialState = entity
             updatePreview()
         }
     }

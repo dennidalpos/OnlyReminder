@@ -28,6 +28,11 @@ class ContactEditViewModel @Inject constructor(
     private val _uiState = MutableStateFlow(ContactEditUiState())
     val uiState = _uiState.asStateFlow()
 
+    private var initialState = ContactEditUiState()
+
+    val hasChanges: Boolean
+        get() = _uiState.value != initialState
+
     val groups: StateFlow<List<GroupEntity>> = repository.getAllGroups()
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
 
@@ -41,7 +46,7 @@ class ContactEditViewModel @Inject constructor(
         viewModelScope.launch {
             repository.getContactById(id)?.let { c ->
                 val tags = repository.getTagsForContact(id).first().joinToString(", ") { it.name }
-                _uiState.value = ContactEditUiState(
+                val loadedState = ContactEditUiState(
                     firstName = c.firstName,
                     lastName = c.lastName,
                     displayName = c.displayName,
@@ -54,6 +59,8 @@ class ContactEditViewModel @Inject constructor(
                     tags = tags,
                     status = c.status
                 )
+                _uiState.value = loadedState
+                initialState = loadedState
             }
         }
     }

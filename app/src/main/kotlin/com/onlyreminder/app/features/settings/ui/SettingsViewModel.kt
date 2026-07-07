@@ -52,4 +52,8 @@ class SettingsViewModel @Inject constructor(
     fun setBirthdayNotificationTime(time: String) {
         viewModelScope.launch { settingsDataStore.updateBirthdayNotificationTime(time) }
     }
+
+    fun setBackupFolder(uri: String) {
+        viewModelScope.launch { settingsDataStore.setBackupFolderUri(uri) }
+    }
 }

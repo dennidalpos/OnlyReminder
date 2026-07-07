@@ -1,5 +1,6 @@
 package com.onlyreminder.app.features.tasks.ui
 
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -40,9 +41,12 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.navigation.NavController
+import com.onlyreminder.app.R
+import com.onlyreminder.app.core.ui.components.ConfirmationDialog
 import com.onlyreminder.app.core.ui.components.OnlyReminderTopBar
 import com.onlyreminder.app.features.tasks.presentation.TaskEditViewModel
 import java.time.Instant
@@ -62,30 +66,47 @@ fun TaskEditScreen(
 
     var showDatePicker by remember { mutableStateOf(false) }
     var showTimePicker by remember { mutableStateOf(false) }
+    var showBackDialog by remember { mutableStateOf(false) }
 
-    val dateTimeFormatter = remember { DateTimeFormatter.ofPattern("dd MMM yyyy, HH:mm") }
+    val onBack = {
+        if (viewModel.hasChanges) {
+            showBackDialog = true
+        } else {
+            navController.navigateUp()
+        }
+        Unit
+    }
+
+    BackHandler(onBack = onBack)
 
     Scaffold(
         topBar = {
             OnlyReminderTopBar(
-                title = if (task?.id == 0L) "New Task" else "Edit Task",
+                title = if (task?.id == 0L) stringResource(id = R.string.new_task) else stringResource(
+                    id = R.string.edit_task
+                ),
                 navigationIcon = {
-                    IconButton(onClick = { navController.navigateUp() }) {
+                    IconButton(onClick = onBack) {
                         Icon(
                             imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                            contentDescription = "Back"
+                            contentDescription = stringResource(id = R.string.back)
                         )
                     }
                 },
                 actions = {
                     IconButton(onClick = { viewModel.saveTask { navController.navigateUp() } }) {
-                        Icon(imageVector = Icons.Default.Save, contentDescription = "Save")
+                        Icon(
+                            imageVector = Icons.Default.Save,
+                            contentDescription = stringResource(id = R.string.save)
+                        )
                     }
                 }
             )
         }
     ) { paddingValues ->
         task?.let { t ->
+            val isBirthday = t.type == "BIRTHDAY"
+
             Column(
                 modifier = Modifier
                     .fillMaxSize()
@@ -97,14 +118,14 @@ fun TaskEditScreen(
                 OutlinedTextField(
                     value = t.title,
                     onValueChange = { viewModel.updateTitle(it) },
-                    label = { Text("Title") },
+                    label = { Text(stringResource(id = R.string.task_title)) },
                     modifier = Modifier.fillMaxWidth()
                 )
 
                 OutlinedTextField(
                     value = t.description,
                     onValueChange = { viewModel.updateDescription(it) },
-                    label = { Text("Description") },
+                    label = { Text(stringResource(id = R.string.task_description)) },
                     modifier = Modifier
                         .fillMaxWidth()
                         .height(100.dp)
@@ -120,7 +141,7 @@ fun TaskEditScreen(
                         value = t.type,
                         onValueChange = {},
                         readOnly = true,
-                        label = { Text("Event Type") },
+                        label = { Text(stringResource(id = R.string.event_type)) },
                         trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = typeExpanded) },
                         modifier = Modifier
                             .menuAnchor(
@@ -152,10 +173,11 @@ fun TaskEditScreen(
                         modifier = Modifier.weight(1f)
                     ) {
                         OutlinedTextField(
-                            value = selectedContact?.displayName ?: "No Contact",
+                            value = selectedContact?.displayName
+                                ?: stringResource(id = R.string.no_contact),
                             onValueChange = {},
                             readOnly = true,
-                            label = { Text("Link Contact") },
+                            label = { Text(stringResource(id = R.string.link_contact)) },
                             trailingIcon = {
                                 ExposedDropdownMenuDefaults.TrailingIcon(
                                     expanded = contactExpanded
@@ -173,7 +195,7 @@ fun TaskEditScreen(
                             onDismissRequest = { contactExpanded = false }
                         ) {
                             DropdownMenuItem(
-                                text = { Text("No Contact") },
+                                text = { Text(stringResource(id = R.string.no_contact)) },
                                 onClick = {
                                     viewModel.updateContact(null); contactExpanded = false
                                 })
@@ -199,10 +221,10 @@ fun TaskEditScreen(
                         modifier = Modifier.weight(1f)
                     ) {
                         OutlinedTextField(
-                            value = selectedGroup?.name ?: "No Group",
+                            value = selectedGroup?.name ?: stringResource(id = R.string.no_group),
                             onValueChange = {},
                             readOnly = true,
-                            label = { Text("Link Group") },
+                            label = { Text(stringResource(id = R.string.link_group)) },
                             trailingIcon = {
                                 ExposedDropdownMenuDefaults.TrailingIcon(
                                     expanded = groupExpanded
@@ -220,7 +242,7 @@ fun TaskEditScreen(
                             onDismissRequest = { groupExpanded = false }
                         ) {
                             DropdownMenuItem(
-                                text = { Text("No Group") },
+                                text = { Text(stringResource(id = R.string.no_group)) },
                                 onClick = { viewModel.updateGroup(null); groupExpanded = false })
                             groups.forEach { group ->
                                 DropdownMenuItem(
@@ -244,7 +266,7 @@ fun TaskEditScreen(
                         value = t.sendMode,
                         onValueChange = {},
                         readOnly = true,
-                        label = { Text("Send Mode") },
+                        label = { Text(stringResource(id = R.string.send_mode_selection)) },
                         trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = modeExpanded) },
                         modifier = Modifier
                             .menuAnchor(
@@ -277,10 +299,10 @@ fun TaskEditScreen(
                     onExpandedChange = { templateExpanded = it }
                 ) {
                     OutlinedTextField(
-                        value = selectedTemplate?.name ?: "No Template",
+                        value = selectedTemplate?.name ?: stringResource(id = R.string.no_template),
                         onValueChange = {},
                         readOnly = true,
-                        label = { Text("Message Template") },
+                        label = { Text(stringResource(id = R.string.message_template)) },
                         trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = templateExpanded) },
                         modifier = Modifier
                             .menuAnchor(
@@ -294,7 +316,7 @@ fun TaskEditScreen(
                         onDismissRequest = { templateExpanded = false }
                     ) {
                         DropdownMenuItem(
-                            text = { Text("No Template") },
+                            text = { Text(stringResource(id = R.string.no_template)) },
                             onClick = {
                                 viewModel.updateTemplate(null); templateExpanded = false
                             })
@@ -312,33 +334,50 @@ fun TaskEditScreen(
 
                 // Due Date/Time
                 Text(
-                    text = "Schedule Event",
+                    text = stringResource(id = R.string.schedule_event),
                     style = MaterialTheme.typography.titleSmall
                 )
+
+                if (isBirthday) {
+                    Text(
+                        text = stringResource(id = R.string.birthday_check_time_desc),
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.secondary
+                    )
+                }
+
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
-                    OutlinedButton(
-                        onClick = { showDatePicker = true },
-                        modifier = Modifier.weight(1f)
-                    ) {
-                        Text("Date: ${t.dueDateTime.toLocalDate()}")
+                    if (!isBirthday) {
+                        OutlinedButton(
+                            onClick = { showDatePicker = true },
+                            modifier = Modifier.weight(1f)
+                        ) {
+                            Text(
+                                stringResource(
+                                    id = R.string.date_label,
+                                    t.dueDateTime.toLocalDate()
+                                )
+                            )
+                        }
                     }
                     OutlinedButton(
                         onClick = { showTimePicker = true },
-                        modifier = Modifier.weight(1f)
+                        modifier = Modifier.weight(if (isBirthday) 1f else 1f)
                     ) {
                         Text(
-                            "Time: ${
+                            stringResource(
+                                id = R.string.time_label,
                                 t.dueDateTime.toLocalTime()
                                     .format(DateTimeFormatter.ofPattern("HH:mm"))
-                            }"
+                            )
                         )
                     }
                 }
 
-                if (showDatePicker) {
+                if (showDatePicker && !isBirthday) {
                     val datePickerState = rememberDatePickerState(
                         initialSelectedDateMillis = t.dueDateTime.atZone(ZoneId.systemDefault())
                             .toInstant().toEpochMilli()
@@ -362,12 +401,12 @@ fun TaskEditScreen(
                                 }
                                 showDatePicker = false
                             }) {
-                                Text("OK")
+                                Text(stringResource(id = R.string.ok))
                             }
                         },
                         dismissButton = {
                             TextButton(onClick = { showDatePicker = false }) {
-                                Text("Cancel")
+                                Text(stringResource(id = R.string.cancel))
                             }
                         }
                     ) {
@@ -393,12 +432,12 @@ fun TaskEditScreen(
                                 )
                                 showTimePicker = false
                             }) {
-                                Text("OK")
+                                Text(stringResource(id = R.string.ok))
                             }
                         },
                         dismissButton = {
                             TextButton(onClick = { showTimePicker = false }) {
-                                Text("Cancel")
+                                Text(stringResource(id = R.string.cancel))
                             }
                         },
                         text = {
@@ -407,6 +446,18 @@ fun TaskEditScreen(
                     )
                 }
             }
+        }
+
+        if (showBackDialog) {
+            ConfirmationDialog(
+                title = stringResource(id = R.string.unsaved_changes_title),
+                message = stringResource(id = R.string.unsaved_changes_msg),
+                onConfirm = {
+                    showBackDialog = false
+                    navController.navigateUp()
+                },
+                onDismiss = { showBackDialog = false }
+            )
         }
     }
 }

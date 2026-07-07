@@ -56,6 +56,7 @@ fun BirthdayReviewScreen(
 ) {
     val latestRun by viewModel.latestRun.collectAsState()
     val items by viewModel.items.collectAsState()
+    val sendMode by viewModel.sendMode.collectAsState()
 
     Scaffold(
         topBar = {
@@ -97,6 +98,16 @@ fun BirthdayReviewScreen(
                     items(items) { itemWithContact ->
                         BirthdayReviewItem(
                             itemWithContact = itemWithContact,
+                            sendMode = sendMode,
+                            onSendIndividual = {
+                                if (sendMode == "WA_API") {
+                                    viewModel.sendItemViaApi(itemWithContact)
+                                } else {
+                                    latestRun?.let { run ->
+                                        navController.navigate(Route.WhatsApp(run.id))
+                                    }
+                                }
+                            },
                             onStatusChange = { status ->
                                 viewModel.updateItemStatus(
                                     itemWithContact.item.id,
@@ -114,13 +125,21 @@ fun BirthdayReviewScreen(
                     }
                 }
 
+                val pendingCount = items.count { it.item.status == BirthdayItemStatus.PENDING }
+
                 BottomActionArea(
+                    isRunEmpty = items.isEmpty(),
+                    hasPending = pendingCount > 0,
                     onSendAll = {
                         latestRun?.let { run ->
                             navController.navigate(Route.WhatsApp(run.id))
                         }
                     },
-                    onSkipAll = { /* Update all to SKIPPED */ }
+                    onSkipAll = { viewModel.skipAll() },
+                    onCompleteRun = {
+                        viewModel.completeRun()
+                        navController.navigateUp()
+                    }
                 )
             }
         }
@@ -145,7 +164,16 @@ fun RunSummaryHeader(run: com.onlyreminder.app.data.database.entities.BirthdayRu
                 style = MaterialTheme.typography.bodyMedium
             )
             Text(
-                text = stringResource(id = R.string.status) + ": ${run.status.name}",
+                text = stringResource(id = R.string.status) + ": " + when (run.status) {
+                    com.onlyreminder.app.domain.model.BirthdayRunStatus.PENDING -> stringResource(id = R.string.status_pending)
+                    com.onlyreminder.app.domain.model.BirthdayRunStatus.COMPLETED -> stringResource(
+                        id = R.string.status_completed
+                    )
+
+                    com.onlyreminder.app.domain.model.BirthdayRunStatus.NOT_REVIEWED -> stringResource(
+                        id = R.string.status_not_reviewed
+                    )
+                },
                 style = MaterialTheme.typography.bodySmall
             )
         }
@@ -155,6 +183,8 @@ fun RunSummaryHeader(run: com.onlyreminder.app.data.database.entities.BirthdayRu
 @Composable
 fun BirthdayReviewItem(
     itemWithContact: BirthdayRunItemWithContact,
+    sendMode: String,
+    onSendIndividual: () -> Unit,
     onStatusChange: (BirthdayItemStatus) -> Unit,
     onDeleteContact: () -> Unit
 ) {
@@ -218,13 +248,27 @@ fun BirthdayReviewItem(
                     Text(stringResource(id = R.string.skip))
                 }
                 if (item.status == BirthdayItemStatus.PENDING) {
-                    Button(onClick = { /* Navigate to WhatsApp Manual or Send via API */ }) {
-                        Text(stringResource(id = R.string.prepare_send))
+                    Button(onClick = onSendIndividual) {
+                        Text(
+                            if (sendMode == "WA_API") stringResource(R.string.send_now_api) else stringResource(
+                                id = R.string.prepare_send
+                            )
+                        )
                     }
                 } else {
                     Text(
-                        text = item.status.name,
-                        color = if (item.status == BirthdayItemStatus.SENT) Color(0xFF4CAF50) else Color.Gray
+                        text = when (item.status) {
+                            BirthdayItemStatus.SENT, BirthdayItemStatus.SENT_MANUAL -> stringResource(
+                                id = R.string.status_sent
+                            )
+
+                            BirthdayItemStatus.FAILED -> stringResource(id = R.string.status_failed)
+                            BirthdayItemStatus.SKIPPED -> stringResource(id = R.string.status_skipped)
+                            else -> item.status.name
+                        },
+                        color = if (item.status == BirthdayItemStatus.SENT || item.status == BirthdayItemStatus.SENT_MANUAL) Color(
+                            0xFF4CAF50
+                        ) else Color.Gray
                     )
                 }
             }
@@ -233,7 +277,13 @@ fun BirthdayReviewItem(
 }
 
 @Composable
-fun BottomActionArea(onSendAll: () -> Unit, onSkipAll: () -> Unit) {
+fun BottomActionArea(
+    isRunEmpty: Boolean,
+    hasPending: Boolean,
+    onSendAll: () -> Unit,
+    onSkipAll: () -> Unit,
+    onCompleteRun: () -> Unit
+) {
     Surface(tonalElevation = 4.dp, shadowElevation = 8.dp) {
         Row(
             modifier = Modifier
@@ -241,11 +291,17 @@ fun BottomActionArea(onSendAll: () -> Unit, onSkipAll: () -> Unit) {
                 .padding(16.dp),
             horizontalArrangement = Arrangement.spacedBy(8.dp)
         ) {
-            OutlinedButton(onClick = onSkipAll, modifier = Modifier.weight(1f)) {
-                Text(stringResource(id = R.string.skip_all))
-            }
-            Button(onClick = onSendAll, modifier = Modifier.weight(1f)) {
-                Text(stringResource(id = R.string.send_selected))
+            if (hasPending) {
+                OutlinedButton(onClick = onSkipAll, modifier = Modifier.weight(1f)) {
+                    Text(stringResource(id = R.string.skip_all))
+                }
+                Button(onClick = onSendAll, modifier = Modifier.weight(1f)) {
+                    Text(stringResource(id = R.string.send_selected))
+                }
+            } else if (!isRunEmpty) {
+                Button(onClick = onCompleteRun, modifier = Modifier.fillMaxWidth()) {
+                    Text(stringResource(R.string.mark_as_completed))
+                }
             }
         }
     }

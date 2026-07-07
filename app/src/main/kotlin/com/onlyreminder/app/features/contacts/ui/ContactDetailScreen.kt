@@ -205,7 +205,10 @@ fun ContactDetailScreen(
                 DetailItem(
                     icon = Icons.Default.Info,
                     label = stringResource(id = R.string.status),
-                    value = c.status.name
+                    value = when (c.status) {
+                        ContactStatus.ACTIVE -> stringResource(id = R.string.active)
+                        ContactStatus.ARCHIVED -> stringResource(id = R.string.archived)
+                    }
                 )
 
                 Spacer(modifier = Modifier.height(24.dp))
@@ -237,6 +240,16 @@ fun ContactDetailScreen(
                         colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.secondary)
                     ) {
                         Text(stringResource(id = R.string.archive_contact))
+                    }
+                } else {
+                    Button(
+                        onClick = { viewModel.restoreContact() },
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(vertical = 8.dp),
+                        colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.tertiary)
+                    ) {
+                        Text(stringResource(id = R.string.restore_contact))
                     }
                 }
             }

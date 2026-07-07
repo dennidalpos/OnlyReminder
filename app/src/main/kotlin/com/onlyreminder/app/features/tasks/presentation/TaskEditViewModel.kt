@@ -44,16 +44,21 @@ class TaskEditViewModel @Inject constructor(
     private val _templates = MutableStateFlow<List<TemplateEntity>>(emptyList())
     val templates: StateFlow<List<TemplateEntity>> = _templates.asStateFlow()
 
+    private var initialState: TaskEntity? = null
+
+    val hasChanges: Boolean
+        get() = _task.value != initialState
+
     init {
         viewModelScope.launch {
             _contacts.value = contactRepository.getAllContacts().first()
             _groups.value = contactRepository.getAllGroups().first()
             _templates.value = mainRepository.getAllTemplates().first()
 
-            if (taskId != null) {
-                _task.value = mainRepository.getTaskById(taskId)
+            val entity = if (taskId != null) {
+                mainRepository.getTaskById(taskId)
             } else {
-                _task.value = TaskEntity(
+                TaskEntity(
                     title = "",
                     description = "",
                     contactId = initialContactId,
@@ -67,6 +72,8 @@ class TaskEditViewModel @Inject constructor(
                     sendMode = "REMINDER_ONLY"
                 )
             }
+            _task.value = entity
+            initialState = entity
         }
     }
 

@@ -38,6 +38,7 @@
     <string name="create_task">Crea Task</string>
     <string name="send_wa">Invia WhatsApp</string>
     <string name="archive_contact">Archivia Contatto</string>
+    <string name="restore_contact">Ripristina Contatto</string>
     <string name="delete_contact_confirm_title">Elimina Contatto</string>
     <string name="delete_contact_confirm_msg">Questo eliminerà definitivamente il contatto selezionato da OnlyReminder. L\'azione non può essere annullata, salvo ripristino da backup.</string>
     <string name="new_contact">Nuovo Contatto</string>
@@ -62,7 +63,11 @@
     <string name="active">Attivo</string>
     <string name="archived">Archiviato</string>
     <string name="save">Salva</string>
+    <string name="complete">Completa</string>
     <string name="no_group">Nessun Gruppo</string>
+    <string name="unsaved_changes_title">Modifiche non salvate</string>
+    <string name="unsaved_changes_msg">Hai delle modifiche non salvate. Sei sicuro di voler tornare indietro e perderle?</string>
+    <string name="discard">Scarta</string>
 
     <!-- Multi-selezione -->
     <string name="select_all">Seleziona Tutto</string>
@@ -83,6 +88,17 @@
     <string name="no_templates">Nessun template creato. Tocca + per crearne uno.</string>
     <string name="duplicate">Duplica</string>
     <string name="default_label">Predefinito</string>
+    <string name="add_template">Aggiungi Template</string>
+    <string name="new_template">Nuovo Template</string>
+    <string name="edit_template">Modifica Template</string>
+    <string name="template_name_label">Nome Template</string>
+    <string name="channel_label">Canale: %1$s</string>
+    <string name="language_label">Lingua: %1$s</string>
+    <string name="set_default_label">Imposta come predefinito per questo canale</string>
+    <string name="message_body_label">Corpo del Messaggio</string>
+    <string name="available_placeholders">Disponibili: {first_name}, {last_name}, {full_name}, {company}, {birthday}, {custom.field_name}</string>
+    <string name="promotional_warning">Questo messaggio potrebbe essere promozionale. Assicurati di avere una base legale adeguata prima di inviarlo.</string>
+    <string name="preview_sample">Anteprima (Contatto di Esempio)</string>
 
     <!-- Step 08 & 09: Importazione -->
     <string name="import_contacts">Importa Contatti</string>
@@ -119,12 +135,22 @@
     <!-- Navigation & Titles -->
     <string name="tasks_title">Promemoria</string>
     <string name="templates_title">Template</string>
-    <string name="add_template">Aggiungi Template</string>
-    <string name="new_template">Nuovo Template</string>
-    <string name="edit_template">Modifica Template</string>
     <string name="birthday_review_title">Compleanni da revisionare</string>
     <string name="backup_title">Backup e Ripristino</string>
     <string name="settings_title">Impostazioni</string>
+    <string name="general_header">Generali</string>
+    <string name="language_label_settings">Lingua</string>
+    <string name="english">English</string>
+    <string name="italian">Italiano</string>
+    <string name="change">Cambia</string>
+    <string name="default_country_code">Prefisso Internazionale Predefinito</string>
+    <string name="toggle">Cambia</string>
+    <string name="sending_mode_header">Modalità Invio</string>
+    <string name="birthdays_header">Compleanni</string>
+    <string name="notification_time">Orario Notifiche</string>
+    <string name="backup_header">Backup</string>
+    <string name="backup_location">Posizione Backup</string>
+    <string name="select">Seleziona</string>
     <string name="security_title">Sicurezza</string>
     <string name="config_wa_api">Configura WhatsApp API</string>
     <string name="config_wa_api_desc">Gestisci token, Phone ID e template</string>
@@ -189,4 +215,47 @@
     <string name="backup_create_failed">Creazione backup fallita.</string>
     <string name="backup_restore_success">Ripristino completato. Riavvia l\'app.</string>
     <string name="backup_restore_failed">Ripristino fallito. Controlla la password o il file.</string>
+
+    <!-- Task Edit -->
+    <string name="new_task">Nuovo Task</string>
+    <string name="edit_task">Modifica Task</string>
+    <string name="task_title">Titolo</string>
+    <string name="task_description">Descrizione</string>
+    <string name="event_type">Tipo Evento</string>
+    <string name="link_contact">Collega Contatto</string>
+    <string name="link_group">Collega Gruppo</string>
+    <string name="message_template">Template Messaggio</string>
+    <string name="schedule_event">Programma Evento</string>
+    <string name="date_label">Data: %1$s</string>
+    <string name="time_label">Ora: %1$s</string>
+    <string name="no_template">Nessun Template</string>
+    <string name="no_contact">Nessun Contatto</string>
+    <string name="birthday_check_time_desc">Per i compleanni è richiesto solo l\'orario di controllo giornaliero.</string>
+
+    <!-- Statuses -->
+    <string name="status_pending">In attesa</string>
+    <string name="status_completed">Completato</string>
+    <string name="status_cancelled">Annullato</string>
+    <string name="status_not_reviewed">Non revisionato</string>
+    <string name="status_sent">Inviato</string>
+    <string name="status_failed">Fallito</string>
+    <string name="status_skipped">Saltato</string>
+
+    <string name="test_connection">Test Connessione</string>
+    <string name="send_test_msg">Invia Messaggio di Test</string>
+    <string name="wa_api_reception_note_title">Nota sulla Ricezione:</string>
+    <string name="wa_api_reception_note_body">La WhatsApp Business API via Cloud supporta solo l\'invio di messaggi dall\'app. Per ricevere risposte, è necessario configurare un Webhook su un server esterno (non incluso in OnlyReminder).</string>
+    <string name="mark_as_completed">Segna come Completato</string>
+    <string name="send_now_api">Invia Ora (API)</string>
+    <string name="new_birthdays_to_review">Hai nuovi compleanni da revisionare e inviare.</string>
+    <string name="management">Gestione</string>
+    <string name="hello">Ciao!</string>
+    <string name="start_by_adding_contacts">Inizia aggiungendo dei contatti.</string>
+    <string name="saved_contacts_count_new">Hai %1$d contatti salvati.</string>
+    <string name="pending_tasks_summary">Hai %1$d attività da completare oggi.</string>
+    <string name="birthdays_today_count">Oggi compiono gli anni %1$d contatti!</string>
+    <string name="report_finale">Report Finale</string>
+    <string name="summary">Riepilogo</string>
+    <string name="total_found">Totale Trovati</string>
+    <string name="details">Dettagli</string>
 </resources>

@@ -9,6 +9,7 @@ import com.onlyreminder.app.data.repository.MainRepositoryImpl
 import com.onlyreminder.app.domain.model.BirthdayItemStatus
 import com.onlyreminder.app.domain.model.MessageStatus
 import com.onlyreminder.app.features.birthday.presentation.BirthdayRunItemWithContact
+import com.onlyreminder.app.features.whatsapp.data.WhatsAppRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -24,10 +25,18 @@ import javax.inject.Inject
 class WhatsAppViewModel @Inject constructor(
     private val mainRepository: MainRepositoryImpl,
     private val contactRepository: ContactRepositoryImpl,
+    private val settingsDataStore: com.onlyreminder.app.data.settings.SettingsDataStore,
+    private val whatsappRepository: WhatsAppRepository,
     savedStateHandle: SavedStateHandle
 ) : ViewModel() {
 
-    private val runId: Long? = savedStateHandle["runId"]
+    val runId: Long? = savedStateHandle["runId"]
+
+    val sendMode = settingsDataStore.sendMode.stateIn(
+        viewModelScope,
+        SharingStarted.WhileSubscribed(),
+        "REMINDER_ONLY"
+    )
 
     private val _queue = MutableStateFlow<List<BirthdayRunItemWithContact>>(emptyList())
     val queue: StateFlow<List<BirthdayRunItemWithContact>> = _queue.asStateFlow()
@@ -83,6 +92,46 @@ class WhatsAppViewModel @Inject constructor(
                     sentAt = java.time.LocalDateTime.now()
                 )
             )
+            next()
+        }
+    }
+
+    fun sendCurrentViaApi() {
+        val current = currentItem.value ?: return
+        val contact = current.contact ?: return
+
+        viewModelScope.launch {
+            val templates = mainRepository.getAllTemplates().first()
+            val birthdayTemplate =
+                templates.find { it.isDefault && it.name.contains("Birthday", ignoreCase = true) }
+                    ?: templates.find { it.name.contains("Birthday", ignoreCase = true) }
+
+            val overrideName = birthdayTemplate?.whatsappApprovedTemplateName
+
+            val success = whatsappRepository.sendMessage(contact, overrideName)
+
+            mainRepository.addRunItem(
+                current.item.copy(
+                    status = if (success) BirthdayItemStatus.SENT else BirthdayItemStatus.FAILED,
+                    updatedAt = java.time.LocalDateTime.now()
+                )
+            )
+
+            mainRepository.addLog(
+                MessageLogEntity(
+                    contactId = contact.id,
+                    templateId = null,
+                    taskId = null,
+                    birthdayRunId = runId,
+                    channel = "WHATSAPP_API",
+                    mode = "API",
+                    status = if (success) MessageStatus.SENT else MessageStatus.FAILED,
+                    errorMessage = if (success) null else "API Error",
+                    payloadPreview = current.item.generatedMessagePreview,
+                    sentAt = java.time.LocalDateTime.now()
+                )
+            )
+
             next()
         }
     }

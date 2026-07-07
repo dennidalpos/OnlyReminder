@@ -56,6 +56,13 @@ class ContactDetailViewModel @Inject constructor(
         }
     }
 
+    fun restoreContact() {
+        viewModelScope.launch {
+            repository.restoreContact(contactId)
+            loadContact()
+        }
+    }
+
     fun deleteContact(onDeleted: () -> Unit) {
         viewModelScope.launch {
             _contact.value?.let {

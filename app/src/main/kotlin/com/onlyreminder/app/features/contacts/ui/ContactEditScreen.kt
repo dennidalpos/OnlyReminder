@@ -1,5 +1,6 @@
 package com.onlyreminder.app.features.contacts.ui
 
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -30,9 +31,12 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.navigation.NavController
+import com.onlyreminder.app.R
+import com.onlyreminder.app.core.ui.components.ConfirmationDialog
 import com.onlyreminder.app.core.ui.components.OnlyReminderTopBar
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -43,22 +47,41 @@ fun ContactEditScreen(
 ) {
     val uiState by viewModel.uiState.collectAsState()
     val groups by viewModel.groups.collectAsState()
+    var showBackDialog by remember { mutableStateOf(false) }
+
+    val onBack = {
+        if (viewModel.hasChanges) {
+            showBackDialog = true
+        } else {
+            navController.navigateUp()
+        }
+        Unit
+    }
+
+    BackHandler(onBack = onBack)
 
     Scaffold(
         topBar = {
             OnlyReminderTopBar(
-                title = if (uiState.displayName.isEmpty()) "New Contact" else "Edit Contact",
+                title = if (uiState.displayName.isEmpty()) {
+                    stringResource(id = R.string.new_contact)
+                } else {
+                    stringResource(id = R.string.edit_contact)
+                },
                 navigationIcon = {
-                    IconButton(onClick = { navController.navigateUp() }) {
+                    IconButton(onClick = onBack) {
                         Icon(
                             imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                            contentDescription = "Back"
+                            contentDescription = stringResource(id = R.string.back)
                         )
                     }
                 },
                 actions = {
                     IconButton(onClick = { viewModel.saveContact { navController.navigateUp() } }) {
-                        Icon(imageVector = Icons.Default.Check, contentDescription = "Save")
+                        Icon(
+                            imageVector = Icons.Default.Check,
+                            contentDescription = stringResource(id = R.string.save)
+                        )
                     }
                 }
             )
@@ -75,7 +98,7 @@ fun ContactEditScreen(
             OutlinedTextField(
                 value = uiState.displayName,
                 onValueChange = viewModel::onDisplayNameChange,
-                label = { Text("Display Name *") },
+                label = { Text(stringResource(id = R.string.display_name_label)) },
                 modifier = Modifier.fillMaxWidth(),
                 singleLine = true
             )
@@ -84,14 +107,14 @@ fun ContactEditScreen(
                 OutlinedTextField(
                     value = uiState.firstName,
                     onValueChange = viewModel::onFirstNameChange,
-                    label = { Text("First Name") },
+                    label = { Text(stringResource(id = R.string.first_name)) },
                     modifier = Modifier.weight(1f),
                     singleLine = true
                 )
                 OutlinedTextField(
                     value = uiState.lastName,
                     onValueChange = viewModel::onLastNameChange,
-                    label = { Text("Last Name") },
+                    label = { Text(stringResource(id = R.string.last_name)) },
                     modifier = Modifier.weight(1f),
                     singleLine = true
                 )
@@ -100,7 +123,7 @@ fun ContactEditScreen(
             OutlinedTextField(
                 value = uiState.phone,
                 onValueChange = viewModel::onPhoneChange,
-                label = { Text("Phone Number") },
+                label = { Text(stringResource(id = R.string.phone)) },
                 modifier = Modifier.fillMaxWidth(),
                 singleLine = true
             )
@@ -108,7 +131,7 @@ fun ContactEditScreen(
             OutlinedTextField(
                 value = uiState.email,
                 onValueChange = viewModel::onEmailChange,
-                label = { Text("Email") },
+                label = { Text(stringResource(id = R.string.email)) },
                 modifier = Modifier.fillMaxWidth(),
                 singleLine = true
             )
@@ -116,7 +139,7 @@ fun ContactEditScreen(
             OutlinedTextField(
                 value = uiState.company,
                 onValueChange = viewModel::onCompanyChange,
-                label = { Text("Company") },
+                label = { Text(stringResource(id = R.string.company)) },
                 modifier = Modifier.fillMaxWidth(),
                 singleLine = true
             )
@@ -124,7 +147,7 @@ fun ContactEditScreen(
             OutlinedTextField(
                 value = uiState.birthday,
                 onValueChange = viewModel::onBirthdayChange,
-                label = { Text("Birthday (YYYY-MM-DD)") },
+                label = { Text(stringResource(id = R.string.birthday_format)) },
                 modifier = Modifier.fillMaxWidth(),
                 singleLine = true
             )
@@ -138,19 +161,31 @@ fun ContactEditScreen(
             OutlinedTextField(
                 value = uiState.tags,
                 onValueChange = viewModel::onTagsChange,
-                label = { Text("Tags (comma separated)") },
+                label = { Text(stringResource(id = R.string.tags_csv)) },
                 modifier = Modifier.fillMaxWidth()
             )
 
             OutlinedTextField(
                 value = uiState.notes,
                 onValueChange = viewModel::onNotesChange,
-                label = { Text("Notes") },
+                label = { Text(stringResource(id = R.string.notes)) },
                 modifier = Modifier.fillMaxWidth(),
                 minLines = 3
             )
 
             Spacer(modifier = Modifier.height(32.dp))
+        }
+
+        if (showBackDialog) {
+            ConfirmationDialog(
+                title = stringResource(id = R.string.unsaved_changes_title),
+                message = stringResource(id = R.string.unsaved_changes_msg),
+                onConfirm = {
+                    showBackDialog = false
+                    navController.navigateUp()
+                },
+                onDismiss = { showBackDialog = false }
+            )
         }
     }
 }
@@ -170,10 +205,10 @@ fun GroupDropdown(
         onExpandedChange = { expanded = !expanded }
     ) {
         OutlinedTextField(
-            value = selectedGroup?.name ?: "No Group",
+            value = selectedGroup?.name ?: stringResource(id = R.string.no_group),
             onValueChange = {},
             readOnly = true,
-            label = { Text("Group") },
+            label = { Text(stringResource(id = R.string.group)) },
             trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
             modifier = Modifier
                 .menuAnchor(type = ExposedDropdownMenuAnchorType.PrimaryNotEditable, enabled = true)
@@ -185,7 +220,7 @@ fun GroupDropdown(
             onDismissRequest = { expanded = false }
         ) {
             DropdownMenuItem(
-                text = { Text("No Group") },
+                text = { Text(stringResource(id = R.string.no_group)) },
                 onClick = {
                     onGroupSelected(null)
                     expanded = false

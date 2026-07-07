@@ -48,12 +48,12 @@ fun SettingsScreen(
     Scaffold(
         topBar = {
             OnlyReminderTopBar(
-                title = "Settings",
+                title = stringResource(id = R.string.settings_title),
                 navigationIcon = {
                     IconButton(onClick = { navController.navigateUp() }) {
                         Icon(
                             imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                            contentDescription = "Back"
+                            contentDescription = stringResource(id = R.string.back)
                         )
                     }
                 }
@@ -68,31 +68,43 @@ fun SettingsScreen(
                 .padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            Text("General", style = MaterialTheme.typography.titleMedium)
+            Text(
+                stringResource(id = R.string.general_header),
+                style = MaterialTheme.typography.titleMedium
+            )
 
             ListItem(
-                headlineContent = { Text("Language") },
-                supportingContent = { Text(if (language == "en") "English" else "Italiano") },
+                headlineContent = { Text(stringResource(id = R.string.language_label_settings)) },
+                supportingContent = {
+                    Text(
+                        if (language == "en") stringResource(id = R.string.english) else stringResource(
+                            id = R.string.italian
+                        )
+                    )
+                },
                 trailingContent = {
                     TextButton(onClick = { viewModel.setLanguage(if (language == "en") "it" else "en") }) {
-                        Text("Change")
+                        Text(stringResource(id = R.string.change))
                     }
                 }
             )
 
             ListItem(
-                headlineContent = { Text("Default Country Code") },
+                headlineContent = { Text(stringResource(id = R.string.default_country_code)) },
                 supportingContent = { Text(countryCode) },
                 trailingContent = {
                     // Simplified: toggle between +39 and +1
                     TextButton(onClick = { viewModel.setDefaultCountryCode(if (countryCode == "+39") "+1" else "+39") }) {
-                        Text("Toggle")
+                        Text(stringResource(id = R.string.toggle))
                     }
                 }
             )
 
             HorizontalDivider()
-            Text("Sending Mode", style = MaterialTheme.typography.titleMedium)
+            Text(
+                stringResource(id = R.string.sending_mode_header),
+                style = MaterialTheme.typography.titleMedium
+            )
 
             Column {
                 val modes = listOf(
@@ -127,19 +139,36 @@ fun SettingsScreen(
             }
 
             HorizontalDivider()
-            Text("Birthdays", style = MaterialTheme.typography.titleMedium)
+            Text(
+                stringResource(id = R.string.birthdays_header),
+                style = MaterialTheme.typography.titleMedium
+            )
 
             ListItem(
-                headlineContent = { Text("Notification Time") },
+                headlineContent = { Text(stringResource(id = R.string.notification_time)) },
                 supportingContent = { Text(notificationTime) }
             )
 
             HorizontalDivider()
-            Text("Backup", style = MaterialTheme.typography.titleMedium)
+            Text(
+                stringResource(id = R.string.backup_header),
+                style = MaterialTheme.typography.titleMedium
+            )
+
+            val backupLauncher = androidx.activity.compose.rememberLauncherForActivityResult(
+                androidx.activity.result.contract.ActivityResultContracts.OpenDocumentTree()
+            ) { uri ->
+                uri?.let { viewModel.setBackupFolder(it.toString()) }
+            }
 
             ListItem(
-                headlineContent = { Text("Backup Location") },
-                supportingContent = { Text(backupUri ?: "Not set") }
+                headlineContent = { Text(stringResource(id = R.string.backup_location)) },
+                supportingContent = { Text(backupUri ?: stringResource(id = R.string.not_set)) },
+                trailingContent = {
+                    TextButton(onClick = { backupLauncher.launch(null) }) {
+                        Text(stringResource(id = R.string.select))
+                    }
+                }
             )
         }
     }

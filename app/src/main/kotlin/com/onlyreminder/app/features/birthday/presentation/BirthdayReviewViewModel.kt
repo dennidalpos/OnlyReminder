@@ -9,20 +9,31 @@ import com.onlyreminder.app.data.repository.ContactRepositoryImpl
 import com.onlyreminder.app.data.repository.MainRepositoryImpl
 import com.onlyreminder.app.domain.model.BirthdayItemStatus
 import com.onlyreminder.app.domain.model.BirthdayRunStatus
+import com.onlyreminder.app.features.whatsapp.data.WhatsAppRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
 class BirthdayReviewViewModel @Inject constructor(
     private val mainRepository: MainRepositoryImpl,
-    private val contactRepository: ContactRepositoryImpl
+    private val contactRepository: ContactRepositoryImpl,
+    private val settingsDataStore: com.onlyreminder.app.data.settings.SettingsDataStore,
+    private val whatsappRepository: WhatsAppRepository
 ) : ViewModel() {
+
+    val sendMode = settingsDataStore.sendMode.stateIn(
+        viewModelScope,
+        SharingStarted.WhileSubscribed(),
+        "REMINDER_ONLY"
+    )
 
     private val _latestRun = MutableStateFlow<BirthdayRunEntity?>(null)
     val latestRun: StateFlow<BirthdayRunEntity?> = _latestRun.asStateFlow()
@@ -68,9 +79,57 @@ class BirthdayReviewViewModel @Inject constructor(
         }
     }
 
+    fun sendItemViaApi(itemWithContact: BirthdayRunItemWithContact) {
+        val contact = itemWithContact.contact ?: return
+        viewModelScope.launch {
+            val templates = mainRepository.getAllTemplates().first()
+            val birthdayTemplate =
+                templates.find { it.isDefault && it.name.contains("Birthday", ignoreCase = true) }
+                    ?: templates.find { it.name.contains("Birthday", ignoreCase = true) }
+
+            val overrideName = birthdayTemplate?.whatsappApprovedTemplateName
+
+            val success = whatsappRepository.sendMessage(contact, overrideName)
+            mainRepository.addRunItem(
+                itemWithContact.item.copy(
+                    status = if (success) BirthdayItemStatus.SENT else BirthdayItemStatus.FAILED,
+                    updatedAt = java.time.LocalDateTime.now()
+                )
+            )
+        }
+    }
+
     fun deleteContact(contact: ContactEntity) {
         viewModelScope.launch {
             contactRepository.hardDeleteContact(contact)
+        }
+    }
+
+    fun skipAll() {
+        viewModelScope.launch {
+            _items.value.forEach { itemWithContact ->
+                if (itemWithContact.item.status == BirthdayItemStatus.PENDING) {
+                    mainRepository.addRunItem(
+                        itemWithContact.item.copy(
+                            status = BirthdayItemStatus.SKIPPED,
+                            updatedAt = java.time.LocalDateTime.now()
+                        )
+                    )
+                }
+            }
+        }
+    }
+
+    fun completeRun() {
+        viewModelScope.launch {
+            _latestRun.value?.let { run ->
+                mainRepository.createBirthdayRun(
+                    run.copy(
+                        status = BirthdayRunStatus.COMPLETED,
+                        completedAt = java.time.LocalDateTime.now()
+                    )
+                )
+            }
         }
     }
 }

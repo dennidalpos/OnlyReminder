@@ -1,15 +1,9 @@
 package com.onlyreminder.app.features.whatsapp.presentation
 
-import android.content.SharedPreferences
-import androidx.core.content.edit
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.onlyreminder.app.core.security.SecurePrefs
-import com.onlyreminder.app.data.repository.MainRepositoryImpl
-import com.onlyreminder.app.features.whatsapp.data.WhatsAppApiService
-import com.onlyreminder.app.features.whatsapp.data.WhatsAppLanguage
-import com.onlyreminder.app.features.whatsapp.data.WhatsAppMessageRequest
-import com.onlyreminder.app.features.whatsapp.data.WhatsAppTemplate
+import com.onlyreminder.app.data.database.entities.ContactEntity
+import com.onlyreminder.app.features.whatsapp.data.WhatsAppRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -19,21 +13,16 @@ import javax.inject.Inject
 
 @HiltViewModel
 class WhatsAppApiViewModel @Inject constructor(
-    @param:SecurePrefs private val sharedPreferences: SharedPreferences,
-    private val mainRepository: MainRepositoryImpl,
-    private val apiService: WhatsAppApiService
+    private val repository: WhatsAppRepository
 ) : ViewModel() {
 
-    private val _phoneNumberId =
-        MutableStateFlow(sharedPreferences.getString("wa_phone_id", "") ?: "")
+    private val _phoneNumberId = MutableStateFlow(repository.getPhoneId())
     val phoneNumberId: StateFlow<String> = _phoneNumberId.asStateFlow()
 
-    private val _accessToken = MutableStateFlow(sharedPreferences.getString("wa_token", "") ?: "")
+    private val _accessToken = MutableStateFlow(repository.getToken())
     val accessToken: StateFlow<String> = _accessToken.asStateFlow()
 
-    private val _templateName = MutableStateFlow(
-        sharedPreferences.getString("wa_template", "birthday_template") ?: "birthday_template"
-    )
+    private val _templateName = MutableStateFlow(repository.getTemplateName())
     val templateName: StateFlow<String> = _templateName.asStateFlow()
 
     private val _isSending = MutableStateFlow(false)
@@ -43,40 +32,22 @@ class WhatsAppApiViewModel @Inject constructor(
         _phoneNumberId.value = phoneId
         _accessToken.value = token
         _templateName.value = template
+        repository.updateConfig(phoneId, token, template)
+    }
 
-        sharedPreferences.edit {
-            putString("wa_phone_id", phoneId)
-            putString("wa_token", token)
-            putString("wa_template", template)
+    fun sendMessage(contact: ContactEntity) {
+        viewModelScope.launch {
+            _isSending.value = true
+            repository.sendMessage(contact)
+            _isSending.value = false
         }
     }
 
-    fun sendMessage(contact: com.onlyreminder.app.data.database.entities.ContactEntity) {
+    fun testConnection() {
         viewModelScope.launch {
             _isSending.value = true
-            try {
-                val request = WhatsAppMessageRequest(
-                    to = contact.phone,
-                    template = WhatsAppTemplate(
-                        name = _templateName.value,
-                        language = WhatsAppLanguage(code = "it")
-                    )
-                )
-
-                val response = apiService.sendMessage(
-                    _phoneNumberId.value,
-                    "Bearer ${_accessToken.value}",
-                    request
-                )
-
-                if (response.isSuccessful) {
-                    // Success logic
-                }
-            } catch (e: Exception) {
-                // Error logic
-            } finally {
-                _isSending.value = false
-            }
+            repository.testConnection(_phoneNumberId.value, _accessToken.value)
+            _isSending.value = false
         }
     }
 

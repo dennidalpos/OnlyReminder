@@ -6,6 +6,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import com.onlyreminder.app.features.backup.ui.BackupScreen
 import com.onlyreminder.app.features.birthday.ui.BirthdayReviewScreen
+import com.onlyreminder.app.features.birthday.ui.ReportScreen
 import com.onlyreminder.app.features.contacts.ui.ContactDetailScreen
 import com.onlyreminder.app.features.contacts.ui.ContactEditScreen
 import com.onlyreminder.app.features.contacts.ui.ContactsScreen
@@ -46,6 +47,7 @@ fun OnlyReminderNavGraph(
         composable<Route.TemplateEdit> { TemplateEditScreen(navController) }
         composable<Route.BirthdayReview> { BirthdayReviewScreen(navController) }
         composable<Route.WhatsApp> { WhatsAppScreen(navController) }
+        composable<Route.Report> { ReportScreen(navController) }
         composable<Route.WhatsAppApi> { WhatsAppApiScreen(navController) }
         composable<Route.Backup> { BackupScreen(navController) }
         composable<Route.Settings> { SettingsScreen(navController) }

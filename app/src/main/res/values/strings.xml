@@ -38,6 +38,7 @@
     <string name="create_task">Create Task</string>
     <string name="send_wa">Send WhatsApp</string>
     <string name="archive_contact">Archive Contact</string>
+    <string name="restore_contact">Restore Contact</string>
     <string name="delete_contact_confirm_title">Delete Contact</string>
     <string name="delete_contact_confirm_msg">This will permanently delete the selected contact from OnlyReminder. This action cannot be undone unless you restore a backup.</string>
     <string name="new_contact">New Contact</string>
@@ -62,7 +63,11 @@
     <string name="active">Active</string>
     <string name="archived">Archived</string>
     <string name="save">Save</string>
+    <string name="complete">Complete</string>
     <string name="no_group">No Group</string>
+    <string name="unsaved_changes_title">Unsaved Changes</string>
+    <string name="unsaved_changes_msg">You have unsaved changes. Are you sure you want to go back and lose them?</string>
+    <string name="discard">Discard</string>
 
     <!-- Multi-selection -->
     <string name="select_all">Select All</string>
@@ -83,6 +88,17 @@
     <string name="no_templates">No templates yet. Tap + to create one.</string>
     <string name="duplicate">Duplicate</string>
     <string name="default_label">Default</string>
+    <string name="add_template">Add Template</string>
+    <string name="new_template">New Template</string>
+    <string name="edit_template">Edit Template</string>
+    <string name="template_name_label">Template Name</string>
+    <string name="channel_label">Channel: %1$s</string>
+    <string name="language_label">Lang: %1$s</string>
+    <string name="set_default_label">Set as default for this channel</string>
+    <string name="message_body_label">Message Body</string>
+    <string name="available_placeholders">Available: {first_name}, {last_name}, {full_name}, {company}, {birthday}, {custom.field_name}</string>
+    <string name="promotional_warning">This message may be promotional. Make sure you have a proper legal basis before sending it.</string>
+    <string name="preview_sample">Preview (Sample Contact)</string>
 
     <!-- Step 08 & 09: Import -->
     <string name="import_contacts">Import Contacts</string>
@@ -119,12 +135,22 @@
     <!-- Navigation & Titles -->
     <string name="tasks_title">Tasks</string>
     <string name="templates_title">Templates</string>
-    <string name="add_template">Add Template</string>
-    <string name="new_template">New Template</string>
-    <string name="edit_template">Edit Template</string>
     <string name="birthday_review_title">Birthday Review</string>
     <string name="backup_title">Backup &amp; Restore</string>
     <string name="settings_title">Settings</string>
+    <string name="general_header">General</string>
+    <string name="language_label_settings">Language</string>
+    <string name="english">English</string>
+    <string name="italian">Italiano</string>
+    <string name="change">Change</string>
+    <string name="default_country_code">Default Country Code</string>
+    <string name="toggle">Toggle</string>
+    <string name="sending_mode_header">Sending Mode</string>
+    <string name="birthdays_header">Birthdays</string>
+    <string name="notification_time">Notification Time</string>
+    <string name="backup_header">Backup</string>
+    <string name="backup_location">Backup Location</string>
+    <string name="select">Select</string>
     <string name="security_title">Security</string>
     <string name="config_wa_api">Configure WhatsApp API</string>
     <string name="config_wa_api_desc">Manage tokens, Phone ID and templates</string>
@@ -189,4 +215,47 @@
     <string name="backup_create_failed">Failed to create backup.</string>
     <string name="backup_restore_success">Restore successful. Please restart the app.</string>
     <string name="backup_restore_failed">Failed to restore backup. Check password or file.</string>
+
+    <!-- Task Edit -->
+    <string name="new_task">New Task</string>
+    <string name="edit_task">Edit Task</string>
+    <string name="task_title">Title</string>
+    <string name="task_description">Description</string>
+    <string name="event_type">Event Type</string>
+    <string name="link_contact">Link Contact</string>
+    <string name="link_group">Link Group</string>
+    <string name="message_template">Message Template</string>
+    <string name="schedule_event">Schedule Event</string>
+    <string name="date_label">Date: %1$s</string>
+    <string name="time_label">Time: %1$s</string>
+    <string name="no_template">No Template</string>
+    <string name="no_contact">No Contact</string>
+    <string name="birthday_check_time_desc">For birthdays, only the daily check time is needed.</string>
+
+    <!-- Statuses -->
+    <string name="status_pending">Pending</string>
+    <string name="status_completed">Completed</string>
+    <string name="status_cancelled">Cancelled</string>
+    <string name="status_not_reviewed">Not Reviewed</string>
+    <string name="status_sent">Sent</string>
+    <string name="status_failed">Failed</string>
+    <string name="status_skipped">Skipped</string>
+
+    <string name="test_connection">Test Connection</string>
+    <string name="send_test_msg">Send Test Message</string>
+    <string name="wa_api_reception_note_title">Note on Reception:</string>
+    <string name="wa_api_reception_note_body">WhatsApp Business API via Cloud only supports sending messages from the app. To receive replies, you need to configure a Webhook on an external server (not included in OnlyReminder).</string>
+    <string name="mark_as_completed">Mark as Completed</string>
+    <string name="send_now_api">Send Now (API)</string>
+    <string name="new_birthdays_to_review">You have new birthdays to review and send.</string>
+    <string name="management">Management</string>
+    <string name="hello">Hello!</string>
+    <string name="start_by_adding_contacts">Start by adding some contacts.</string>
+    <string name="saved_contacts_count_new">You have %1$d saved contacts.</string>
+    <string name="pending_tasks_summary">You have %1$d tasks to complete today.</string>
+    <string name="birthdays_today_count">Today is the birthday of %1$d contacts!</string>
+    <string name="report_finale">Final Report</string>
+    <string name="summary">Summary</string>
+    <string name="total_found">Total Found</string>
+    <string name="details">Details</string>
 </resources>

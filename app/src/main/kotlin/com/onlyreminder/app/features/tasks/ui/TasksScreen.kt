@@ -108,32 +108,35 @@ fun TasksScreen(
                         IconButton(onClick = { navController.navigateUp() }) {
                             Icon(
                                 imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                                contentDescription = "Back"
+                                contentDescription = stringResource(id = R.string.back)
                             )
                         }
                     },
                     actions = {
                         var expanded by remember { mutableStateOf(false) }
                         IconButton(onClick = { expanded = true }) {
-                            Icon(Icons.Default.FilterList, contentDescription = "Filter")
+                            Icon(
+                                Icons.Default.FilterList,
+                                contentDescription = stringResource(id = R.string.filters)
+                            )
                         }
                         DropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
                             DropdownMenuItem(
                                 text = { Text(stringResource(id = R.string.all)) },
                                 onClick = { viewModel.setFilterStatus(null); expanded = false })
                             DropdownMenuItem(
-                                text = { Text(TaskStatus.PENDING.name) },
+                                text = { Text(stringResource(id = R.string.status_pending)) },
                                 onClick = {
                                     viewModel.setFilterStatus(TaskStatus.PENDING); expanded = false
                                 })
                             DropdownMenuItem(
-                                text = { Text(TaskStatus.COMPLETED.name) },
+                                text = { Text(stringResource(id = R.string.status_completed)) },
                                 onClick = {
                                     viewModel.setFilterStatus(TaskStatus.COMPLETED); expanded =
                                     false
                                 })
                             DropdownMenuItem(
-                                text = { Text(TaskStatus.CANCELLED.name) },
+                                text = { Text(stringResource(id = R.string.status_cancelled)) },
                                 onClick = {
                                     viewModel.setFilterStatus(TaskStatus.CANCELLED); expanded =
                                     false
@@ -146,7 +149,10 @@ fun TasksScreen(
         floatingActionButton = {
             if (!isSelectionMode) {
                 FloatingActionButton(onClick = { navController.navigate(Route.TaskEdit()) }) {
-                    Icon(Icons.Default.Add, contentDescription = "Add Task")
+                    Icon(
+                        Icons.Default.Add,
+                        contentDescription = stringResource(id = R.string.add_contact)
+                    ) // Reusing add_contact or could use a new string
                 }
             }
         }
@@ -283,10 +289,10 @@ fun TaskItem(
                 Spacer(modifier = Modifier.height(8.dp))
                 Row(horizontalArrangement = Arrangement.End, modifier = Modifier.fillMaxWidth()) {
                     TextButton(onClick = onSkip) {
-                        Text("Cancel")
+                        Text(stringResource(id = R.string.cancel))
                     }
                     Button(onClick = onComplete) {
-                        Text("Complete")
+                        Text(stringResource(id = R.string.complete))
                     }
                 }
             }
@@ -307,7 +313,11 @@ fun StatusBadge(status: TaskStatus) {
         border = androidx.compose.foundation.BorderStroke(1.dp, color)
     ) {
         Text(
-            text = status.name,
+            text = when (status) {
+                TaskStatus.PENDING -> stringResource(id = R.string.status_pending)
+                TaskStatus.COMPLETED -> stringResource(id = R.string.status_completed)
+                TaskStatus.CANCELLED -> stringResource(id = R.string.status_cancelled)
+            },
             modifier = Modifier.padding(horizontal = 4.dp, vertical = 2.dp),
             style = MaterialTheme.typography.labelSmall,
             color = color

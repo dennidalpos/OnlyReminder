@@ -48,6 +48,12 @@ class ContactRepositoryImpl @Inject constructor(
         }
     }
 
+    suspend fun restoreContact(id: Long) {
+        contactDao.getContactById(id)?.let { contact ->
+            contactDao.updateContact(contact.copy(status = ContactStatus.ACTIVE))
+        }
+    }
+
     suspend fun hardDeleteContact(contact: ContactEntity) {
         contactDao.deleteContact(contact)
     }

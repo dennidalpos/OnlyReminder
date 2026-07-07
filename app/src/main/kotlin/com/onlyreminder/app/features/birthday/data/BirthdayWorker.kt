@@ -43,25 +43,25 @@ class BirthdayWorker @AssistedInject constructor(
             return Result.success()
         }
 
-        // Requirement: Until a task is defined with users in it, the app does nothing automatically.
-        val activeBirthdayTasks =
-            mainRepository.getTasksByStatus(com.onlyreminder.app.domain.model.TaskStatus.PENDING)
-                .first()
-                .filter { it.type == "BIRTHDAY" }
-
-        if (activeBirthdayTasks.isEmpty()) {
-            return Result.success()
-        }
-
         val allContactsToday = birthdayScanner.findBirthdaysForDate(today)
         if (allContactsToday.isEmpty()) {
             return Result.success()
         }
 
         // Filter contacts that are actually covered by an active birthday task
-        val contacts = allContactsToday.filter { contact ->
-            activeBirthdayTasks.any { task ->
-                task.contactId == contact.id || (task.groupId != null && contact.groupId == task.groupId)
+        // If no tasks are defined, we scan ALL contacts (Evolution: make it easy for users)
+        val activeBirthdayTasks =
+            mainRepository.getTasksByStatus(com.onlyreminder.app.domain.model.TaskStatus.PENDING)
+                .first()
+                .filter { it.type == "BIRTHDAY" }
+
+        val contacts = if (activeBirthdayTasks.isEmpty()) {
+            allContactsToday
+        } else {
+            allContactsToday.filter { contact ->
+                activeBirthdayTasks.any { task ->
+                    task.contactId == contact.id || (task.groupId != null && contact.groupId == task.groupId)
+                }
             }
         }
 

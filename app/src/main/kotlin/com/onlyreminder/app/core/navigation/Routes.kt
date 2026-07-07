@@ -46,6 +46,9 @@ sealed interface Route {
     data class WhatsApp(val runId: Long) : Route
 
     @Serializable
+    data class Report(val runId: Long) : Route
+
+    @Serializable
     data object WhatsAppApi : Route
 
     @Serializable

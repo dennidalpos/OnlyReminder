@@ -30,6 +30,12 @@ class GroupEditViewModel @Inject constructor(
     private val _description = MutableStateFlow("")
     val description = _description.asStateFlow()
 
+    private var initialName = ""
+    private var initialDescription = ""
+
+    val hasChanges: Boolean
+        get() = _name.value != initialName || _description.value != initialDescription
+
     val members: StateFlow<List<ContactEntity>> = if (groupId != null) {
         repository.searchContacts(null, groupId, null)
             .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
@@ -38,7 +44,12 @@ class GroupEditViewModel @Inject constructor(
     }
 
     val availableContacts: StateFlow<List<ContactEntity>> = repository.getAllContacts()
-        .map { list -> list.filter { it.groupId == null } } // Only contacts without a group
+        .map { list ->
+            list.filter {
+                (groupId == null || it.groupId != groupId) &&
+                        it.status == com.onlyreminder.app.domain.model.ContactStatus.ACTIVE
+            }
+        }
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
 
     init {
@@ -52,6 +63,8 @@ class GroupEditViewModel @Inject constructor(
             repository.getGroupById(id)?.let { group ->
                 _name.value = group.name
                 _description.value = group.description
+                initialName = group.name
+                initialDescription = group.description
             }
         }
     }

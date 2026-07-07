@@ -34,6 +34,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.onlyreminder.app.R
+import com.onlyreminder.app.core.navigation.Route
 import com.onlyreminder.app.core.ui.components.OnlyReminderTopBar
 import com.onlyreminder.app.features.whatsapp.domain.WhatsAppManualManager
 import com.onlyreminder.app.features.whatsapp.domain.WhatsAppResult
@@ -47,14 +48,19 @@ fun WhatsAppScreen(
     val currentItem by viewModel.currentItem.collectAsState()
     val queue by viewModel.queue.collectAsState()
     val currentIndex by viewModel.currentIndex.collectAsState()
+    val sendMode by viewModel.sendMode.collectAsState()
     val context = LocalContext.current
+
     val whatsappManager = remember { WhatsAppManualManager() }
 
     Scaffold(
         topBar = {
             OnlyReminderTopBar(
-                title = stringResource(id = R.string.whatsapp_manual_send),
+                title = if (sendMode == "WA_API") stringResource(R.string.whatsapp_api_mode) else stringResource(
+                    id = R.string.whatsapp_manual_send
+                ),
                 navigationIcon = {
+
                     IconButton(onClick = { navController.navigateUp() }) {
                         Icon(
                             imageVector = Icons.AutoMirrored.Filled.ArrowBack,
@@ -85,7 +91,16 @@ fun WhatsAppScreen(
                         style = MaterialTheme.typography.headlineSmall
                     )
                     Spacer(modifier = Modifier.height(16.dp))
-                    Button(onClick = { navController.navigateUp() }) {
+                    Button(onClick = {
+                        val rId = viewModel.runId
+                        if (rId != null) {
+                            navController.navigate(Route.Report(rId)) {
+                                popUpTo(Route.WhatsApp(rId)) { inclusive = true }
+                            }
+                        } else {
+                            navController.navigateUp()
+                        }
+                    }) {
                         Text(stringResource(id = R.string.back_to_review))
                     }
                 }
@@ -148,21 +163,31 @@ fun WhatsAppScreen(
                                 Text(stringResource(id = R.string.skip))
                             }
 
-                            Button(
-                                onClick = {
-                                    val success = whatsappManager.openWhatsAppChat(
-                                        context,
-                                        item.contact?.phone ?: "",
-                                        item.item.generatedMessagePreview
-                                    )
-                                    if (success is WhatsAppResult.Success) {
-                                        viewModel.markCurrentAsManualOpened()
-                                    }
-                                },
-                                modifier = Modifier.weight(1f)
-                            ) {
-                                Text(stringResource(id = R.string.open_whatsapp))
+                            if (sendMode == "WA_API") {
+                                Button(
+                                    onClick = { viewModel.sendCurrentViaApi() },
+                                    modifier = Modifier.weight(1f)
+                                ) {
+                                    Text(stringResource(R.string.send_now_api))
+                                }
+                            } else {
+                                Button(
+                                    onClick = {
+                                        val success = whatsappManager.openWhatsAppChat(
+                                            context,
+                                            item.contact?.phone ?: "",
+                                            item.item.generatedMessagePreview
+                                        )
+                                        if (success is WhatsAppResult.Success) {
+                                            viewModel.markCurrentAsManualOpened()
+                                        }
+                                    },
+                                    modifier = Modifier.weight(1f)
+                                ) {
+                                    Text(stringResource(id = R.string.open_whatsapp))
+                                }
                             }
+
                         }
 
                         TextButton(

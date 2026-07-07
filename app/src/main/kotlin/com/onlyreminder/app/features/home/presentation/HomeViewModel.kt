@@ -18,6 +18,7 @@ import javax.inject.Inject
 data class HomeUiState(
     val contactCount: Int = 0,
     val upcomingBirthdays: List<ContactEntity> = emptyList(),
+    val birthdaysTodayCount: Int = 0,
     val pendingTasks: List<TaskEntity> = emptyList(),
     val birthdayReviewRequired: Boolean = false,
     val sendMode: String = "REMINDER_ONLY"
@@ -36,9 +37,13 @@ class HomeViewModel @Inject constructor(
         mainRepository.getAllBirthdayRuns(),
         settingsDataStore.sendMode
     ) { contacts, tasks, birthdayRuns, sendMode ->
+        val today = java.time.LocalDate.now()
+        val birthdaysToday = contacts.filter { isBirthdayToday(it.birthday, today) }
+
         HomeUiState(
             contactCount = contacts.size,
-            upcomingBirthdays = contacts.filter { isBirthdaySoon(it.birthday) }.take(5),
+            upcomingBirthdays = contacts.filter { isBirthdaySoon(it.birthday, today) }.take(5),
+            birthdaysTodayCount = birthdaysToday.size,
             pendingTasks = tasks,
             birthdayReviewRequired = birthdayRuns.any { it.status == com.onlyreminder.app.domain.model.BirthdayRunStatus.PENDING },
             sendMode = sendMode
@@ -50,10 +55,25 @@ class HomeViewModel @Inject constructor(
             initialValue = HomeUiState()
         )
 
-    private fun isBirthdaySoon(birthday: String?): Boolean {
-        // Simple logic for demonstration, could be improved with proper date handling
+    private fun isBirthdayToday(birthday: String?, today: java.time.LocalDate): Boolean {
         if (birthday == null) return false
-        // For now, just return false or implement a real check if needed
-        return false
+        return try {
+            val date = java.time.LocalDate.parse(birthday)
+            date.monthValue == today.monthValue && date.dayOfMonth == today.dayOfMonth
+        } catch (e: Exception) {
+            false
+        }
+    }
+
+    private fun isBirthdaySoon(birthday: String?, today: java.time.LocalDate): Boolean {
+        if (birthday == null) return false
+        return try {
+            val bDate = java.time.LocalDate.parse(birthday)
+            val birthdayThisYear = bDate.withYear(today.year)
+            val diff = java.time.temporal.ChronoUnit.DAYS.between(today, birthdayThisYear)
+            diff in 1..7
+        } catch (e: Exception) {
+            false
+        }
     }
 }

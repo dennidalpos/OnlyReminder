@@ -15,12 +15,8 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.Backup
-import androidx.compose.material.icons.filled.Cake
 import androidx.compose.material.icons.filled.Description
 import androidx.compose.material.icons.filled.Group
-import androidx.compose.material.icons.filled.ImportExport
-import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.NotificationsActive
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Settings
@@ -30,6 +26,7 @@ import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -58,10 +55,25 @@ fun HomeScreen(
     val uiState by viewModel.uiState.collectAsState()
 
     Scaffold(
-        topBar = { OnlyReminderTopBar(title = "OnlyReminder") },
+        topBar = {
+            OnlyReminderTopBar(
+                title = stringResource(id = R.string.app_name),
+                actions = {
+                    IconButton(onClick = { navController.navigate(Route.Settings) }) {
+                        Icon(
+                            Icons.Default.Settings,
+                            contentDescription = stringResource(id = R.string.settings_title)
+                        )
+                    }
+                }
+            )
+        },
         floatingActionButton = {
             FloatingActionButton(onClick = { navController.navigate(Route.ContactEdit(null)) }) {
-                Icon(Icons.Default.Add, contentDescription = "Add Contact")
+                Icon(
+                    Icons.Default.Add,
+                    contentDescription = stringResource(id = R.string.add_contact)
+                )
             }
         }
     ) { paddingValues ->
@@ -71,207 +83,113 @@ fun HomeScreen(
                 .fillMaxSize()
                 .verticalScroll(rememberScrollState())
                 .padding(16.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp)
+            verticalArrangement = Arrangement.spacedBy(20.dp)
         ) {
-            // Dashboard Summary
+            // 1. Welcome & Status Summary
             SummarySection(uiState.contactCount, uiState.upcomingBirthdays.size)
 
-            // Action Required Banner
-            if (uiState.birthdayReviewRequired || uiState.pendingTasks.isNotEmpty()) {
-                ActionRequiredBanner(
-                    birthdayReviewRequired = uiState.birthdayReviewRequired,
-                    pendingTasksCount = uiState.pendingTasks.size,
-                    onActionClick = {
-                        if (uiState.birthdayReviewRequired) {
-                            navController.navigate(Route.BirthdayReview)
-                        } else {
-                            navController.navigate(Route.Tasks)
-                        }
-                    }
+            // 2. Urgent Action (Review)
+            if (uiState.birthdayReviewRequired) {
+                UrgentActionCard(
+                    title = stringResource(R.string.birthday_review_title),
+                    description = if (uiState.birthdaysTodayCount > 0)
+                        stringResource(R.string.birthdays_today_count, uiState.birthdaysTodayCount)
+                    else
+                        stringResource(R.string.new_birthdays_to_review),
+                    icon = Icons.Default.NotificationsActive,
+                    onClick = { navController.navigate(Route.BirthdayReview) }
+                )
+            }
+
+            if (uiState.pendingTasks.isNotEmpty()) {
+                UrgentActionCard(
+                    title = stringResource(R.string.tasks_title),
+                    description = stringResource(
+                        id = R.string.pending_tasks_summary,
+                        uiState.pendingTasks.size
+                    ),
+                    icon = Icons.Default.Task,
+                    onClick = { navController.navigate(Route.Tasks) }
                 )
             }
 
             Text(
-                text = stringResource(R.string.what_do_you_want_to_do),
-                style = MaterialTheme.typography.titleMedium,
+                text = stringResource(R.string.management),
+                style = MaterialTheme.typography.titleLarge,
                 fontWeight = FontWeight.Bold
             )
 
-            // Primary Actions Grid
-            val mainActions = listOf(
-                DashboardAction(
-                    stringResource(R.string.contacts_title),
-                    Icons.Default.Person,
-                    Route.Contacts
-                ),
-                DashboardAction(
-                    stringResource(R.string.groups_title),
-                    Icons.Default.Group,
-                    Route.Groups
-                ),
-                DashboardAction(
-                    stringResource(R.string.tasks_title),
-                    Icons.Default.Task,
-                    Route.Tasks
-                ),
-                DashboardAction(
-                    stringResource(R.string.templates_title),
-                    Icons.Default.Description,
-                    Route.Templates
-                ),
-            )
+            // 3. Clean Management Grid
+            ManagementSection(navController)
 
-            DashboardGrid(mainActions) { route ->
-                navController.navigate(route)
-            }
-
-            Text(
-                text = stringResource(R.string.tools),
-                style = MaterialTheme.typography.titleMedium,
-                fontWeight = FontWeight.Bold
-            )
-
-            // Tools Section
-            val tools = mutableListOf(
-                DashboardAction(
-                    stringResource(R.string.import_contacts),
-                    Icons.Default.ImportExport,
-                    Route.Import
-                ),
-                DashboardAction(
-                    stringResource(R.string.birthday_review_title),
-                    Icons.Default.Cake,
-                    Route.BirthdayReview
-                ),
-                DashboardAction(
-                    stringResource(R.string.backup_title),
-                    Icons.Default.Backup,
-                    Route.Backup
-                ),
-            )
-
-            if (uiState.sendMode == "WA_API") {
-                tools.add(
-                    DashboardAction(
-                        stringResource(R.string.config_wa_api),
-                        Icons.Default.Settings,
-                        Route.WhatsAppApi
-                    )
-                )
-            }
-
-            tools.forEach { tool ->
-                ToolRow(tool) {
-                    navController.navigate(tool.route)
-                }
-            }
-
-            Text(
-                text = stringResource(R.string.app),
-                style = MaterialTheme.typography.titleMedium,
-                fontWeight = FontWeight.Bold
-            )
-
-            val appSettings = listOf(
-                DashboardAction(
-                    stringResource(R.string.settings_title),
-                    Icons.Default.Settings,
-                    Route.Settings
-                ),
-                DashboardAction(
-                    stringResource(R.string.security_title),
-                    Icons.Default.Lock,
-                    Route.Security
-                ),
-            )
-
-            appSettings.forEach { setting ->
-                ToolRow(setting) {
-                    navController.navigate(setting.route)
-                }
-            }
-
-            Spacer(modifier = Modifier.height(80.dp)) // Space for FAB
-        }
-    }
-}
-
-@Composable
-fun ActionRequiredBanner(
-    birthdayReviewRequired: Boolean,
-    pendingTasksCount: Int,
-    onActionClick: () -> Unit
-) {
-    Card(
-        modifier = Modifier
-            .fillMaxWidth()
-            .clickable(onClick = onActionClick),
-        colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.errorContainer
-        )
-    ) {
-        Row(
-            modifier = Modifier.padding(16.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Icon(
-                imageVector = Icons.Default.NotificationsActive,
-                contentDescription = null,
-                tint = MaterialTheme.colorScheme.error
-            )
-            Spacer(modifier = Modifier.width(16.dp))
-            Column {
-                Text(
-                    text = "Action Required",
-                    style = MaterialTheme.typography.titleMedium,
-                    color = MaterialTheme.colorScheme.onErrorContainer,
-                    fontWeight = FontWeight.Bold
-                )
-                val message = when {
-                    birthdayReviewRequired && pendingTasksCount > 0 ->
-                        "You have birthdays to review and $pendingTasksCount pending tasks."
-
-                    birthdayReviewRequired ->
-                        "You have birthdays to review."
-
-                    else ->
-                        "You have $pendingTasksCount pending tasks."
-                }
-                Text(
-                    text = message,
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onErrorContainer
-                )
-            }
+            Spacer(modifier = Modifier.height(80.dp)) // FAB Space
         }
     }
 }
 
 @Composable
 fun SummarySection(contactCount: Int, upcomingCount: Int) {
+    Column(modifier = Modifier.fillMaxWidth()) {
+        Text(
+            text = stringResource(R.string.hello),
+            style = MaterialTheme.typography.headlineMedium,
+            fontWeight = FontWeight.Bold
+        )
+        Text(
+            text = if (contactCount == 0) stringResource(R.string.start_by_adding_contacts) else stringResource(
+                R.string.saved_contacts_count_new,
+                contactCount
+            ),
+            style = MaterialTheme.typography.bodyLarge,
+            color = MaterialTheme.colorScheme.onSurfaceVariant
+        )
+        if (upcomingCount > 0) {
+            Text(
+                text = stringResource(R.string.upcoming_birthdays_count, upcomingCount),
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.primary,
+                fontWeight = FontWeight.Bold
+            )
+        }
+    }
+}
+
+@Composable
+fun UrgentActionCard(
+    title: String,
+    description: String,
+    icon: ImageVector,
+    onClick: () -> Unit
+) {
     Card(
-        modifier = Modifier.fillMaxWidth(),
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable(onClick = onClick),
         colors = CardDefaults.cardColors(
             containerColor = MaterialTheme.colorScheme.primaryContainer
-        )
+        ),
+        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
     ) {
-        Column(modifier = Modifier.padding(16.dp)) {
-            Text(
-                text = stringResource(R.string.welcome_back),
-                style = MaterialTheme.typography.headlineSmall,
-                color = MaterialTheme.colorScheme.onPrimaryContainer
+        Row(
+            modifier = Modifier.padding(20.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Icon(
+                imageVector = icon,
+                contentDescription = null,
+                modifier = Modifier.size(40.dp),
+                tint = MaterialTheme.colorScheme.primary
             )
-            Text(
-                text = stringResource(R.string.saved_contacts_count, contactCount),
-                style = MaterialTheme.typography.bodyLarge,
-                color = MaterialTheme.colorScheme.onPrimaryContainer
-            )
-            if (upcomingCount > 0) {
+            Spacer(modifier = Modifier.width(20.dp))
+            Column {
                 Text(
-                    text = stringResource(R.string.upcoming_birthdays_count, upcomingCount),
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onPrimaryContainer,
+                    text = title,
+                    style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.Bold
+                )
+                Text(
+                    text = description,
+                    style = MaterialTheme.typography.bodyMedium
                 )
             }
         }
@@ -279,65 +197,39 @@ fun SummarySection(contactCount: Int, upcomingCount: Int) {
 }
 
 @Composable
-fun DashboardGrid(actions: List<DashboardAction>, onActionClick: (Route) -> Unit) {
-    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-        val chunks = actions.chunked(2)
-        chunks.forEach { rowActions ->
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
-                rowActions.forEach { action ->
-                    ActionCard(
-                        action = action,
-                        modifier = Modifier.weight(1f),
-                        onClick = { onActionClick(action.route) }
-                    )
-                }
-                if (rowActions.size == 1) {
-                    Spacer(modifier = Modifier.weight(1f))
-                }
-            }
-        }
+fun ManagementSection(navController: NavController) {
+    Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+        ManagementRow(
+            title = stringResource(R.string.contacts_title),
+            icon = Icons.Default.Person,
+            onClick = { navController.navigate(Route.Contacts) }
+        )
+        ManagementRow(
+            title = stringResource(R.string.groups_title),
+            icon = Icons.Default.Group,
+            onClick = { navController.navigate(Route.Groups) }
+        )
+        ManagementRow(
+            title = stringResource(R.string.templates_title),
+            icon = Icons.Default.Description,
+            onClick = { navController.navigate(Route.Templates) }
+        )
+        ManagementRow(
+            title = stringResource(R.string.import_contacts),
+            icon = Icons.Default.Add, // Changed icon for clarity
+            onClick = { navController.navigate(Route.Import) }
+        )
     }
 }
 
 @Composable
-fun ActionCard(action: DashboardAction, modifier: Modifier = Modifier, onClick: () -> Unit) {
-    Card(
-        modifier = modifier
-            .height(100.dp)
-            .clickable(onClick = onClick),
-        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
-    ) {
-        Column(
-            modifier = Modifier.fillMaxSize(),
-            verticalArrangement = Arrangement.Center,
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            Icon(
-                imageVector = action.icon,
-                contentDescription = null,
-                modifier = Modifier.size(32.dp),
-                tint = MaterialTheme.colorScheme.primary
-            )
-            Spacer(modifier = Modifier.height(8.dp))
-            Text(
-                text = action.title,
-                style = MaterialTheme.typography.labelLarge
-            )
-        }
-    }
-}
-
-@Composable
-fun ToolRow(action: DashboardAction, onClick: () -> Unit) {
+fun ManagementRow(title: String, icon: ImageVector, onClick: () -> Unit) {
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .clickable(onClick = onClick)
-            .padding(vertical = 4.dp),
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
+            .clickable(onClick = onClick),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+        elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)
     ) {
         Row(
             modifier = Modifier
@@ -346,18 +238,16 @@ fun ToolRow(action: DashboardAction, onClick: () -> Unit) {
             verticalAlignment = Alignment.CenterVertically
         ) {
             Icon(
-                imageVector = action.icon,
+                imageVector = icon,
                 contentDescription = null,
                 tint = MaterialTheme.colorScheme.secondary
             )
             Spacer(modifier = Modifier.width(16.dp))
-            Text(text = action.title, style = MaterialTheme.typography.bodyLarge)
+            Text(
+                text = title,
+                style = MaterialTheme.typography.bodyLarge,
+                fontWeight = FontWeight.Medium
+            )
         }
     }
 }
-
-data class DashboardAction(
-    val title: String,
-    val icon: ImageVector,
-    val route: Route
-)
