@@ -23,6 +23,9 @@ class TemplatesViewModel @Inject constructor(
     private val _templates = MutableStateFlow<List<TemplateEntity>>(emptyList())
     val templates: StateFlow<List<TemplateEntity>> = _templates.asStateFlow()
 
+    private val _selectedTemplateIds = MutableStateFlow<Set<Long>>(emptySet())
+    val selectedTemplateIds = _selectedTemplateIds.asStateFlow()
+
     init {
         viewModelScope.launch {
             repository.initializeDefaultTemplates()
@@ -35,6 +38,33 @@ class TemplatesViewModel @Inject constructor(
     fun deleteTemplate(template: TemplateEntity) {
         viewModelScope.launch {
             repository.deleteTemplate(template)
+        }
+    }
+
+    fun toggleTemplateSelection(templateId: Long) {
+        val current = _selectedTemplateIds.value
+        if (current.contains(templateId)) {
+            _selectedTemplateIds.value = current - templateId
+        } else {
+            _selectedTemplateIds.value = current + templateId
+        }
+    }
+
+    fun selectAllTemplates() {
+        _selectedTemplateIds.value = templates.value.map { it.id }.toSet()
+    }
+
+    fun clearSelection() {
+        _selectedTemplateIds.value = emptySet()
+    }
+
+    fun deleteSelectedTemplates() {
+        viewModelScope.launch {
+            val idsToDelete = _selectedTemplateIds.value
+            templates.value.filter { it.id in idsToDelete }.forEach {
+                repository.deleteTemplate(it)
+            }
+            clearSelection()
         }
     }
 

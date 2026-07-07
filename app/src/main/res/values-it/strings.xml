@@ -64,6 +64,26 @@
     <string name="save">Salva</string>
     <string name="no_group">Nessun Gruppo</string>
 
+    <!-- Multi-selezione -->
+    <string name="select_all">Seleziona Tutto</string>
+    <string name="items_selected">%1$d selezionati</string>
+    <string name="assign_to_group">Assegna a Gruppo</string>
+    <string name="assign_task">Assegna Task</string>
+    <string name="task_title_label">Titolo Task *</string>
+    <string name="task_description_label">Descrizione (opzionale)</string>
+    <string name="assign_task_to_contacts">Assegna Task a %1$d contatti</string>
+    <string name="delete_selected">Elimina Selezionati</string>
+    <string name="delete_selected_confirm_msg">Sei sicuro di voler eliminare i %1$d elementi selezionati? L\'azione non può essere annullata.</string>
+    <string name="move_to_group_title">Sposta nel Gruppo</string>
+    <string name="members_title">Membri</string>
+    <string name="add_member">Aggiungi Membro</string>
+    <string name="add_members_title">Aggiungi Membri</string>
+    <string name="no_available_contacts">Nessun contatto disponibile da aggiungere.</string>
+    <string name="remove">Rimuovi</string>
+    <string name="no_templates">Nessun template creato. Tocca + per crearne uno.</string>
+    <string name="duplicate">Duplica</string>
+    <string name="default_label">Predefinito</string>
+
     <!-- Step 08 & 09: Importazione -->
     <string name="import_contacts">Importa Contatti</string>
     <string name="import_file">Importa File</string>
@@ -87,6 +107,9 @@
     <!-- Navigation & Titles -->
     <string name="tasks_title">Promemoria</string>
     <string name="templates_title">Template</string>
+    <string name="add_template">Aggiungi Template</string>
+    <string name="new_template">Nuovo Template</string>
+    <string name="edit_template">Modifica Template</string>
     <string name="birthday_review_title">Compleanni da revisionare</string>
     <string name="backup_title">Backup e Ripristino</string>
     <string name="settings_title">Impostazioni</string>

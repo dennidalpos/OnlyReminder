@@ -22,6 +22,9 @@ class TasksViewModel @Inject constructor(
     private val _tasks = MutableStateFlow<List<TaskEntity>>(emptyList())
     val tasks: StateFlow<List<TaskEntity>> = _tasks.asStateFlow()
 
+    private val _selectedTaskIds = MutableStateFlow<Set<Long>>(emptySet())
+    val selectedTaskIds = _selectedTaskIds.asStateFlow()
+
     private val _filterStatus = MutableStateFlow<TaskStatus?>(null)
     val filterStatus: StateFlow<TaskStatus?> = _filterStatus.asStateFlow()
 
@@ -46,6 +49,34 @@ class TasksViewModel @Inject constructor(
 
     fun setFilterStatus(status: TaskStatus?) {
         _filterStatus.value = status
+    }
+
+    fun toggleTaskSelection(taskId: Long) {
+        val current = _selectedTaskIds.value
+        if (current.contains(taskId)) {
+            _selectedTaskIds.value = current - taskId
+        } else {
+            _selectedTaskIds.value = current + taskId
+        }
+    }
+
+    fun selectAllTasks() {
+        _selectedTaskIds.value = tasks.value.map { it.id }.toSet()
+    }
+
+    fun clearSelection() {
+        _selectedTaskIds.value = emptySet()
+    }
+
+    fun deleteSelectedTasks() {
+        viewModelScope.launch {
+            val idsToDelete = _selectedTaskIds.value
+            tasks.value.filter { it.id in idsToDelete }.forEach {
+                taskScheduler.cancelTask(it)
+                repository.deleteTask(it)
+            }
+            clearSelection()
+        }
     }
 
     fun updateTaskStatus(taskId: Long, status: TaskStatus) {

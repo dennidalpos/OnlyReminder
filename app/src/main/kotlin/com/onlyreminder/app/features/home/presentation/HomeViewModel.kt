@@ -3,8 +3,11 @@ package com.onlyreminder.app.features.home.presentation
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.onlyreminder.app.data.database.entities.ContactEntity
+import com.onlyreminder.app.data.database.entities.TaskEntity
 import com.onlyreminder.app.data.repository.ContactRepositoryImpl
+import com.onlyreminder.app.data.repository.MainRepositoryImpl
 import com.onlyreminder.app.data.settings.SettingsDataStore
+import com.onlyreminder.app.domain.model.TaskStatus
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -15,22 +18,29 @@ import javax.inject.Inject
 data class HomeUiState(
     val contactCount: Int = 0,
     val upcomingBirthdays: List<ContactEntity> = emptyList(),
+    val pendingTasks: List<TaskEntity> = emptyList(),
+    val birthdayReviewRequired: Boolean = false,
     val sendMode: String = "REMINDER_ONLY"
 )
 
 @HiltViewModel
 class HomeViewModel @Inject constructor(
     private val contactRepository: ContactRepositoryImpl,
+    private val mainRepository: MainRepositoryImpl,
     private val settingsDataStore: SettingsDataStore
 ) : ViewModel() {
 
     val uiState: StateFlow<HomeUiState> = combine(
         contactRepository.getAllContacts(),
+        mainRepository.getTasksByStatus(TaskStatus.PENDING),
+        mainRepository.getAllBirthdayRuns(),
         settingsDataStore.sendMode
-    ) { contacts, sendMode ->
+    ) { contacts, tasks, birthdayRuns, sendMode ->
         HomeUiState(
             contactCount = contacts.size,
             upcomingBirthdays = contacts.filter { isBirthdaySoon(it.birthday) }.take(5),
+            pendingTasks = tasks,
+            birthdayReviewRequired = birthdayRuns.any { it.status == com.onlyreminder.app.domain.model.BirthdayRunStatus.PENDING },
             sendMode = sendMode
         )
     }

@@ -21,9 +21,11 @@ import androidx.compose.material.icons.filled.Description
 import androidx.compose.material.icons.filled.Group
 import androidx.compose.material.icons.filled.ImportExport
 import androidx.compose.material.icons.filled.Lock
+import androidx.compose.material.icons.filled.NotificationsActive
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.Task
+import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -74,6 +76,21 @@ fun HomeScreen(
         ) {
             // Dashboard Summary
             SummarySection(uiState.contactCount, uiState.upcomingBirthdays.size)
+
+            // Action Required Banner
+            if (uiState.birthdayReviewRequired || uiState.pendingTasks.isNotEmpty()) {
+                ActionRequiredBanner(
+                    birthdayReviewRequired = uiState.birthdayReviewRequired,
+                    pendingTasksCount = uiState.pendingTasks.size,
+                    onActionClick = {
+                        if (uiState.birthdayReviewRequired) {
+                            navController.navigate(Route.BirthdayReview)
+                        } else {
+                            navController.navigate(Route.Tasks)
+                        }
+                    }
+                )
+            }
 
             Text(
                 text = stringResource(R.string.what_do_you_want_to_do),
@@ -176,6 +193,55 @@ fun HomeScreen(
             }
 
             Spacer(modifier = Modifier.height(80.dp)) // Space for FAB
+        }
+    }
+}
+
+@Composable
+fun ActionRequiredBanner(
+    birthdayReviewRequired: Boolean,
+    pendingTasksCount: Int,
+    onActionClick: () -> Unit
+) {
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable(onClick = onActionClick),
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.errorContainer
+        )
+    ) {
+        Row(
+            modifier = Modifier.padding(16.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Icon(
+                imageVector = Icons.Default.NotificationsActive,
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.error
+            )
+            Spacer(modifier = Modifier.width(16.dp))
+            Column {
+                Text(
+                    text = "Action Required",
+                    style = MaterialTheme.typography.titleMedium,
+                    color = MaterialTheme.colorScheme.onErrorContainer,
+                    fontWeight = FontWeight.Bold
+                )
+                val message = when {
+                    birthdayReviewRequired && pendingTasksCount > 0 ->
+                        "You have birthdays to review and $pendingTasksCount pending tasks."
+                    birthdayReviewRequired ->
+                        "You have birthdays to review."
+                    else ->
+                        "You have $pendingTasksCount pending tasks."
+                }
+                Text(
+                    text = message,
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onErrorContainer
+                )
+            }
         }
     }
 }

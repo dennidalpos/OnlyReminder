@@ -4,6 +4,7 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.onlyreminder.app.data.database.entities.ContactEntity
+import com.onlyreminder.app.data.database.entities.GroupEntity
 import com.onlyreminder.app.data.database.entities.TaskEntity
 import com.onlyreminder.app.data.database.entities.TemplateEntity
 import com.onlyreminder.app.data.repository.ContactRepositoryImpl
@@ -37,12 +38,16 @@ class TaskEditViewModel @Inject constructor(
     private val _contacts = MutableStateFlow<List<ContactEntity>>(emptyList())
     val contacts: StateFlow<List<ContactEntity>> = _contacts.asStateFlow()
 
+    private val _groups = MutableStateFlow<List<GroupEntity>>(emptyList())
+    val groups: StateFlow<List<GroupEntity>> = _groups.asStateFlow()
+
     private val _templates = MutableStateFlow<List<TemplateEntity>>(emptyList())
     val templates: StateFlow<List<TemplateEntity>> = _templates.asStateFlow()
 
     init {
         viewModelScope.launch {
             _contacts.value = contactRepository.getAllContacts().first()
+            _groups.value = contactRepository.getAllGroups().first()
             _templates.value = mainRepository.getAllTemplates().first()
 
             if (taskId != null) {
@@ -74,7 +79,15 @@ class TaskEditViewModel @Inject constructor(
     }
 
     fun updateContact(contactId: Long?) {
-        _task.value = _task.value?.copy(contactId = contactId)
+        _task.value = _task.value?.copy(contactId = contactId, groupId = null)
+    }
+
+    fun updateGroup(groupId: Long?) {
+        _task.value = _task.value?.copy(groupId = groupId, contactId = null)
+    }
+
+    fun updateType(type: String) {
+        _task.value = _task.value?.copy(type = type)
     }
 
     fun updateTemplate(templateId: Long?) {

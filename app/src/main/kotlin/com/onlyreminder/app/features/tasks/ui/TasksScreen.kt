@@ -1,5 +1,8 @@
 package com.onlyreminder.app.features.tasks.ui
 
+import androidx.activity.compose.BackHandler
+import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -10,15 +13,21 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Clear
+import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.FilterList
+import androidx.compose.material.icons.filled.SelectAll
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.Checkbox
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.FloatingActionButton
@@ -38,7 +47,9 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import com.onlyreminder.app.R
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.onlyreminder.app.core.navigation.Route
@@ -55,51 +66,80 @@ fun TasksScreen(
     viewModel: TasksViewModel = hiltViewModel()
 ) {
     val tasks by viewModel.tasks.collectAsState()
-    val filterStatus by viewModel.filterStatus.collectAsState()
+    val selectedTaskIds by viewModel.selectedTaskIds.collectAsState()
+
+    var showDeleteDialog by remember { mutableStateOf(false) }
+
+    val isSelectionMode = selectedTaskIds.isNotEmpty()
+
+    BackHandler(enabled = isSelectionMode) {
+        viewModel.clearSelection()
+    }
 
     Scaffold(
         topBar = {
-            OnlyReminderTopBar(
-                title = "Tasks",
-                navigationIcon = {
-                    IconButton(onClick = { navController.navigateUp() }) {
-                        Icon(
-                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                            contentDescription = "Back"
-                        )
+            if (isSelectionMode) {
+                OnlyReminderTopBar(
+                    title = stringResource(id = R.string.items_selected, selectedTaskIds.size),
+                    navigationIcon = {
+                        IconButton(onClick = { viewModel.clearSelection() }) {
+                            Icon(Icons.Default.Clear, contentDescription = null)
+                        }
+                    },
+                    actions = {
+                        IconButton(onClick = { viewModel.selectAllTasks() }) {
+                            Icon(Icons.Default.SelectAll, contentDescription = stringResource(id = R.string.select_all))
+                        }
+                        IconButton(onClick = { showDeleteDialog = true }) {
+                            Icon(Icons.Default.Delete, contentDescription = stringResource(id = R.string.delete_selected))
+                        }
                     }
-                },
-                actions = {
-                    var expanded by remember { mutableStateOf(false) }
-                    IconButton(onClick = { expanded = true }) {
-                        Icon(Icons.Default.FilterList, contentDescription = "Filter")
+                )
+            } else {
+                OnlyReminderTopBar(
+                    title = stringResource(id = R.string.tasks_title),
+                    navigationIcon = {
+                        IconButton(onClick = { navController.navigateUp() }) {
+                            Icon(
+                                imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                                contentDescription = "Back"
+                            )
+                        }
+                    },
+                    actions = {
+                        var expanded by remember { mutableStateOf(false) }
+                        IconButton(onClick = { expanded = true }) {
+                            Icon(Icons.Default.FilterList, contentDescription = "Filter")
+                        }
+                        DropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
+                            DropdownMenuItem(
+                                text = { Text(stringResource(id = R.string.all)) },
+                                onClick = { viewModel.setFilterStatus(null); expanded = false })
+                            DropdownMenuItem(
+                                text = { Text(TaskStatus.PENDING.name) },
+                                onClick = {
+                                    viewModel.setFilterStatus(TaskStatus.PENDING); expanded = false
+                                })
+                            DropdownMenuItem(
+                                text = { Text(TaskStatus.COMPLETED.name) },
+                                onClick = {
+                                    viewModel.setFilterStatus(TaskStatus.COMPLETED); expanded = false
+                                })
+                            DropdownMenuItem(
+                                text = { Text(TaskStatus.CANCELLED.name) },
+                                onClick = {
+                                    viewModel.setFilterStatus(TaskStatus.CANCELLED); expanded = false
+                                })
+                        }
                     }
-                    DropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
-                        DropdownMenuItem(
-                            text = { Text("All") },
-                            onClick = { viewModel.setFilterStatus(null); expanded = false })
-                        DropdownMenuItem(
-                            text = { Text("Pending") },
-                            onClick = {
-                                viewModel.setFilterStatus(TaskStatus.PENDING); expanded = false
-                            })
-                        DropdownMenuItem(
-                            text = { Text("Completed") },
-                            onClick = {
-                                viewModel.setFilterStatus(TaskStatus.COMPLETED); expanded = false
-                            })
-                        DropdownMenuItem(
-                            text = { Text("Cancelled") },
-                            onClick = {
-                                viewModel.setFilterStatus(TaskStatus.CANCELLED); expanded = false
-                            })
-                    }
-                }
-            )
+                )
+            }
         },
         floatingActionButton = {
-            FloatingActionButton(onClick = { navController.navigate(Route.TaskEdit()) }) {
-                Icon(Icons.Default.Add, contentDescription = "Add Task")
+            if (!isSelectionMode) {
+                FloatingActionButton(onClick = { navController.navigate(Route.TaskEdit()) }) {
+                    Icon(Icons.Default.Add, contentDescription = "Add Task")
+                }
             }
         }
     ) { paddingValues ->
@@ -110,7 +150,7 @@ fun TasksScreen(
                     .padding(paddingValues),
                 contentAlignment = Alignment.Center
             ) {
-                Text("No tasks found.")
+                Text(stringResource(id = R.string.none))
             }
         } else {
             LazyColumn(
@@ -121,32 +161,79 @@ fun TasksScreen(
                 verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
                 items(tasks) { task ->
+                    val isSelected = selectedTaskIds.contains(task.id)
                     TaskItem(
                         task = task,
-                        onEdit = { navController.navigate(Route.TaskEdit(task.id)) },
+                        isSelected = isSelected,
+                        isSelectionMode = isSelectionMode,
+                        onClick = {
+                            if (isSelectionMode) {
+                                viewModel.toggleTaskSelection(task.id)
+                            } else {
+                                navController.navigate(Route.TaskEdit(task.id))
+                            }
+                        },
+                        onLongClick = { viewModel.toggleTaskSelection(task.id) },
                         onComplete = { viewModel.updateTaskStatus(task.id, TaskStatus.COMPLETED) },
                         onSkip = { viewModel.updateTaskStatus(task.id, TaskStatus.CANCELLED) }
                     )
                 }
             }
         }
+
+        if (showDeleteDialog) {
+            AlertDialog(
+                onDismissRequest = { showDeleteDialog = false },
+                title = { Text(stringResource(id = R.string.delete_selected)) },
+                text = {
+                    Text(
+                        stringResource(
+                            id = R.string.delete_selected_confirm_msg,
+                            selectedTaskIds.size
+                        )
+                    )
+                },
+                confirmButton = {
+                    TextButton(onClick = {
+                        viewModel.deleteSelectedTasks()
+                        showDeleteDialog = false
+                    }) {
+                        Text(stringResource(id = R.string.delete))
+                    }
+                },
+                dismissButton = {
+                    TextButton(onClick = { showDeleteDialog = false }) {
+                        Text(stringResource(id = R.string.cancel))
+                    }
+                }
+            )
+        }
     }
 }
 
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun TaskItem(
     task: TaskEntity,
-    onEdit: () -> Unit,
+    isSelected: Boolean,
+    isSelectionMode: Boolean,
+    onClick: () -> Unit,
+    onLongClick: () -> Unit,
     onComplete: () -> Unit,
     onSkip: () -> Unit
 ) {
     val dateTimeFormatter = remember { DateTimeFormatter.ofPattern("dd MMM yyyy, HH:mm") }
-    val isPast = task.dueDateTime.isBefore(LocalDateTime.now()) && task.status == TaskStatus.PENDING
+    val isPast = (task.dueDateTime.isBefore(LocalDateTime.now()) && task.status == TaskStatus.PENDING)
 
     Card(
-        modifier = Modifier.fillMaxWidth(),
-        onClick = onEdit,
-        colors = if (isPast) CardDefaults.cardColors(
+        modifier = Modifier
+            .fillMaxWidth()
+            .combinedClickable(
+                onClick = onClick,
+                onLongClick = onLongClick
+            ),
+        colors = if (isSelected) CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.primaryContainer)
+        else if (isPast) CardDefaults.cardColors(
             containerColor = MaterialTheme.colorScheme.errorContainer.copy(
                 alpha = 0.1f
             )
@@ -158,6 +245,10 @@ fun TaskItem(
                 modifier = Modifier.fillMaxWidth(),
                 verticalAlignment = Alignment.CenterVertically
             ) {
+                if (isSelectionMode) {
+                    Checkbox(checked = isSelected, onCheckedChange = { onClick() })
+                    Spacer(modifier = Modifier.width(8.dp))
+                }
                 Column(modifier = Modifier.weight(1f)) {
                     Text(text = task.title, style = MaterialTheme.typography.titleMedium)
                     Text(

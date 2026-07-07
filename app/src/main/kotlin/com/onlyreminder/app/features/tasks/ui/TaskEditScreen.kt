@@ -3,15 +3,21 @@ package com.onlyreminder.app.features.tasks.ui
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Save
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.DatePicker
+import androidx.compose.material3.DatePickerDialog
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -20,22 +26,34 @@ import androidx.compose.material3.ExposedDropdownMenuBox
 import androidx.compose.material3.ExposedDropdownMenuDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
+import androidx.compose.material3.TimePicker
+import androidx.compose.material3.rememberDatePickerState
+import androidx.compose.material3.rememberTimePickerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.onlyreminder.app.core.ui.components.OnlyReminderTopBar
 import com.onlyreminder.app.features.tasks.presentation.TaskEditViewModel
+import java.time.Instant
+import java.time.LocalDate
+import java.time.LocalDateTime
+import java.time.LocalTime
+import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -46,7 +64,11 @@ fun TaskEditScreen(
 ) {
     val task by viewModel.task.collectAsState()
     val contacts by viewModel.contacts.collectAsState()
+    val groups by viewModel.groups.collectAsState()
     val templates by viewModel.templates.collectAsState()
+
+    var showDatePicker by remember { mutableStateOf(false) }
+    var showTimePicker by remember { mutableStateOf(false) }
 
     val dateTimeFormatter = remember { DateTimeFormatter.ofPattern("dd MMM yyyy, HH:mm") }
 
@@ -95,19 +117,18 @@ fun TaskEditScreen(
                         .height(100.dp)
                 )
 
-                // Contact Picker
-                var contactExpanded by remember { mutableStateOf(false) }
-                val selectedContact = contacts.find { it.id == t.contactId }
+                // Event Type Selector
+                var typeExpanded by remember { mutableStateOf(false) }
                 ExposedDropdownMenuBox(
-                    expanded = contactExpanded,
-                    onExpandedChange = { contactExpanded = it }
+                    expanded = typeExpanded,
+                    onExpandedChange = { typeExpanded = it }
                 ) {
                     OutlinedTextField(
-                        value = selectedContact?.displayName ?: "No Contact",
+                        value = t.type,
                         onValueChange = {},
                         readOnly = true,
-                        label = { Text("Link Contact") },
-                        trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = contactExpanded) },
+                        label = { Text("Event Type") },
+                        trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = typeExpanded) },
                         modifier = Modifier
                             .menuAnchor(
                                 type = ExposedDropdownMenuAnchorType.PrimaryNotEditable,
@@ -116,35 +137,131 @@ fun TaskEditScreen(
                             .fillMaxWidth()
                     )
                     ExposedDropdownMenu(
-                        expanded = contactExpanded,
-                        onDismissRequest = { contactExpanded = false }
+                        expanded = typeExpanded,
+                        onDismissRequest = { typeExpanded = false }
                     ) {
-                        DropdownMenuItem(
-                            text = { Text("No Contact") },
-                            onClick = { viewModel.updateContact(null); contactExpanded = false })
-                        contacts.forEach { contact ->
+                        listOf("REMINDER", "BIRTHDAY").forEach { type ->
                             DropdownMenuItem(
-                                text = { Text(contact.displayName) },
-                                onClick = {
-                                    viewModel.updateContact(contact.id); contactExpanded = false
-                                }
+                                text = { Text(type) },
+                                onClick = { viewModel.updateType(type); typeExpanded = false }
                             )
+                        }
+                    }
+                }
+
+                Row(modifier = Modifier.fillMaxWidth()) {
+                    // Contact Picker
+                    var contactExpanded by remember { mutableStateOf(false) }
+                    val selectedContact = contacts.find { it.id == t.contactId }
+                    ExposedDropdownMenuBox(
+                        expanded = contactExpanded,
+                        onExpandedChange = { contactExpanded = it },
+                        modifier = Modifier.weight(1f)
+                    ) {
+                        OutlinedTextField(
+                            value = selectedContact?.displayName ?: "No Contact",
+                            onValueChange = {},
+                            readOnly = true,
+                            label = { Text("Link Contact") },
+                            trailingIcon = {
+                                ExposedDropdownMenuDefaults.TrailingIcon(
+                                    expanded = contactExpanded
+                                )
+                            },
+                            modifier = Modifier
+                                .menuAnchor(
+                                    type = ExposedDropdownMenuAnchorType.PrimaryNotEditable,
+                                    enabled = true
+                                )
+                                .fillMaxWidth()
+                        )
+                        ExposedDropdownMenu(
+                            expanded = contactExpanded,
+                            onDismissRequest = { contactExpanded = false }
+                        ) {
+                            DropdownMenuItem(
+                                text = { Text("No Contact") },
+                                onClick = { viewModel.updateContact(null); contactExpanded = false })
+                            contacts.forEach { contact ->
+                                DropdownMenuItem(
+                                    text = { Text(contact.displayName) },
+                                    onClick = {
+                                        viewModel.updateContact(contact.id); contactExpanded = false
+                                    }
+                                )
+                            }
+                        }
+                    }
+
+                    Spacer(modifier = Modifier.width(8.dp))
+
+                    // Group Picker
+                    var groupExpanded by remember { mutableStateOf(false) }
+                    val selectedGroup = groups.find { it.id == t.groupId }
+                    ExposedDropdownMenuBox(
+                        expanded = groupExpanded,
+                        onExpandedChange = { groupExpanded = it },
+                        modifier = Modifier.weight(1f)
+                    ) {
+                        OutlinedTextField(
+                            value = selectedGroup?.name ?: "No Group",
+                            onValueChange = {},
+                            readOnly = true,
+                            label = { Text("Link Group") },
+                            trailingIcon = {
+                                ExposedDropdownMenuDefaults.TrailingIcon(
+                                    expanded = groupExpanded
+                                )
+                            },
+                            modifier = Modifier
+                                .menuAnchor(
+                                    type = ExposedDropdownMenuAnchorType.PrimaryNotEditable,
+                                    enabled = true
+                                )
+                                .fillMaxWidth()
+                        )
+                        ExposedDropdownMenu(
+                            expanded = groupExpanded,
+                            onDismissRequest = { groupExpanded = false }
+                        ) {
+                            DropdownMenuItem(
+                                text = { Text("No Group") },
+                                onClick = { viewModel.updateGroup(null); groupExpanded = false })
+                            groups.forEach { group ->
+                                DropdownMenuItem(
+                                    text = { Text(group.name) },
+                                    onClick = {
+                                        viewModel.updateGroup(group.id); groupExpanded = false
+                                    }
+                                )
+                            }
                         }
                     }
                 }
 
                 // Send Mode
                 var modeExpanded by remember { mutableStateOf(false) }
-                Box {
-                    OutlinedButton(
-                        onClick = { modeExpanded = true },
-                        modifier = Modifier.fillMaxWidth()
-                    ) {
-                        Text("Send Mode: ${t.sendMode}")
-                    }
-                    DropdownMenu(
+                ExposedDropdownMenuBox(
+                    expanded = modeExpanded,
+                    onExpandedChange = { modeExpanded = it }
+                ) {
+                    OutlinedTextField(
+                        value = t.sendMode,
+                        onValueChange = {},
+                        readOnly = true,
+                        label = { Text("Send Mode") },
+                        trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = modeExpanded) },
+                        modifier = Modifier
+                            .menuAnchor(
+                                type = ExposedDropdownMenuAnchorType.PrimaryNotEditable,
+                                enabled = true
+                            )
+                            .fillMaxWidth()
+                    )
+                    ExposedDropdownMenu(
                         expanded = modeExpanded,
-                        onDismissRequest = { modeExpanded = false }) {
+                        onDismissRequest = { modeExpanded = false }
+                    ) {
                         listOf(
                             "REMINDER_ONLY",
                             "MANUAL_WHATSAPP",
@@ -157,52 +274,143 @@ fun TaskEditScreen(
                     }
                 }
 
-                if (t.sendMode != "REMINDER_ONLY") {
-                    // Template Picker
-                    var templateExpanded by remember { mutableStateOf(false) }
-                    val selectedTemplate = templates.find { it.id == t.templateId }
-                    ExposedDropdownMenuBox(
+                // Template Picker
+                var templateExpanded by remember { mutableStateOf(false) }
+                val selectedTemplate = templates.find { it.id == t.templateId }
+                ExposedDropdownMenuBox(
+                    expanded = templateExpanded,
+                    onExpandedChange = { templateExpanded = it }
+                ) {
+                    OutlinedTextField(
+                        value = selectedTemplate?.name ?: "No Template",
+                        onValueChange = {},
+                        readOnly = true,
+                        label = { Text("Message Template") },
+                        trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = templateExpanded) },
+                        modifier = Modifier
+                            .menuAnchor(
+                                type = ExposedDropdownMenuAnchorType.PrimaryNotEditable,
+                                enabled = true
+                            )
+                            .fillMaxWidth()
+                    )
+                    ExposedDropdownMenu(
                         expanded = templateExpanded,
-                        onExpandedChange = { templateExpanded = it }
+                        onDismissRequest = { templateExpanded = false }
                     ) {
-                        OutlinedTextField(
-                            value = selectedTemplate?.name ?: "No Template",
-                            onValueChange = {},
-                            readOnly = true,
-                            label = { Text("Message Template") },
-                            trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = templateExpanded) },
-                            modifier = Modifier
-                                .menuAnchor(
-                                    type = ExposedDropdownMenuAnchorType.PrimaryNotEditable,
-                                    enabled = true
-                                )
-                                .fillMaxWidth()
-                        )
-                        ExposedDropdownMenu(
-                            expanded = templateExpanded,
-                            onDismissRequest = { templateExpanded = false }
-                        ) {
+                        DropdownMenuItem(
+                            text = { Text("No Template") },
+                            onClick = {
+                                viewModel.updateTemplate(null); templateExpanded = false
+                            })
+                        templates.forEach { template ->
                             DropdownMenuItem(
-                                text = { Text("No Template") },
+                                text = { Text(template.name) },
                                 onClick = {
-                                    viewModel.updateTemplate(null); templateExpanded = false
-                                })
-                            templates.forEach { template ->
-                                DropdownMenuItem(
-                                    text = { Text(template.name) },
-                                    onClick = {
-                                        viewModel.updateTemplate(template.id); templateExpanded =
-                                        false
-                                    }
-                                )
-                            }
+                                    viewModel.updateTemplate(template.id); templateExpanded =
+                                    false
+                                }
+                            )
                         }
                     }
                 }
 
-                // Due Date/Time (Simplified for now)
-                Text("Due Date: ${t.dueDateTime.format(dateTimeFormatter)}")
-                // In a real app, I'd add DatePickerDialog and TimePickerDialog here.
+                // Due Date/Time
+                Text(
+                    text = "Schedule Event",
+                    style = MaterialTheme.typography.titleSmall
+                )
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    OutlinedButton(
+                        onClick = { showDatePicker = true },
+                        modifier = Modifier.weight(1f)
+                    ) {
+                        Text("Date: ${t.dueDateTime.toLocalDate()}")
+                    }
+                    OutlinedButton(
+                        onClick = { showTimePicker = true },
+                        modifier = Modifier.weight(1f)
+                    ) {
+                        Text(
+                            "Time: ${
+                                t.dueDateTime.toLocalTime()
+                                    .format(DateTimeFormatter.ofPattern("HH:mm"))
+                            }"
+                        )
+                    }
+                }
+
+                if (showDatePicker) {
+                    val datePickerState = rememberDatePickerState(
+                        initialSelectedDateMillis = t.dueDateTime.atZone(ZoneId.systemDefault())
+                            .toInstant().toEpochMilli()
+                    )
+                    DatePickerDialog(
+                        onDismissRequest = { showDatePicker = false },
+                        confirmButton = {
+                            TextButton(onClick = {
+                                datePickerState.selectedDateMillis?.let {
+                                    val selectedDate = Instant.ofEpochMilli(it)
+                                        .atZone(ZoneId.of("UTC"))
+                                        .toLocalDate()
+                                    val newDateTime = t.dueDateTime
+                                        .withYear(selectedDate.year)
+                                        .withMonth(selectedDate.monthValue)
+                                        .withDayOfMonth(selectedDate.dayOfMonth)
+                                    viewModel.updateDueDateTime(
+                                        newDateTime.atZone(ZoneId.systemDefault()).toInstant()
+                                            .toEpochMilli()
+                                    )
+                                }
+                                showDatePicker = false
+                            }) {
+                                Text("OK")
+                            }
+                        },
+                        dismissButton = {
+                            TextButton(onClick = { showDatePicker = false }) {
+                                Text("Cancel")
+                            }
+                        }
+                    ) {
+                        DatePicker(state = datePickerState)
+                    }
+                }
+
+                if (showTimePicker) {
+                    val timePickerState = rememberTimePickerState(
+                        initialHour = t.dueDateTime.hour,
+                        initialMinute = t.dueDateTime.minute
+                    )
+                    AlertDialog(
+                        onDismissRequest = { showTimePicker = false },
+                        confirmButton = {
+                            TextButton(onClick = {
+                                val newDateTime = t.dueDateTime
+                                    .withHour(timePickerState.hour)
+                                    .withMinute(timePickerState.minute)
+                                viewModel.updateDueDateTime(
+                                    newDateTime.atZone(ZoneId.systemDefault()).toInstant()
+                                        .toEpochMilli()
+                                )
+                                showTimePicker = false
+                            }) {
+                                Text("OK")
+                            }
+                        },
+                        dismissButton = {
+                            TextButton(onClick = { showTimePicker = false }) {
+                                Text("Cancel")
+                            }
+                        },
+                        text = {
+                            TimePicker(state = timePickerState)
+                        }
+                    )
+                }
             }
         }
     }

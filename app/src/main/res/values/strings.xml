@@ -64,6 +64,26 @@
     <string name="save">Save</string>
     <string name="no_group">No Group</string>
 
+    <!-- Multi-selection -->
+    <string name="select_all">Select All</string>
+    <string name="items_selected">%1$d selected</string>
+    <string name="assign_to_group">Assign to Group</string>
+    <string name="assign_task">Assign Task</string>
+    <string name="task_title_label">Task Title *</string>
+    <string name="task_description_label">Description (optional)</string>
+    <string name="assign_task_to_contacts">Assign Task to %1$d contacts</string>
+    <string name="delete_selected">Delete Selected</string>
+    <string name="delete_selected_confirm_msg">Are you sure you want to delete %1$d selected items? This action cannot be undone.</string>
+    <string name="move_to_group_title">Move to Group</string>
+    <string name="members_title">Members</string>
+    <string name="add_member">Add Member</string>
+    <string name="add_members_title">Add Members</string>
+    <string name="no_available_contacts">No contacts available to add.</string>
+    <string name="remove">Remove</string>
+    <string name="no_templates">No templates yet. Tap + to create one.</string>
+    <string name="duplicate">Duplicate</string>
+    <string name="default_label">Default</string>
+
     <!-- Step 08 & 09: Import -->
     <string name="import_contacts">Import Contacts</string>
     <string name="import_file">Import File</string>
@@ -87,6 +107,9 @@
     <!-- Navigation & Titles -->
     <string name="tasks_title">Tasks</string>
     <string name="templates_title">Templates</string>
+    <string name="add_template">Add Template</string>
+    <string name="new_template">New Template</string>
+    <string name="edit_template">Edit Template</string>
     <string name="birthday_review_title">Birthday Review</string>
     <string name="backup_title">Backup &amp; Restore</string>
     <string name="settings_title">Settings</string>
