@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Privacy Policy - OnlyReminder</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #6750A4;
+            --primary-container: #EADDFF;
+            --on-primary-container: #21005D;
+            --secondary: #625B71;
+            --background: #FFFBFE;
+            --surface: #FFFFFF;
+            --on-surface: #1C1B1F;
+            --on-surface-variant: #49454F;
+            --outline: #79747E;
+            --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        [data-theme="dark"] {
+            --background: #1C1B1F;
+            --surface: #2B2930;
+            --on-surface: #E6E1E5;
+            --on-surface-variant: #CAC4D0;
+            --primary: #D0BCFF;
+            --primary-container: #4F378B;
+            --on-primary-container: #EADDFF;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            margin: 0;
+            background-color: var(--background);
+            color: var(--on-surface);
+            line-height: 1.6;
+            transition: background-color 0.3s ease;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 0 24px;
+        }
+
+        header {
+            padding: 1.5rem 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-weight: 800;
+            font-size: 1.5rem;
+            color: var(--primary);
+            text-decoration: none;
+        }
+
+        .nav-actions {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+        }
+
+        .icon-btn {
+            background: var(--primary-container);
+            color: var(--on-primary-container);
+            border: none;
+            padding: 8px 16px;
+            border-radius: 100px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+
+        .content {
+            padding: 40px 0 80px;
+        }
+
+        h1 { font-size: 3rem; font-weight: 800; margin-bottom: 40px; }
+        h2 { font-size: 1.75rem; margin-top: 48px; color: var(--primary); }
+        p { color: var(--on-surface-variant); margin-bottom: 24px; font-size: 1.1rem; }
+
+        .policy-card {
+            background: var(--surface);
+            padding: 32px;
+            border-radius: 24px;
+            border: 1px solid rgba(0,0,0,0.05);
+            margin-bottom: 24px;
+        }
+
+        footer {
+            text-align: center;
+            padding: 60px 0;
+            color: var(--on-surface-variant);
+            border-top: 1px solid rgba(0,0,0,0.05);
+        }
+
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            color: var(--primary);
+            text-decoration: none;
+            font-weight: 600;
+            margin-bottom: 24px;
+        }
+
+        [lang="en"] .it, [lang="en"] .lang-it { display: none !important; }
+        [lang="it"] .en, [lang="it"] .lang-en { display: none !important; }
+    </style>
+</head>
+<body lang="it">
+
+<div class="container">
+    <header>
+        <a href="index.html" class="logo">OnlyReminder</a>
+        <div class="nav-actions">
+            <button class="icon-btn" onclick="toggleLang()">
+                <span class="en">🇮🇹 IT</span>
+                <span class="it">🇺🇸 EN</span>
+            </button>
+            <button class="icon-btn" onclick="toggleTheme()">🌓</button>
+        </div>
+    </header>
+
+    <main class="content">
+        <a href="index.html" class="back-link">
+            <span class="en">← Back to Home</span>
+            <span class="it">← Torna alla Home</span>
+        </a>
+
+        <h1 class="en">Privacy Policy</h1>
+        <h1 class="it">Informativa sulla Privacy</h1>
+
+        <div class="policy-card">
+            <h2 class="en">1. Introduction</h2>
+            <h2 class="it">1. Introduzione</h2>
+            <p class="en">OnlyReminder is built as a Local-First application. This means your data belongs to you, and stays with you.</p>
+            <p class="it">OnlyReminder è concepita come un'applicazione Local-First. Ciò significa che i tuoi dati ti appartengono e rimangono con te.</p>
+
+            <h2 class="en">2. Data Collection</h2>
+            <h2 class="it">2. Raccolta dei Dati</h2>
+            <p class="en">We do not collect, store, or share any personal data. There are no remote servers, no analytics, and no tracking scripts.</p>
+            <p class="it">Non raccogliamo, memorizziamo né condividiamo alcun dato personale. Non esistono server remoti, né sistemi di analisi o script di tracciamento.</p>
+
+            <h2 class="en">3. Local Storage & Encryption</h2>
+            <h2 class="it">3. Archiviazione Locale e Cifratura</h2>
+            <p class="en">All contact information, birthdays, and notes are stored locally on your device in a database encrypted with SQLCipher (AES-256). Even if your device is compromised, your data remains protected.</p>
+            <p class="it">Tutte le informazioni sui contatti, i compleanni e le note sono memorizzate localmente sul tuo dispositivo in un database cifrato con SQLCipher (AES-256). Anche se il tuo dispositivo fosse compromesso, i tuoi dati rimangono protetti.</p>
+
+            <h2 class="en">4. Permissions</h2>
+            <h2 class="it">4. Permessi</h2>
+            <p class="en">The app requests access to your Contacts (to import birthdays) and Storage (to save encrypted backups). These permissions are used exclusively for local operations.</p>
+            <p class="it">L'app richiede l'accesso ai tuoi Contatti (per importare i compleanni) e alla Memoria (per salvare backup cifrati). Questi permessi sono utilizzati esclusivamente per operazioni locali.</p>
+
+            <h2 class="en">5. WhatsApp Integration</h2>
+            <h2 class="it">5. Integrazione WhatsApp</h2>
+            <p class="en">OnlyReminder facilitates sending messages via WhatsApp, but it never sends messages automatically. Every message is reviewed and sent manually by the user.</p>
+            <p class="it">OnlyReminder facilita l'invio di messaggi tramite WhatsApp, ma non invia mai messaggi automaticamente. Ogni messaggio viene revisionato e inviato manualmente dall'utente.</p>
+        </div>
+    </main>
+
+    <footer>
+        <p>&copy; 2024 OnlyReminder. Privacy by Design.</p>
+    </footer>
+</div>
+
+<script>
+    function toggleLang() {
+        const body = document.body;
+        const currentLang = body.getAttribute('lang');
+        const newLang = currentLang === 'en' ? 'it' : 'en';
+        body.setAttribute('lang', newLang);
+        localStorage.setItem('preferredLang', newLang);
+    }
+
+    function toggleTheme() {
+        const body = document.body;
+        const currentTheme = body.getAttribute('data-theme');
+        const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+        body.setAttribute('data-theme', newTheme);
+        localStorage.setItem('preferredTheme', newTheme);
+    }
+
+    window.addEventListener('DOMContentLoaded', () => {
+        const savedLang = localStorage.getItem('preferredLang') || (navigator.language.startsWith('it') ? 'it' : 'en');
+        document.body.setAttribute('lang', savedLang);
+        const savedTheme = localStorage.getItem('preferredTheme') || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+        document.body.setAttribute('data-theme', savedTheme);
+    });
+</script>
+
+</body>
+</html>

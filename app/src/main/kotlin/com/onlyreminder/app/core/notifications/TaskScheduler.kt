@@ -6,6 +6,7 @@ import android.content.Context
 import android.content.Intent
 import android.os.Build
 import com.onlyreminder.app.data.database.entities.TaskEntity
+import com.onlyreminder.app.domain.model.TaskStatus
 import dagger.hilt.android.qualifiers.ApplicationContext
 import java.time.ZoneId
 import javax.inject.Inject
@@ -17,7 +18,7 @@ class TaskScheduler @Inject constructor(
 ) {
 
     fun scheduleTask(task: TaskEntity) {
-        if (task.status != "PENDING") return
+        if (task.status != TaskStatus.PENDING) return
 
         val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
         val intent = Intent(context, ReminderReceiver::class.java).apply {

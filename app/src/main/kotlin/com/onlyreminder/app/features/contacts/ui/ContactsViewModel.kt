@@ -6,6 +6,7 @@ import com.onlyreminder.app.data.database.entities.ContactEntity
 import com.onlyreminder.app.data.database.entities.GroupEntity
 import com.onlyreminder.app.data.database.entities.TagEntity
 import com.onlyreminder.app.data.repository.ContactRepositoryImpl
+import com.onlyreminder.app.domain.model.ContactStatus
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -30,7 +31,7 @@ class ContactsViewModel @Inject constructor(
     private val _selectedGroupId = MutableStateFlow<Long?>(null)
     val selectedGroupId = _selectedGroupId.asStateFlow()
 
-    private val _selectedStatus = MutableStateFlow<String?>(null)
+    private val _selectedStatus = MutableStateFlow<ContactStatus?>(null)
     val selectedStatus = _selectedStatus.asStateFlow()
 
     private val _selectedTag = MutableStateFlow<String?>(null)
@@ -74,7 +75,7 @@ class ContactsViewModel @Inject constructor(
     data class FilterParams(
         val query: String,
         val groupId: Long?,
-        val status: String?,
+        val status: ContactStatus?,
         val tag: String?
     )
 
@@ -86,7 +87,7 @@ class ContactsViewModel @Inject constructor(
         _selectedGroupId.value = groupId
     }
 
-    fun onStatusFilterChanged(status: String?) {
+    fun onStatusFilterChanged(status: ContactStatus?) {
         _selectedStatus.value = status
     }
 

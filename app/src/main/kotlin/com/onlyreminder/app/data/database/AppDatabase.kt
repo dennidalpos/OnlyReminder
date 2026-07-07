@@ -4,7 +4,9 @@ import androidx.room.Database
 import androidx.room.RoomDatabase
 import androidx.room.TypeConverters
 import com.onlyreminder.app.data.database.dao.ContactDao
+import com.onlyreminder.app.data.database.dao.GroupDao
 import com.onlyreminder.app.data.database.dao.MainDao
+import com.onlyreminder.app.data.database.dao.TagDao
 import com.onlyreminder.app.data.database.entities.BirthdayRunEntity
 import com.onlyreminder.app.data.database.entities.BirthdayRunItemEntity
 import com.onlyreminder.app.data.database.entities.ContactEntity
@@ -35,6 +37,8 @@ import com.onlyreminder.app.data.database.entities.TemplateEntity
 @TypeConverters(Converters::class)
 abstract class AppDatabase : RoomDatabase() {
     abstract fun contactDao(): ContactDao
+    abstract fun groupDao(): GroupDao
+    abstract fun tagDao(): TagDao
     abstract fun mainDao(): MainDao
 
     companion object {

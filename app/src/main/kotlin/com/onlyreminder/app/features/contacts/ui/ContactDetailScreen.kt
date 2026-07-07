@@ -48,14 +48,19 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.navigation.NavController
+import com.onlyreminder.app.R
 import com.onlyreminder.app.core.navigation.Route
 import com.onlyreminder.app.core.ui.components.DestructiveConfirmationDialog
 import com.onlyreminder.app.core.ui.components.OnlyReminderTopBar
+import com.onlyreminder.app.domain.model.ContactStatus
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
 @Composable
@@ -66,18 +71,19 @@ fun ContactDetailScreen(
     val contact by viewModel.contact.collectAsState()
     val group by viewModel.group.collectAsState()
     val tags by viewModel.tags.collectAsState()
+    val context = LocalContext.current
 
     var showDeleteDialog by remember { mutableStateOf(value = false) }
 
     Scaffold(
         topBar = {
             OnlyReminderTopBar(
-                title = "Contact Details",
+                title = stringResource(id = R.string.contact_details),
                 navigationIcon = {
                     IconButton(onClick = { navController.navigateUp() }) {
                         Icon(
                             imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                            contentDescription = "Back"
+                            contentDescription = stringResource(id = R.string.back)
                         )
                     }
                 },
@@ -87,12 +93,18 @@ fun ContactDetailScreen(
                             navController.navigate(Route.ContactEdit(contact?.id))
                         },
                     ) {
-                        Icon(imageVector = Icons.Default.Edit, contentDescription = "Edit")
+                        Icon(
+                            imageVector = Icons.Default.Edit,
+                            contentDescription = stringResource(id = R.string.edit)
+                        )
                     }
                     IconButton(
                         onClick = { showDeleteDialog = true },
                     ) {
-                        Icon(imageVector = Icons.Default.Delete, contentDescription = "Delete")
+                        Icon(
+                            imageVector = Icons.Default.Delete,
+                            contentDescription = stringResource(id = R.string.delete)
+                        )
                     }
                 },
             )
@@ -141,29 +153,40 @@ fun ContactDetailScreen(
 
                 Spacer(modifier = Modifier.height(24.dp))
 
-                DetailItem(icon = Icons.Default.Phone, label = "Phone", value = c.phone)
+                DetailItem(
+                    icon = Icons.Default.Phone,
+                    label = stringResource(id = R.string.phone),
+                    value = c.phone
+                )
                 if (c.normalizedPhone.isNotEmpty() && (c.normalizedPhone != c.phone)) {
                     DetailItem(
                         icon = Icons.Default.Dialpad,
-                        label = "Normalized",
+                        label = stringResource(id = R.string.normalized),
                         value = c.normalizedPhone,
                     )
                 }
-                DetailItem(icon = Icons.Default.Email, label = "Email", value = c.email)
+                DetailItem(
+                    icon = Icons.Default.Email,
+                    label = stringResource(id = R.string.email),
+                    value = c.email
+                )
                 DetailItem(
                     icon = Icons.Default.Cake,
-                    label = "Birthday",
-                    value = c.birthday ?: "Not set",
+                    label = stringResource(id = R.string.birthday),
+                    value = c.birthday ?: stringResource(id = R.string.not_set),
                 )
                 DetailItem(
                     icon = Icons.Default.Group,
-                    label = "Group",
-                    value = group?.name ?: "None"
+                    label = stringResource(id = R.string.group),
+                    value = group?.name ?: stringResource(id = R.string.none)
                 )
 
                 if (tags.isNotEmpty()) {
                     Spacer(modifier = Modifier.height(16.dp))
-                    Text(text = "Tags", style = MaterialTheme.typography.labelLarge)
+                    Text(
+                        text = stringResource(id = R.string.tags),
+                        style = MaterialTheme.typography.labelLarge
+                    )
                     FlowRow(
                         modifier = Modifier.padding(vertical = 8.dp),
                         horizontalArrangement = Arrangement.spacedBy(8.dp)
@@ -174,24 +197,38 @@ fun ContactDetailScreen(
                     }
                 }
 
-                DetailItem(icon = Icons.AutoMirrored.Filled.Notes, label = "Notes", value = c.notes)
-                DetailItem(icon = Icons.Default.Info, label = "Status", value = c.status)
+                DetailItem(
+                    icon = Icons.AutoMirrored.Filled.Notes,
+                    label = stringResource(id = R.string.notes),
+                    value = c.notes
+                )
+                DetailItem(
+                    icon = Icons.Default.Info,
+                    label = stringResource(id = R.string.status),
+                    value = c.status.name
+                )
 
                 Spacer(modifier = Modifier.height(24.dp))
                 HorizontalDivider()
                 Spacer(modifier = Modifier.height(24.dp))
 
-                // Placeholders
-                PlaceholderAction(
-                    label = "Create Task (Coming Soon)",
-                    icon = Icons.AutoMirrored.Filled.Assignment
+                // Actions
+                DetailAction(
+                    label = stringResource(id = R.string.create_task),
+                    icon = Icons.AutoMirrored.Filled.Assignment,
+                    onClick = {
+                        navController.navigate(Route.TaskEdit(contactId = c.id))
+                    }
                 )
-                PlaceholderAction(
-                    label = "Send WhatsApp (Coming Soon)",
-                    icon = Icons.AutoMirrored.Filled.Send
+                DetailAction(
+                    label = stringResource(id = R.string.send_wa),
+                    icon = Icons.AutoMirrored.Filled.Send,
+                    onClick = {
+                        viewModel.openWhatsApp(context)
+                    }
                 )
 
-                if (c.status != "ARCHIVED") {
+                if (c.status != ContactStatus.ARCHIVED) {
                     Button(
                         onClick = { viewModel.archiveContact() },
                         modifier = Modifier
@@ -199,7 +236,7 @@ fun ContactDetailScreen(
                             .padding(vertical = 8.dp),
                         colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.secondary)
                     ) {
-                        Text("Archive Contact")
+                        Text(stringResource(id = R.string.archive_contact))
                     }
                 }
             }
@@ -209,8 +246,8 @@ fun ContactDetailScreen(
 
         if (showDeleteDialog) {
             DestructiveConfirmationDialog(
-                title = "Delete Contact",
-                message = "This will permanently delete the selected contact from OnlyReminder. This action cannot be undone unless you restore a backup.",
+                title = stringResource(id = R.string.delete_contact_confirm_title),
+                message = stringResource(id = R.string.delete_contact_confirm_msg),
                 onConfirm = {
                     viewModel.deleteContact {
                         navController.navigateUp()
@@ -251,24 +288,30 @@ fun DetailItem(icon: ImageVector, label: String, value: String) {
 }
 
 @Composable
-fun PlaceholderAction(label: String, icon: ImageVector) {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(vertical = 8.dp),
-        verticalAlignment = Alignment.CenterVertically
+fun DetailAction(label: String, icon: ImageVector, onClick: () -> Unit) {
+    androidx.compose.material3.Surface(
+        onClick = onClick,
+        modifier = Modifier.fillMaxWidth(),
+        color = Color.Transparent
     ) {
-        Icon(
-            imageVector = icon,
-            contentDescription = null,
-            tint = MaterialTheme.colorScheme.outline,
-            modifier = Modifier.size(24.dp)
-        )
-        Spacer(modifier = Modifier.width(16.dp))
-        Text(
-            text = label,
-            style = MaterialTheme.typography.bodyLarge,
-            color = MaterialTheme.colorScheme.outline
-        )
+        Row(
+            modifier = Modifier
+                .padding(vertical = 12.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Icon(
+                imageVector = icon,
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.primary,
+                modifier = Modifier.size(24.dp)
+            )
+            Spacer(modifier = Modifier.width(16.dp))
+            Text(
+                text = label,
+                style = MaterialTheme.typography.bodyLarge,
+                color = MaterialTheme.colorScheme.primary,
+                fontWeight = FontWeight.Medium
+            )
+        }
     }
 }

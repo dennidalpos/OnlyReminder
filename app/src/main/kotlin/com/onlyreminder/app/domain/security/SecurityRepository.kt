@@ -2,6 +2,7 @@ package com.onlyreminder.app.domain.security
 
 import android.content.SharedPreferences
 import android.util.Base64
+import androidx.core.content.edit
 import com.onlyreminder.app.core.security.SecurePrefs
 import java.security.MessageDigest
 import java.security.SecureRandom
@@ -10,17 +11,17 @@ import javax.inject.Singleton
 
 @Singleton
 class SecurityRepository @Inject constructor(
-    @SecurePrefs private val encryptedPrefs: SharedPreferences
+    @param:SecurePrefs private val encryptedPrefs: SharedPreferences,
 ) {
     fun setPin(pin: String) {
         val salt = ByteArray(16).apply { SecureRandom().nextBytes(this) }
         val saltString = Base64.encodeToString(salt, Base64.DEFAULT)
         val hashedPin = hashPin(pin, salt)
 
-        encryptedPrefs.edit()
-            .putString(KEY_PIN_HASH, hashedPin)
-            .putString(KEY_PIN_SALT, saltString)
-            .apply()
+        encryptedPrefs.edit {
+            putString(KEY_PIN_HASH, hashedPin)
+            putString(KEY_PIN_SALT, saltString)
+        }
     }
 
     fun verifyPin(pin: String): Boolean {
@@ -44,14 +45,14 @@ class SecurityRepository @Inject constructor(
     }
 
     fun clearPin() {
-        encryptedPrefs.edit()
-            .remove(KEY_PIN_HASH)
-            .remove(KEY_PIN_SALT)
-            .apply()
+        encryptedPrefs.edit {
+            remove(KEY_PIN_HASH)
+            remove(KEY_PIN_SALT)
+        }
     }
 
     fun setBiometricEnabled(enabled: Boolean) {
-        encryptedPrefs.edit().putBoolean(KEY_BIOMETRIC_ENABLED, enabled).apply()
+        encryptedPrefs.edit { putBoolean(KEY_BIOMETRIC_ENABLED, enabled) }
     }
 
     fun isBiometricEnabled(): Boolean {
@@ -59,7 +60,7 @@ class SecurityRepository @Inject constructor(
     }
 
     fun setAutoLockTimeout(minutes: Int) {
-        encryptedPrefs.edit().putInt(KEY_AUTO_LOCK_TIMEOUT, minutes).apply()
+        encryptedPrefs.edit { putInt(KEY_AUTO_LOCK_TIMEOUT, minutes) }
     }
 
     fun getAutoLockTimeout(): Int {
@@ -67,7 +68,7 @@ class SecurityRepository @Inject constructor(
     }
 
     fun setWhatsAppAccessToken(token: String) {
-        encryptedPrefs.edit().putString(KEY_WA_ACCESS_TOKEN, token).apply()
+        encryptedPrefs.edit { putString(KEY_WA_ACCESS_TOKEN, token) }
     }
 
     fun getWhatsAppAccessToken(): String? {
@@ -78,7 +79,7 @@ class SecurityRepository @Inject constructor(
      * Wipes all security related data and settings.
      */
     fun wipeSecurityData() {
-        encryptedPrefs.edit().clear().apply()
+        encryptedPrefs.edit { clear() }
     }
 
     companion object {

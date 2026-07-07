@@ -13,8 +13,8 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.FilterList
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
@@ -39,11 +39,12 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
-import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.onlyreminder.app.core.navigation.Route
 import com.onlyreminder.app.core.ui.components.OnlyReminderTopBar
 import com.onlyreminder.app.data.database.entities.TaskEntity
+import com.onlyreminder.app.domain.model.TaskStatus
 import com.onlyreminder.app.features.tasks.presentation.TasksViewModel
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
@@ -62,7 +63,10 @@ fun TasksScreen(
                 title = "Tasks",
                 navigationIcon = {
                     IconButton(onClick = { navController.navigateUp() }) {
-                        Icon(imageVector = Icons.Default.ArrowBack, contentDescription = "Back")
+                        Icon(
+                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                            contentDescription = "Back"
+                        )
                     }
                 },
                 actions = {
@@ -76,13 +80,19 @@ fun TasksScreen(
                             onClick = { viewModel.setFilterStatus(null); expanded = false })
                         DropdownMenuItem(
                             text = { Text("Pending") },
-                            onClick = { viewModel.setFilterStatus("PENDING"); expanded = false })
+                            onClick = {
+                                viewModel.setFilterStatus(TaskStatus.PENDING); expanded = false
+                            })
                         DropdownMenuItem(
                             text = { Text("Completed") },
-                            onClick = { viewModel.setFilterStatus("COMPLETED"); expanded = false })
+                            onClick = {
+                                viewModel.setFilterStatus(TaskStatus.COMPLETED); expanded = false
+                            })
                         DropdownMenuItem(
-                            text = { Text("Skipped") },
-                            onClick = { viewModel.setFilterStatus("SKIPPED"); expanded = false })
+                            text = { Text("Cancelled") },
+                            onClick = {
+                                viewModel.setFilterStatus(TaskStatus.CANCELLED); expanded = false
+                            })
                     }
                 }
             )
@@ -114,8 +124,8 @@ fun TasksScreen(
                     TaskItem(
                         task = task,
                         onEdit = { navController.navigate(Route.TaskEdit(task.id)) },
-                        onComplete = { viewModel.updateTaskStatus(task.id, "COMPLETED") },
-                        onSkip = { viewModel.updateTaskStatus(task.id, "SKIPPED") }
+                        onComplete = { viewModel.updateTaskStatus(task.id, TaskStatus.COMPLETED) },
+                        onSkip = { viewModel.updateTaskStatus(task.id, TaskStatus.CANCELLED) }
                     )
                 }
             }
@@ -131,7 +141,7 @@ fun TaskItem(
     onSkip: () -> Unit
 ) {
     val dateTimeFormatter = remember { DateTimeFormatter.ofPattern("dd MMM yyyy, HH:mm") }
-    val isPast = task.dueDateTime.isBefore(LocalDateTime.now()) && task.status == "PENDING"
+    val isPast = task.dueDateTime.isBefore(LocalDateTime.now()) && task.status == TaskStatus.PENDING
 
     Card(
         modifier = Modifier.fillMaxWidth(),
@@ -169,11 +179,11 @@ fun TaskItem(
                 )
             }
 
-            if (task.status == "PENDING") {
+            if (task.status == TaskStatus.PENDING) {
                 Spacer(modifier = Modifier.height(8.dp))
                 Row(horizontalArrangement = Arrangement.End, modifier = Modifier.fillMaxWidth()) {
                     TextButton(onClick = onSkip) {
-                        Text("Skip")
+                        Text("Cancel")
                     }
                     Button(onClick = onComplete) {
                         Text("Complete")
@@ -185,12 +195,11 @@ fun TaskItem(
 }
 
 @Composable
-fun StatusBadge(status: String) {
+fun StatusBadge(status: TaskStatus) {
     val color = when (status) {
-        "COMPLETED" -> Color(0xFF4CAF50)
-        "SKIPPED" -> Color.Gray
-        "PENDING" -> MaterialTheme.colorScheme.primary
-        else -> Color.Gray
+        TaskStatus.COMPLETED -> Color(0xFF4CAF50)
+        TaskStatus.CANCELLED -> Color.Gray
+        TaskStatus.PENDING -> MaterialTheme.colorScheme.primary
     }
     Surface(
         color = color.copy(alpha = 0.1f),
@@ -198,7 +207,7 @@ fun StatusBadge(status: String) {
         border = androidx.compose.foundation.BorderStroke(1.dp, color)
     ) {
         Text(
-            text = status,
+            text = status.name,
             modifier = Modifier.padding(horizontal = 4.dp, vertical = 2.dp),
             style = MaterialTheme.typography.labelSmall,
             color = color

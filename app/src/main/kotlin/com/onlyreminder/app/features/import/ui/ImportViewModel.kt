@@ -6,6 +6,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.onlyreminder.app.data.database.entities.ContactEntity
 import com.onlyreminder.app.data.repository.ContactRepositoryImpl
+import com.onlyreminder.app.domain.model.ContactStatus
 import com.onlyreminder.app.features.importer.data.CsvParser
 import com.onlyreminder.app.features.importer.data.JsonParser
 import com.onlyreminder.app.features.importer.data.XlsxParser
@@ -148,7 +149,14 @@ class ImportViewModel @Inject constructor(
                                     ContactField.GROUP -> importContact.copy(group = value)
                                     ContactField.SOURCE -> importContact.copy(source = value)
                                     ContactField.NOTES -> importContact.copy(notes = value)
-                                    ContactField.STATUS -> importContact.copy(status = value)
+                                    ContactField.STATUS -> importContact.copy(
+                                        status = try {
+                                            ContactStatus.valueOf(value.uppercase())
+                                        } catch (_: Exception) {
+                                            ContactStatus.ACTIVE
+                                        }
+                                    )
+
                                     ContactField.MARKETING_CONSENT -> importContact.copy(
                                         marketingConsent = value.lowercase() == "true" || value == "1"
                                     )
@@ -156,6 +164,8 @@ class ImportViewModel @Inject constructor(
                                     ContactField.PRIVACY_CONSENT -> importContact.copy(
                                         privacyConsent = value.lowercase() == "true" || value == "1"
                                     )
+
+                                    ContactField.IGNORE -> importContact
                                 }
                             }
                         }

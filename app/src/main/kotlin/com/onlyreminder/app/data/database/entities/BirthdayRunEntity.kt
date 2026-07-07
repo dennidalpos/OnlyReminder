@@ -2,13 +2,15 @@ package com.onlyreminder.app.data.database.entities
 
 import androidx.room.Entity
 import androidx.room.PrimaryKey
+import com.onlyreminder.app.domain.model.BirthdayItemStatus
+import com.onlyreminder.app.domain.model.BirthdayRunStatus
 import java.time.LocalDateTime
 
 @Entity(tableName = "birthday_runs")
 data class BirthdayRunEntity(
     @PrimaryKey(autoGenerate = true) val id: Long = 0,
     val date: String, // YYYY-MM-DD
-    val status: String, // PENDING, COMPLETED, NOT_REVIEWED
+    val status: BirthdayRunStatus,
     val totalFound: Int,
     val totalSelected: Int,
     val totalSkipped: Int,
@@ -24,7 +26,7 @@ data class BirthdayRunItemEntity(
     @PrimaryKey(autoGenerate = true) val id: Long = 0,
     val birthdayRunId: Long,
     val contactId: Long,
-    val status: String, // PENDING, SENT, FAILED, SKIPPED
+    val status: BirthdayItemStatus,
     val generatedMessagePreview: String,
     val errorMessage: String?,
     val createdAt: LocalDateTime = LocalDateTime.now(),

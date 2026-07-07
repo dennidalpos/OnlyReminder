@@ -6,16 +6,29 @@ import androidx.work.Configuration
 import androidx.work.ExistingPeriodicWorkPolicy
 import androidx.work.PeriodicWorkRequestBuilder
 import androidx.work.WorkManager
+import com.onlyreminder.app.data.database.DatabaseSeeder
 import com.onlyreminder.app.features.birthday.data.BirthdayWorker
 import dagger.hilt.android.HiltAndroidApp
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 
 @HiltAndroidApp
 class OnlyReminderApp : Application(), Configuration.Provider {
 
+    companion object {
+        init {
+            System.loadLibrary("sqlcipher")
+        }
+    }
+
     @Inject
     lateinit var workerFactory: HiltWorkerFactory
+
+    @Inject
+    lateinit var seeder: DatabaseSeeder
 
     override val workManagerConfiguration: Configuration
         get() = Configuration.Builder()
@@ -24,6 +37,13 @@ class OnlyReminderApp : Application(), Configuration.Provider {
 
     override fun onCreate() {
         super.onCreate()
+
+        if (resources.getBoolean(R.bool.is_demo)) {
+            CoroutineScope(Dispatchers.IO).launch {
+                seeder.seedDemoData()
+            }
+        }
+
         scheduleBirthdayWorker()
     }
 

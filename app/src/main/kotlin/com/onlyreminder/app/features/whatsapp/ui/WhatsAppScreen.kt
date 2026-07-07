@@ -10,7 +10,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.Icon
@@ -30,7 +30,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
-import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.onlyreminder.app.core.ui.components.OnlyReminderTopBar
 import com.onlyreminder.app.features.whatsapp.domain.WhatsAppManualManager
@@ -40,7 +40,7 @@ import com.onlyreminder.app.features.whatsapp.presentation.WhatsAppViewModel
 @Composable
 fun WhatsAppScreen(
     navController: NavController,
-    viewModel: WhatsAppViewModel = hiltViewModel()
+    viewModel: WhatsAppViewModel = hiltViewModel(),
 ) {
     val currentItem by viewModel.currentItem.collectAsState()
     val queue by viewModel.queue.collectAsState()
@@ -54,7 +54,10 @@ fun WhatsAppScreen(
                 title = "WhatsApp Manual Send",
                 navigationIcon = {
                     IconButton(onClick = { navController.navigateUp() }) {
-                        Icon(imageVector = Icons.Default.ArrowBack, contentDescription = "Back")
+                        Icon(
+                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                            contentDescription = "Back"
+                        )
                     }
                 }
             )
@@ -79,7 +82,8 @@ fun WhatsAppScreen(
                     }
                 }
             } else {
-                currentItem?.let { item ->
+                val item = currentItem
+                if (item != null) {
                     Column(
                         modifier = Modifier
                             .fillMaxSize()
@@ -87,7 +91,7 @@ fun WhatsAppScreen(
                         verticalArrangement = Arrangement.spacedBy(24.dp)
                     ) {
                         LinearProgressIndicator(
-                            progress = (currentIndex + 1).toFloat() / queue.size,
+                            progress = { (currentIndex + 1).toFloat() / queue.size },
                             modifier = Modifier.fillMaxWidth()
                         )
 

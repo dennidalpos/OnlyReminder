@@ -7,34 +7,35 @@ import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import androidx.room.Update
 import com.onlyreminder.app.data.database.entities.ContactEntity
-import com.onlyreminder.app.data.database.entities.ContactTagCrossRefEntity
 import com.onlyreminder.app.data.database.entities.CustomFieldEntity
-import com.onlyreminder.app.data.database.entities.GroupEntity
-import com.onlyreminder.app.data.database.entities.TagEntity
+import com.onlyreminder.app.domain.model.ContactStatus
 import kotlinx.coroutines.flow.Flow
 
 @Dao
 interface ContactDao {
-    @Query("SELECT * FROM contacts WHERE deletedAt IS NULL ORDER BY displayName ASC")
+    @Query("SELECT * FROM contacts ORDER BY displayName ASC")
     fun getAllContacts(): Flow<List<ContactEntity>>
 
     @Query(
         """
         SELECT * FROM contacts 
-        WHERE deletedAt IS NULL 
-        AND (:query IS NULL OR displayName LIKE '%' || :query || '%' OR phone LIKE '%' || :query || '%')
+        WHERE (:query IS NULL OR displayName LIKE '%' || :query || '%' OR phone LIKE '%' || :query || '%')
         AND (:groupId IS NULL OR groupId = :groupId)
         AND (:status IS NULL OR status = :status)
         ORDER BY displayName ASC
     """,
     )
-    fun searchContacts(query: String?, groupId: Long?, status: String?): Flow<List<ContactEntity>>
+    fun searchContacts(
+        query: String?,
+        groupId: Long?,
+        status: ContactStatus?
+    ): Flow<List<ContactEntity>>
 
     @Query(
         """
         SELECT c.* FROM contacts c
         INNER JOIN contact_tag_cross_ref ct ON c.id = ct.contactId
-        WHERE c.deletedAt IS NULL AND ct.tagName = :tagName
+        WHERE ct.tagName = :tagName
         ORDER BY c.displayName ASC
     """
     )
@@ -46,8 +47,7 @@ interface ContactDao {
     @Query(
         """
         SELECT * FROM contacts 
-        WHERE deletedAt IS NULL 
-        AND birthday IS NOT NULL 
+        WHERE birthday IS NOT NULL 
         AND strftime('%m-%d', birthday) = :monthDay
     """
     )
@@ -59,52 +59,8 @@ interface ContactDao {
     @Update
     suspend fun updateContact(contact: ContactEntity)
 
-    @Query("UPDATE contacts SET deletedAt = :deletedAt WHERE id = :id")
-    suspend fun softDeleteContact(id: Long, deletedAt: java.time.LocalDateTime)
-
-    @Query("UPDATE contacts SET deletedAt = NULL WHERE id = :id")
-    suspend fun restoreContact(id: Long)
-
     @Delete
-    suspend fun hardDeleteContact(contact: ContactEntity)
-
-    // Groups
-    @Query("SELECT * FROM `groups` ORDER BY name ASC")
-    fun getAllGroups(): Flow<List<GroupEntity>>
-
-    @Query("SELECT * FROM `groups` WHERE id = :id")
-    suspend fun getGroupById(id: Long): GroupEntity?
-
-    @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insertGroup(group: GroupEntity): Long
-
-    @Delete
-    suspend fun deleteGroup(group: GroupEntity)
-
-    // Tags
-    @Query("SELECT * FROM tags ORDER BY name ASC")
-    fun getAllTags(): Flow<List<TagEntity>>
-
-    @Insert(onConflict = OnConflictStrategy.IGNORE)
-    suspend fun insertTag(tag: TagEntity)
-
-    @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insertContactTagCrossRef(crossRef: ContactTagCrossRefEntity)
-
-    @Query("DELETE FROM contact_tag_cross_ref WHERE contactId = :contactId AND tagName = :tagName")
-    suspend fun deleteContactTagCrossRef(contactId: Long, tagName: String)
-
-    @Query("DELETE FROM contact_tag_cross_ref WHERE contactId = :contactId")
-    suspend fun deleteAllTagsForContact(contactId: Long)
-
-    @Query(
-        """
-        SELECT tags.* FROM tags 
-        INNER JOIN contact_tag_cross_ref ON tags.name = contact_tag_cross_ref.tagName 
-        WHERE contact_tag_cross_ref.contactId = :contactId
-    """
-    )
-    fun getTagsForContact(contactId: Long): Flow<List<TagEntity>>
+    suspend fun deleteContact(contact: ContactEntity)
 
     // Custom Fields
     @Query("SELECT * FROM contact_custom_fields WHERE contactId = :contactId")

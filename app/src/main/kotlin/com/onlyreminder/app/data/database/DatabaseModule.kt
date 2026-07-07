@@ -6,7 +6,9 @@ import androidx.core.content.edit
 import androidx.room.Room
 import com.onlyreminder.app.core.security.SecurePrefs
 import com.onlyreminder.app.data.database.dao.ContactDao
+import com.onlyreminder.app.data.database.dao.GroupDao
 import com.onlyreminder.app.data.database.dao.MainDao
+import com.onlyreminder.app.data.database.dao.TagDao
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -19,6 +21,10 @@ import javax.inject.Singleton
 @Module
 @InstallIn(SingletonComponent::class)
 object DatabaseModule {
+
+    init {
+        System.loadLibrary("sqlcipher")
+    }
 
     private const val KEY_DB_PASSPHRASE = "db_passphrase"
 
@@ -53,12 +59,17 @@ object DatabaseModule {
             AppDatabase.DB_NAME,
         )
             .openHelperFactory(factory)
-            .fallbackToDestructiveMigration(dropAllTables = true) // Only for early development
             .build()
     }
 
     @Provides
     fun provideContactDao(db: AppDatabase): ContactDao = db.contactDao()
+
+    @Provides
+    fun provideGroupDao(db: AppDatabase): GroupDao = db.groupDao()
+
+    @Provides
+    fun provideTagDao(db: AppDatabase): TagDao = db.tagDao()
 
     @Provides
     fun provideMainDao(db: AppDatabase): MainDao = db.mainDao()

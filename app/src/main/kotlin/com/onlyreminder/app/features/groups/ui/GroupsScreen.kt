@@ -6,8 +6,8 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material3.FloatingActionButton
@@ -23,7 +23,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.onlyreminder.app.core.navigation.Route
 import com.onlyreminder.app.core.ui.components.EmptyState
@@ -43,7 +43,10 @@ fun GroupsScreen(
                 title = "Groups",
                 navigationIcon = {
                     IconButton(onClick = { navController.navigateUp() }) {
-                        Icon(imageVector = Icons.Default.ArrowBack, contentDescription = "Back")
+                        Icon(
+                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                            contentDescription = "Back"
+                        )
                     }
                 }
             )
@@ -86,7 +89,11 @@ fun GroupItem(
 ) {
     ListItem(
         headlineContent = { Text(text = group.name) },
-        supportingContent = { if (group.description.isNotEmpty()) Text(text = group.description) else null },
+        supportingContent = {
+            if (group.description.isNotEmpty()) {
+                Text(text = group.description)
+            }
+        },
         trailingContent = {
             Row {
                 IconButton(onClick = onEdit) {

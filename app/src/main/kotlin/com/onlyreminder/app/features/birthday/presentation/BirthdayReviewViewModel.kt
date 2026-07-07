@@ -7,6 +7,8 @@ import com.onlyreminder.app.data.database.entities.BirthdayRunItemEntity
 import com.onlyreminder.app.data.database.entities.ContactEntity
 import com.onlyreminder.app.data.repository.ContactRepositoryImpl
 import com.onlyreminder.app.data.repository.MainRepositoryImpl
+import com.onlyreminder.app.domain.model.BirthdayItemStatus
+import com.onlyreminder.app.domain.model.BirthdayRunStatus
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -35,7 +37,8 @@ class BirthdayReviewViewModel @Inject constructor(
     private fun loadLatestRun() {
         viewModelScope.launch {
             mainRepository.getAllBirthdayRuns().collectLatest { runs ->
-                val latest = runs.firstOrNull { it.status == "PENDING" } ?: runs.firstOrNull()
+                val latest = runs.firstOrNull { it.status == BirthdayRunStatus.PENDING }
+                    ?: runs.firstOrNull()
                 _latestRun.value = latest
 
                 if (latest != null) {
@@ -53,7 +56,7 @@ class BirthdayReviewViewModel @Inject constructor(
         }
     }
 
-    fun updateItemStatus(itemId: Long, status: String) {
+    fun updateItemStatus(itemId: Long, status: BirthdayItemStatus) {
         viewModelScope.launch {
             val item = _items.value.find { it.item.id == itemId }?.item ?: return@launch
             mainRepository.addRunItem(
@@ -67,8 +70,7 @@ class BirthdayReviewViewModel @Inject constructor(
 
     fun deleteContact(contact: ContactEntity) {
         viewModelScope.launch {
-            contactRepository.softDeleteContact(contact.id)
-            // Optionally remove from current items list or it will be updated by flow
+            contactRepository.hardDeleteContact(contact)
         }
     }
 }

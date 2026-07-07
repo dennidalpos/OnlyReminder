@@ -10,11 +10,13 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.Cake
 import androidx.compose.material3.Button
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.Icon
@@ -34,10 +36,11 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
-import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.onlyreminder.app.R
 import com.onlyreminder.app.core.navigation.Route
@@ -60,7 +63,10 @@ fun OnboardingScreen(
                 navigationIcon = {
                     if (currentStep > 0) {
                         IconButton(onClick = { viewModel.prevStep() }) {
-                            Icon(imageVector = Icons.Default.ArrowBack, contentDescription = "Back")
+                            Icon(
+                                imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                                contentDescription = "Back"
+                            )
                         }
                     }
                 }
@@ -77,20 +83,23 @@ fun OnboardingScreen(
             verticalArrangement = Arrangement.Center
         ) {
             when (currentStep) {
-                0 -> LanguageStep(language, onLanguageSelected = { viewModel.setLanguage(it) })
-                1 -> SecurityStep(isPinSet, onPinSet = { viewModel.setPin(it) })
-                2 -> SendModeStep(sendMode, onModeSelected = { viewModel.setSendMode(it) })
-                3 -> {
+                0 -> WelcomeStep()
+                1 -> LanguageStep(language, onLanguageSelected = { viewModel.setLanguage(it) })
+                2 -> SecurityStep(isPinSet, onPinSet = { viewModel.setPin(it) })
+                3 -> SendModeStep(sendMode, onModeSelected = { viewModel.setSendMode(it) })
+                4 -> {
                     if (sendMode == "WA_API") {
-                        WhatsAppApiStep()
+                        WhatsAppApiStep(onConfigSave = { phoneId, token, template ->
+                            viewModel.updateWhatsAppConfig(phoneId, token, template)
+                        })
                     } else {
                         // Skip if not API
                         LaunchedEffect(Unit) { viewModel.nextStep() }
                     }
                 }
 
-                4 -> BackupStep(onFolderSelected = { viewModel.setBackupFolder(it) })
-                5 -> PrivacyStep()
+                5 -> BackupStep(onFolderSelected = { viewModel.setBackupFolder(it) })
+                6 -> PrivacyStep()
                 else -> {
                     viewModel.completeOnboarding()
                     navController.navigate(Route.Home) {
@@ -105,10 +114,32 @@ fun OnboardingScreen(
                 onClick = { viewModel.nextStep() },
                 modifier = Modifier.fillMaxWidth()
             ) {
-                Text(if (currentStep < 5) stringResource(R.string.next) else stringResource(R.string.finish))
+                Text(if (currentStep < 6) stringResource(R.string.next) else stringResource(R.string.finish))
             }
         }
     }
+}
+
+@Composable
+fun WelcomeStep() {
+    Icon(
+        imageVector = Icons.Default.Cake,
+        contentDescription = null,
+        modifier = Modifier.size(100.dp),
+        tint = MaterialTheme.colorScheme.primary
+    )
+    Spacer(modifier = Modifier.height(24.dp))
+    Text(
+        stringResource(R.string.welcome_message),
+        style = MaterialTheme.typography.headlineMedium,
+        fontWeight = FontWeight.Bold
+    )
+    Spacer(modifier = Modifier.height(16.dp))
+    Text(
+        stringResource(R.string.welcome_description),
+        style = MaterialTheme.typography.bodyLarge,
+        textAlign = androidx.compose.ui.text.style.TextAlign.Center
+    )
 }
 
 @Composable
@@ -180,14 +211,47 @@ fun SendModeStep(currentMode: String, onModeSelected: (String) -> Unit) {
 }
 
 @Composable
-fun WhatsAppApiStep() {
-    Text("WhatsApp API Setup", style = MaterialTheme.typography.headlineSmall)
+fun WhatsAppApiStep(onConfigSave: (String, String, String) -> Unit) {
+    var phoneId by remember { mutableStateOf("") }
+    var token by remember { mutableStateOf("") }
+    var template by remember { mutableStateOf("birthday_template") }
+
+    Text(
+        stringResource(R.string.whatsapp_api_setup),
+        style = MaterialTheme.typography.headlineSmall
+    )
     Spacer(modifier = Modifier.height(16.dp))
-    Text("Enter your WhatsApp Business credentials. These will be stored securely.")
-    // Placeholder fields for now
-    TextField(value = "", onValueChange = {}, label = { Text("Business Account ID") })
-    TextField(value = "", onValueChange = {}, label = { Text("Phone Number ID") })
-    TextField(value = "", onValueChange = {}, label = { Text("Access Token") })
+    Text(stringResource(R.string.whatsapp_api_setup_desc))
+
+    Spacer(modifier = Modifier.height(16.dp))
+
+    TextField(
+        value = phoneId,
+        onValueChange = { phoneId = it },
+        label = { Text(stringResource(R.string.phone_number_id)) },
+        modifier = Modifier.fillMaxWidth()
+    )
+    Spacer(modifier = Modifier.height(8.dp))
+    TextField(
+        value = token,
+        onValueChange = { token = it },
+        label = { Text(stringResource(R.string.access_token)) },
+        visualTransformation = PasswordVisualTransformation(),
+        modifier = Modifier.fillMaxWidth()
+    )
+    Spacer(modifier = Modifier.height(8.dp))
+    TextField(
+        value = template,
+        onValueChange = { template = it },
+        label = { Text(stringResource(R.string.approved_template_name)) },
+        modifier = Modifier.fillMaxWidth()
+    )
+
+    Spacer(modifier = Modifier.height(16.dp))
+
+    Button(onClick = { onConfigSave(phoneId, token, template) }) {
+        Text(stringResource(R.string.save_configuration))
+    }
 }
 
 @Composable

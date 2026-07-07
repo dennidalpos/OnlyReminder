@@ -6,6 +6,8 @@ import androidx.lifecycle.viewModelScope
 import com.onlyreminder.app.data.database.entities.MessageLogEntity
 import com.onlyreminder.app.data.repository.ContactRepositoryImpl
 import com.onlyreminder.app.data.repository.MainRepositoryImpl
+import com.onlyreminder.app.domain.model.BirthdayItemStatus
+import com.onlyreminder.app.domain.model.MessageStatus
 import com.onlyreminder.app.features.birthday.presentation.BirthdayRunItemWithContact
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -46,12 +48,13 @@ class WhatsAppViewModel @Inject constructor(
         viewModelScope.launch {
             mainRepository.getItemsForRun(runId).first().let { runItems ->
                 val contacts = contactRepository.getAllContacts().first()
-                val pendingItems = runItems.filter { it.status == "PENDING" }.map { item ->
-                    BirthdayRunItemWithContact(
-                        item = item,
-                        contact = contacts.find { it.id == item.contactId }
-                    )
-                }
+                val pendingItems =
+                    runItems.filter { it.status == BirthdayItemStatus.PENDING }.map { item ->
+                        BirthdayRunItemWithContact(
+                            item = item,
+                            contact = contacts.find { it.id == item.contactId }
+                        )
+                    }
                 _queue.value = pendingItems
             }
         }
@@ -62,7 +65,7 @@ class WhatsAppViewModel @Inject constructor(
         viewModelScope.launch {
             mainRepository.addRunItem(
                 current.item.copy(
-                    status = "SENT_MANUAL",
+                    status = BirthdayItemStatus.SENT_MANUAL,
                     updatedAt = java.time.LocalDateTime.now()
                 )
             )
@@ -74,7 +77,7 @@ class WhatsAppViewModel @Inject constructor(
                     birthdayRunId = runId,
                     channel = "WHATSAPP_MANUAL",
                     mode = "MANUAL",
-                    status = "SENT",
+                    status = MessageStatus.SENT,
                     errorMessage = null,
                     payloadPreview = current.item.generatedMessagePreview,
                     sentAt = java.time.LocalDateTime.now()
@@ -89,7 +92,7 @@ class WhatsAppViewModel @Inject constructor(
         viewModelScope.launch {
             mainRepository.addRunItem(
                 current.item.copy(
-                    status = "SKIPPED",
+                    status = BirthdayItemStatus.SKIPPED,
                     updatedAt = java.time.LocalDateTime.now()
                 )
             )

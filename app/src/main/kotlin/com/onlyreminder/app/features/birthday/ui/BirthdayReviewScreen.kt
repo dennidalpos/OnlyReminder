@@ -13,7 +13,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material3.Button
@@ -39,10 +39,11 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
-import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.onlyreminder.app.core.navigation.Route
 import com.onlyreminder.app.core.ui.components.OnlyReminderTopBar
+import com.onlyreminder.app.domain.model.BirthdayItemStatus
 import com.onlyreminder.app.features.birthday.presentation.BirthdayReviewViewModel
 import com.onlyreminder.app.features.birthday.presentation.BirthdayRunItemWithContact
 
@@ -60,7 +61,10 @@ fun BirthdayReviewScreen(
                 title = "Birthday Review",
                 navigationIcon = {
                     IconButton(onClick = { navController.navigateUp() }) {
-                        Icon(imageVector = Icons.Default.ArrowBack, contentDescription = "Back")
+                        Icon(
+                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                            contentDescription = "Back"
+                        )
                     }
                 }
             )
@@ -91,10 +95,10 @@ fun BirthdayReviewScreen(
                     items(items) { itemWithContact ->
                         BirthdayReviewItem(
                             itemWithContact = itemWithContact,
-                            onStatusChange = {
+                            onStatusChange = { status ->
                                 viewModel.updateItemStatus(
                                     itemWithContact.item.id,
-                                    it
+                                    status
                                 )
                             },
                             onDeleteContact = {
@@ -135,7 +139,7 @@ fun RunSummaryHeader(run: com.onlyreminder.app.data.database.entities.BirthdayRu
                 text = "Contacts Found: ${run.totalFound}",
                 style = MaterialTheme.typography.bodyMedium
             )
-            Text(text = "Status: ${run.status}", style = MaterialTheme.typography.bodySmall)
+            Text(text = "Status: ${run.status.name}", style = MaterialTheme.typography.bodySmall)
         }
     }
 }
@@ -143,7 +147,7 @@ fun RunSummaryHeader(run: com.onlyreminder.app.data.database.entities.BirthdayRu
 @Composable
 fun BirthdayReviewItem(
     itemWithContact: BirthdayRunItemWithContact,
-    onStatusChange: (String) -> Unit,
+    onStatusChange: (BirthdayItemStatus) -> Unit,
     onDeleteContact: () -> Unit
 ) {
     val contact = itemWithContact.contact
@@ -202,17 +206,17 @@ fun BirthdayReviewItem(
 
             Spacer(modifier = Modifier.height(8.dp))
             Row(horizontalArrangement = Arrangement.End, modifier = Modifier.fillMaxWidth()) {
-                TextButton(onClick = { onStatusChange("SKIPPED") }) {
+                TextButton(onClick = { onStatusChange(BirthdayItemStatus.SKIPPED) }) {
                     Text("Skip")
                 }
-                if (item.status == "PENDING") {
+                if (item.status == BirthdayItemStatus.PENDING) {
                     Button(onClick = { /* Navigate to WhatsApp Manual or Send via API */ }) {
                         Text("Prepare Send")
                     }
                 } else {
                     Text(
-                        text = item.status,
-                        color = if (item.status == "SENT") Color(0xFF4CAF50) else Color.Gray
+                        text = item.status.name,
+                        color = if (item.status == BirthdayItemStatus.SENT) Color(0xFF4CAF50) else Color.Gray
                     )
                 }
             }

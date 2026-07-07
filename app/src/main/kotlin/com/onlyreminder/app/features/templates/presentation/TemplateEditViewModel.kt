@@ -7,6 +7,7 @@ import com.onlyreminder.app.data.database.entities.ContactEntity
 import com.onlyreminder.app.data.database.entities.TemplateEntity
 import com.onlyreminder.app.data.repository.ContactRepositoryImpl
 import com.onlyreminder.app.data.repository.MainRepositoryImpl
+import com.onlyreminder.app.domain.model.ContactStatus
 import com.onlyreminder.app.features.templates.domain.TemplateEngine
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -92,7 +93,7 @@ class TemplateEditViewModel @Inject constructor(
                     groupId = null,
                     source = "MANUAL",
                     notes = "",
-                    status = "ACTIVE",
+                    status = ContactStatus.ACTIVE,
                     lastContactDate = null,
                     marketingConsent = false,
                     privacyConsent = false

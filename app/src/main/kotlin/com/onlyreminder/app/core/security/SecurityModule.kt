@@ -1,3 +1,5 @@
+@file:Suppress("DEPRECATION")
+
 package com.onlyreminder.app.core.security
 
 import android.content.Context
@@ -19,7 +21,7 @@ object SecurityModule {
     @Provides
     @Singleton
     fun provideMasterKey(@ApplicationContext context: Context): MasterKey {
-        return MasterKey.Builder(context, MasterKey.DEFAULT_MASTER_KEY_ALIAS)
+        return MasterKey.Builder(context)
             .setKeyScheme(MasterKey.KeyScheme.AES256_GCM)
             .build()
     }
@@ -29,7 +31,7 @@ object SecurityModule {
     @SecurePrefs
     fun provideEncryptedSharedPreferences(
         @ApplicationContext context: Context,
-        masterKey: MasterKey
+        masterKey: MasterKey,
     ): SharedPreferences {
         val fileName = "onlyreminder_secure_prefs"
         return try {
@@ -38,9 +40,9 @@ object SecurityModule {
                 fileName,
                 masterKey,
                 EncryptedSharedPreferences.PrefKeyEncryptionScheme.AES256_SIV,
-                EncryptedSharedPreferences.PrefValueEncryptionScheme.AES256_GCM
+                EncryptedSharedPreferences.PrefValueEncryptionScheme.AES256_GCM,
             )
-        } catch (e: Exception) {
+        } catch (_: Exception) {
             // Handle cases where the keys are lost but the file still exists
             context.deleteSharedPreferences(fileName)
             val prefsFile = File(context.filesDir.parent, "shared_prefs/$fileName.xml")
@@ -52,7 +54,7 @@ object SecurityModule {
                 fileName,
                 masterKey,
                 EncryptedSharedPreferences.PrefKeyEncryptionScheme.AES256_SIV,
-                EncryptedSharedPreferences.PrefValueEncryptionScheme.AES256_GCM
+                EncryptedSharedPreferences.PrefValueEncryptionScheme.AES256_GCM,
             )
         }
     }

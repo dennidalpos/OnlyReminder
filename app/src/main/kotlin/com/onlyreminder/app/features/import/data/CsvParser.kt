@@ -11,7 +11,7 @@ class CsvParser {
     fun parse(
         inputStream: InputStream,
         separator: Char? = null,
-        encoding: String = "UTF-8"
+        encoding: String = "UTF-8",
     ): List<RawImportRow> {
         val reader = BufferedReader(InputStreamReader(inputStream, Charset.forName(encoding)))
         val lines = reader.readLines()
@@ -54,13 +54,14 @@ class CsvParser {
                     curVal.append(ch)
                 }
             } else {
-                if (ch == '\"') {
-                    inQuotes = true
-                } else if (ch == separator) {
-                    result.add(curVal.toString().trim())
-                    curVal = StringBuilder()
-                } else {
-                    curVal.append(ch)
+                when (ch) {
+                    '\"' -> inQuotes = true
+                    separator -> {
+                        result.add(curVal.toString().trim())
+                        curVal = StringBuilder()
+                    }
+
+                    else -> curVal.append(ch)
                 }
             }
             i++

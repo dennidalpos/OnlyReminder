@@ -2,6 +2,7 @@ package com.onlyreminder.app.data.database.entities
 
 import androidx.room.Entity
 import androidx.room.PrimaryKey
+import com.onlyreminder.app.domain.model.ContactStatus
 import java.time.LocalDateTime
 
 @Entity(tableName = "contacts")
@@ -18,11 +19,10 @@ data class ContactEntity(
     val groupId: Long?,
     val source: String,
     val notes: String,
-    val status: String, // ACTIVE, ARCHIVED
+    val status: ContactStatus,
     val lastContactDate: LocalDateTime?,
     val marketingConsent: Boolean,
     val privacyConsent: Boolean,
     val createdAt: LocalDateTime = LocalDateTime.now(),
-    val updatedAt: LocalDateTime = LocalDateTime.now(),
-    val deletedAt: LocalDateTime? = null
+    val updatedAt: LocalDateTime = LocalDateTime.now()
 )

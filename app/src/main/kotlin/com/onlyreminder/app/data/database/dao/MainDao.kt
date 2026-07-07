@@ -10,6 +10,7 @@ import com.onlyreminder.app.data.database.entities.BirthdayRunItemEntity
 import com.onlyreminder.app.data.database.entities.MessageLogEntity
 import com.onlyreminder.app.data.database.entities.TaskEntity
 import com.onlyreminder.app.data.database.entities.TemplateEntity
+import com.onlyreminder.app.domain.model.TaskStatus
 import kotlinx.coroutines.flow.Flow
 
 @Dao
@@ -35,7 +36,7 @@ interface MainDao {
     fun getAllTasks(): Flow<List<TaskEntity>>
 
     @Query("SELECT * FROM tasks WHERE status = :status ORDER BY dueDateTime ASC")
-    fun getTasksByStatus(status: String): Flow<List<TaskEntity>>
+    fun getTasksByStatus(status: TaskStatus): Flow<List<TaskEntity>>
 
     @Query("SELECT * FROM tasks WHERE contactId = :contactId ORDER BY dueDateTime ASC")
     fun getTasksForContact(contactId: Long): Flow<List<TaskEntity>>

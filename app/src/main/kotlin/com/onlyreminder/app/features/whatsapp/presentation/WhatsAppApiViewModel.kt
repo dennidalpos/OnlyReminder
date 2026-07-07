@@ -1,6 +1,7 @@
 package com.onlyreminder.app.features.whatsapp.presentation
 
 import android.content.SharedPreferences
+import androidx.core.content.edit
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.onlyreminder.app.core.security.SecurePrefs
@@ -23,7 +24,7 @@ import javax.inject.Inject
 
 @HiltViewModel
 class WhatsAppApiViewModel @Inject constructor(
-    @SecurePrefs private val sharedPreferences: SharedPreferences,
+    @param:SecurePrefs private val sharedPreferences: SharedPreferences,
     private val mainRepository: MainRepositoryImpl
 ) : ViewModel() {
 
@@ -47,11 +48,11 @@ class WhatsAppApiViewModel @Inject constructor(
         _accessToken.value = token
         _templateName.value = template
 
-        sharedPreferences.edit()
-            .putString("wa_phone_id", phoneId)
-            .putString("wa_token", token)
-            .putString("wa_template", template)
-            .apply()
+        sharedPreferences.edit {
+            putString("wa_phone_id", phoneId)
+            putString("wa_token", token)
+            putString("wa_template", template)
+        }
     }
 
     private val apiService: WhatsAppApiService by lazy {

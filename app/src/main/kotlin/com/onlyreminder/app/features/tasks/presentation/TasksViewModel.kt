@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.onlyreminder.app.data.database.entities.TaskEntity
 import com.onlyreminder.app.data.repository.MainRepositoryImpl
+import com.onlyreminder.app.domain.model.TaskStatus
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -21,8 +22,8 @@ class TasksViewModel @Inject constructor(
     private val _tasks = MutableStateFlow<List<TaskEntity>>(emptyList())
     val tasks: StateFlow<List<TaskEntity>> = _tasks.asStateFlow()
 
-    private val _filterStatus = MutableStateFlow<String?>(null)
-    val filterStatus: StateFlow<String?> = _filterStatus.asStateFlow()
+    private val _filterStatus = MutableStateFlow<TaskStatus?>(null)
+    val filterStatus: StateFlow<TaskStatus?> = _filterStatus.asStateFlow()
 
     init {
         loadTasks()
@@ -43,16 +44,16 @@ class TasksViewModel @Inject constructor(
         }
     }
 
-    fun setFilterStatus(status: String?) {
+    fun setFilterStatus(status: TaskStatus?) {
         _filterStatus.value = status
     }
 
-    fun updateTaskStatus(taskId: Long, status: String) {
+    fun updateTaskStatus(taskId: Long, status: TaskStatus) {
         viewModelScope.launch {
             repository.updateTaskStatus(taskId, status)
             val task = repository.getTaskById(taskId)
             if (task != null) {
-                if (status == "COMPLETED" || status == "SKIPPED") {
+                if (status == TaskStatus.COMPLETED) {
                     taskScheduler.cancelTask(task)
                 }
             }

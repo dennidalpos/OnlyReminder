@@ -1,0 +1,3 @@
+<resources>
+    <bool name="is_demo">true</bool>
+</resources>

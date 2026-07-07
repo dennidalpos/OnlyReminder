@@ -9,22 +9,27 @@ Il focus attuale si è spostato sulla stabilità, l'ottimizzazione e l'implement
 
 ## Obiettivi Correnti
 1. **Manutenzione**: Correzione di bug, aggiornamento dipendenze e ottimizzazione delle performance.
-2. **Release**: Supporto alla generazione di APK/AAB e gestione del versionamento.
-3. **Integrità**: Garantire che ogni modifica rispetti l'architettura Clean/MVVM e le Regole d'Oro.
+2. **Allineamento Varianti**: Garantire che le modifiche siano compatibili e allineate tra i flavor `demo` e `full`.
+3. **Internazionalizzazione**: Mantenere il supporto multilingua (EN/IT) ed evitare testi hardcoded.
+4. **Release**: Supporto alla generazione di APK/AAB e gestione del versionamento.
+5. **Integrità**: Garantire che ogni modifica rispetti l'architettura Clean/MVVM e le Regole d'Oro.
 
 ## Regole d'Oro (Golden Rules) - MANDATORIE
 
 - **Local-First**: Nessun backend, cloud, login o sincronizzazione remota. Tutto vive sul dispositivo.
-- **Privacy & Sicurezza**: Database (SQLCipher) e backup devono essere cifrati.
+- **Privacy & Sicurezza**: Database (SQLCipher), backup e parametri API (WhatsApp) devono essere cifrati e mai esposti.
 - **No Invio Automatico**: I messaggi di compleanno devono SEMPRE passare per una review umana. L'invio automatico è severamente proibito.
+- **Modern Android (Edge-to-Edge)**: A partire da Android 15 (API 35), l'edge-to-edge è obbligatorio. Non utilizzare `statusBarColor` o `navigationBarColor`. Usa `enableEdgeToEdge()` e gestisci gli insets tramite Compose (`Modifier.statusBarsPadding()`, ecc.).
+- **Zero Hardcoded Strings**: Ogni testo della UI deve essere definito in `strings.xml` per garantire la localizzazione.
 - **Scope-Creep Control**: Non implementare funzionalità fuori perimetro (analytics, tracking, pagamenti, dashboard web).
 
 ## Processo di Lavoro
 Per ogni nuova richiesta:
 1. **Analisi d'Impatto**: Verifica come la modifica influisce su Room, Hilt e la UI in Compose.
-2. **Backward Compatibility**: Assicurati che le migrazioni del database siano gestite (se necessario).
-3. **Security Check**: Verifica che le chiavi nel Keystore e la cifratura SQLCipher siano preservate.
-4. **Testing**: Fornisci un report delle modifiche e dei test manuali eseguiti (o unit test se applicabili).
+2. **Allineamento Varianti**: Verifica se la modifica impatta i flavor `demo` e `full` e assicurati che le risorse (es. `strings.xml`) siano aggiornate in entrambi se necessario.
+3. **Backward Compatibility**: Assicurati che le migrazioni del database siano gestite (se necessario).
+4. **Security Check**: Verifica che le chiavi nel Keystore, la cifratura SQLCipher e le credenziali API siano preservate.
+5. **Testing**: Fornisci un report delle modifiche e dei test eseguiti (unit test, build delle varianti).
 
 ## Stack Tecnologico
 - **Linguaggio**: Kotlin (Coroutines, Flow)

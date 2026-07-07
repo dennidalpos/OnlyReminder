@@ -8,7 +8,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
@@ -28,9 +28,11 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.navigation.NavController
+import com.onlyreminder.app.R
 import com.onlyreminder.app.core.ui.components.OnlyReminderTopBar
 import com.onlyreminder.app.features.whatsapp.presentation.WhatsAppApiViewModel
 
@@ -51,10 +53,13 @@ fun WhatsAppApiScreen(
     Scaffold(
         topBar = {
             OnlyReminderTopBar(
-                title = "WhatsApp API Mode",
+                title = stringResource(R.string.whatsapp_api_mode),
                 navigationIcon = {
                     IconButton(onClick = { navController.navigateUp() }) {
-                        Icon(imageVector = Icons.Default.ArrowBack, contentDescription = "Back")
+                        Icon(
+                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                            contentDescription = stringResource(R.string.back)
+                        )
                     }
                 }
             )
@@ -68,19 +73,22 @@ fun WhatsAppApiScreen(
                 .verticalScroll(rememberScrollState()),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            Text("API Configuration", style = MaterialTheme.typography.titleMedium)
+            Text(
+                stringResource(R.string.api_configuration),
+                style = MaterialTheme.typography.titleMedium
+            )
 
             OutlinedTextField(
                 value = tempPhoneId,
                 onValueChange = { tempPhoneId = it },
-                label = { Text("Phone Number ID") },
+                label = { Text(stringResource(R.string.phone_number_id)) },
                 modifier = Modifier.fillMaxWidth()
             )
 
             OutlinedTextField(
                 value = tempToken,
                 onValueChange = { tempToken = it },
-                label = { Text("Access Token") },
+                label = { Text(stringResource(R.string.access_token)) },
                 modifier = Modifier.fillMaxWidth(),
                 visualTransformation = androidx.compose.ui.text.input.PasswordVisualTransformation()
             )
@@ -88,7 +96,7 @@ fun WhatsAppApiScreen(
             OutlinedTextField(
                 value = tempTemplate,
                 onValueChange = { tempTemplate = it },
-                label = { Text("Approved Template Name") },
+                label = { Text(stringResource(R.string.approved_template_name)) },
                 modifier = Modifier.fillMaxWidth()
             )
 
@@ -96,12 +104,12 @@ fun WhatsAppApiScreen(
                 onClick = { viewModel.updateConfig(tempPhoneId, tempToken, tempTemplate) },
                 modifier = Modifier.fillMaxWidth()
             ) {
-                Text("Save Configuration")
+                Text(stringResource(R.string.save_configuration))
             }
 
             HorizontalDivider()
 
-            Text("Operations", style = MaterialTheme.typography.titleMedium)
+            Text(stringResource(R.string.operations), style = MaterialTheme.typography.titleMedium)
 
             if (isSending) {
                 LinearProgressIndicator(modifier = Modifier.fillMaxWidth())
@@ -110,20 +118,20 @@ fun WhatsAppApiScreen(
                     modifier = Modifier.fillMaxWidth(),
                     colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.error)
                 ) {
-                    Text("Stop Sending")
+                    Text(stringResource(R.string.stop_sending))
                 }
             } else {
                 Button(
                     onClick = { /* In a real scenario, we'd pass contacts from current run */ },
                     modifier = Modifier.fillMaxWidth()
                 ) {
-                    Text("Start Sending Queue")
+                    Text(stringResource(R.string.start_sending_queue))
                 }
             }
 
             Card(colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)) {
                 Text(
-                    text = "Your WhatsApp API credentials are stored only on this device and encrypted locally. You are responsible for their security and for the lawful use of the WhatsApp Business Platform.",
+                    text = stringResource(R.string.wa_api_security_notice),
                     modifier = Modifier.padding(16.dp),
                     style = MaterialTheme.typography.bodySmall
                 )

@@ -1,7 +1,10 @@
 package com.onlyreminder.app.features.onboarding.ui
 
+import android.content.SharedPreferences
+import androidx.core.content.edit
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.onlyreminder.app.core.security.SecurePrefs
 import com.onlyreminder.app.data.settings.SettingsDataStore
 import com.onlyreminder.app.domain.security.SecurityRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -16,7 +19,8 @@ import javax.inject.Inject
 @HiltViewModel
 class OnboardingViewModel @Inject constructor(
     private val settingsDataStore: SettingsDataStore,
-    private val securityRepository: SecurityRepository
+    private val securityRepository: SecurityRepository,
+    @param:SecurePrefs private val sharedPreferences: SharedPreferences
 ) : ViewModel() {
 
     private val _currentStep = MutableStateFlow(0)
@@ -65,6 +69,14 @@ class OnboardingViewModel @Inject constructor(
     fun completeOnboarding() {
         viewModelScope.launch {
             settingsDataStore.setOnboardingCompleted(true)
+        }
+    }
+
+    fun updateWhatsAppConfig(phoneId: String, token: String, template: String) {
+        sharedPreferences.edit {
+            putString("wa_phone_id", phoneId)
+            putString("wa_token", token)
+            putString("wa_template", template)
         }
     }
 }

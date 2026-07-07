@@ -34,9 +34,11 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.navigation.NavController
+import com.onlyreminder.app.R
 import com.onlyreminder.app.core.ui.components.OnlyReminderTopBar
 import com.onlyreminder.app.features.backup.presentation.BackupViewModel
 
@@ -66,12 +68,12 @@ fun BackupScreen(
     Scaffold(
         topBar = {
             OnlyReminderTopBar(
-                title = "Backup & Restore",
+                title = stringResource(id = R.string.backup_title),
                 navigationIcon = {
                     IconButton(onClick = { navController.navigateUp() }) {
                         Icon(
                             imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                            contentDescription = "Back",
+                            contentDescription = stringResource(id = R.string.back),
                         )
                     }
                 },
@@ -94,7 +96,7 @@ fun BackupScreen(
             )
 
             Text(
-                "Keep your contacts safe by creating encrypted backups. You will need a password to restore them.",
+                stringResource(id = R.string.backup_description),
                 style = MaterialTheme.typography.bodyMedium,
                 textAlign = androidx.compose.ui.text.style.TextAlign.Center,
             )
@@ -108,7 +110,7 @@ fun BackupScreen(
             ) {
                 Icon(Icons.Default.Backup, contentDescription = null)
                 Spacer(modifier = Modifier.width(8.dp))
-                Text("Create Backup Now")
+                Text(stringResource(id = R.string.backup_create))
             }
 
             OutlinedButton(
@@ -117,7 +119,7 @@ fun BackupScreen(
             ) {
                 Icon(Icons.Default.Restore, contentDescription = null)
                 Spacer(modifier = Modifier.width(8.dp))
-                Text("Restore from Backup")
+                Text(stringResource(id = R.string.backup_restore))
             }
 
             if (isLoading) {
@@ -126,12 +128,12 @@ fun BackupScreen(
 
             status?.let {
                 Text(
-                    it,
+                    it.asString(),
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.secondary,
                 )
                 Button(onClick = { viewModel.clearStatus() }) {
-                    Text("OK")
+                    Text(stringResource(id = R.string.ok))
                 }
             }
         }
@@ -140,12 +142,17 @@ fun BackupScreen(
     if (showPasswordDialog) {
         AlertDialog(
             onDismissRequest = { showPasswordDialog = false },
-            title = { Text(if (isRestoreMode) "Enter Password to Restore" else "Set Backup Password") },
+            title = {
+                Text(
+                    if (isRestoreMode) stringResource(id = R.string.backup_restore_password_title)
+                    else stringResource(id = R.string.backup_create_password_title)
+                )
+            },
             text = {
                 OutlinedTextField(
                     value = password,
                     onValueChange = { password = it },
-                    label = { Text("Password") },
+                    label = { Text(stringResource(id = R.string.password)) },
                     visualTransformation = androidx.compose.ui.text.input.PasswordVisualTransformation(),
                     singleLine = true,
                 )
@@ -162,12 +169,12 @@ fun BackupScreen(
                         password = ""
                     },
                 ) {
-                    Text("Proceed")
+                    Text(stringResource(id = R.string.proceed))
                 }
             },
             dismissButton = {
                 TextButton(onClick = { showPasswordDialog = false }) {
-                    Text("Cancel")
+                    Text(stringResource(id = R.string.cancel))
                 }
             },
         )

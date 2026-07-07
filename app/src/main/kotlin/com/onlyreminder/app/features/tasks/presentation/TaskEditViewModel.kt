@@ -8,6 +8,7 @@ import com.onlyreminder.app.data.database.entities.TaskEntity
 import com.onlyreminder.app.data.database.entities.TemplateEntity
 import com.onlyreminder.app.data.repository.ContactRepositoryImpl
 import com.onlyreminder.app.data.repository.MainRepositoryImpl
+import com.onlyreminder.app.domain.model.TaskStatus
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -56,7 +57,7 @@ class TaskEditViewModel @Inject constructor(
                     dueDateTime = LocalDateTime.now().plusHours(1),
                     repeatRule = null,
                     priority = 1,
-                    status = "PENDING",
+                    status = TaskStatus.PENDING,
                     templateId = null,
                     sendMode = "REMINDER_ONLY"
                 )

@@ -16,12 +16,16 @@ class BackupWorker @AssistedInject constructor(
     @Assisted context: Context,
     @Assisted params: WorkerParameters,
     private val backupManager: BackupManager,
-    @SecurePrefs private val sharedPreferences: SharedPreferences,
+    @param:SecurePrefs private val sharedPreferences: SharedPreferences,
 ) : CoroutineWorker(context, params) {
 
     override suspend fun doWork(): ListenableWorker.Result {
-        val password = sharedPreferences.getString("backup_password", "default_secure_backup_pwd")
-            ?: "default_secure_backup_pwd"
+        val password = sharedPreferences.getString("backup_password", null)
+
+        if (password == null) {
+            // Scheduled backup requires a password to be set in settings
+            return ListenableWorker.Result.failure()
+        }
 
         val file = backupManager.createBackup(password)
 

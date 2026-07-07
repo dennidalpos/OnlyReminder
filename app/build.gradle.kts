@@ -23,6 +23,19 @@ android {
         }
     }
 
+    flavorDimensions += "version"
+    productFlavors {
+        create("full") {
+            dimension = "version"
+            applicationIdSuffix = ""
+        }
+        create("demo") {
+            dimension = "version"
+            applicationIdSuffix = ".demo"
+            versionNameSuffix = "-demo"
+        }
+    }
+
     signingConfigs {
         create("release") {
         }
@@ -32,6 +45,7 @@ android {
         release {
             isMinifyEnabled = true
             isShrinkResources = true
+            signingConfig = signingConfigs.getByName("release")
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro",
@@ -44,6 +58,7 @@ android {
     }
     buildFeatures {
         compose = true
+        buildConfig = true
     }
     packaging {
         resources {

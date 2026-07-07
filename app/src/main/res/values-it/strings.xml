@@ -1,6 +1,8 @@
 <resources>
     <string name="app_name">OnlyReminder</string>
-    <string name="onboarding_title">Benvenuto in OnlyReminder</string>
+    <string name="onboarding_title">Configura OnlyReminder</string>
+    <string name="welcome_message">Benvenuto in OnlyReminder</string>
+    <string name="welcome_description">Gestisci la tua rete professionale, tieni traccia dei compleanni e invia messaggi personalizzati in modo sicuro e privato.</string>
     <string name="next">Avanti</string>
     <string name="back">Indietro</string>
     <string name="finish">Fine</string>
@@ -33,8 +35,8 @@
     <string name="tags">Tag</string>
     <string name="notes">Note</string>
     <string name="status">Stato</string>
-    <string name="create_task_soon">Crea Task (In arrivo)</string>
-    <string name="send_wa_soon">Invia WhatsApp (In arrivo)</string>
+    <string name="create_task">Crea Task</string>
+    <string name="send_wa">Invia WhatsApp</string>
     <string name="archive_contact">Archivia Contatto</string>
     <string name="delete_contact_confirm_title">Elimina Contatto</string>
     <string name="delete_contact_confirm_msg">Questo eliminerà definitivamente il contatto selezionato da OnlyReminder. L\'azione non può essere annullata, salvo ripristino da backup.</string>
@@ -81,4 +83,54 @@
     <string name="back_to_contacts">Torna ai Contatti</string>
     <string name="error_reading_file">Errore lettura file: %1$s</string>
     <string name="file_empty">Il file è vuoto o il formato non è riconosciuto.</string>
+
+    <!-- Navigation & Titles -->
+    <string name="tasks_title">Promemoria</string>
+    <string name="templates_title">Template</string>
+    <string name="birthday_review_title">Compleanni da revisionare</string>
+    <string name="backup_title">Backup e Ripristino</string>
+    <string name="settings_title">Impostazioni</string>
+    <string name="security_title">Sicurezza</string>
+    <string name="config_wa_api">Configura WhatsApp API</string>
+    <string name="config_wa_api_desc">Gestisci token, Phone ID e template</string>
+    <string name="whatsapp_api_setup">Configurazione WhatsApp API</string>
+    <string name="whatsapp_api_setup_desc">Inserisci le tue credenziali WhatsApp Business. Saranno conservate in modo sicuro.</string>
+
+    <!-- Home Screen -->
+    <string name="welcome_back">Bentornato!</string>
+    <string name="saved_contacts_count">Hai %1$d contatti salvati.</string>
+    <string name="upcoming_birthdays_count">Hai %1$d compleanni in arrivo!</string>
+    <string name="what_do_you_want_to_do">Cosa vuoi fare?</string>
+    <string name="tools">Strumenti</string>
+    <string name="app">App</string>
+
+    <!-- WhatsApp API Screen -->
+    <string name="whatsapp_api_mode">Modalità WhatsApp API</string>
+    <string name="api_configuration">Configurazione API</string>
+    <string name="phone_number_id">ID Numero di Telefono</string>
+    <string name="access_token">Token di Accesso</string>
+    <string name="approved_template_name">Nome Template Approvato</string>
+    <string name="save_configuration">Salva Configurazione</string>
+    <string name="operations">Operazioni</string>
+    <string name="stop_sending">Interrompi Invio</string>
+    <string name="start_sending_queue">Avvia Coda di Invio</string>
+    <string name="wa_api_security_notice">Le tue credenziali WhatsApp API sono memorizzate solo su questo dispositivo e criptate localmente. Sei responsabile della loro sicurezza e dell\'uso lecito della piattaforma WhatsApp Business.</string>
+
+    <!-- Generale -->
+    <string name="ok">OK</string>
+    <string name="password">Password</string>
+    <string name="proceed">Procedi</string>
+    <string name="not_set">Non impostato</string>
+    <string name="none">Nessuno</string>
+
+    <!-- Schermata Backup -->
+    <string name="backup_description">Proteggi i tuoi contatti creando backup criptati. Avrai bisogno di una password per ripristinarli.</string>
+    <string name="backup_create">Crea Backup Ora</string>
+    <string name="backup_restore">Ripristina da Backup</string>
+    <string name="backup_restore_password_title">Inserisci Password per Ripristino</string>
+    <string name="backup_create_password_title">Imposta Password Backup</string>
+    <string name="backup_create_success">Backup creato con successo: %1$s</string>
+    <string name="backup_create_failed">Creazione backup fallita.</string>
+    <string name="backup_restore_success">Ripristino completato. Riavvia l\'app.</string>
+    <string name="backup_restore_failed">Ripristino fallito. Controlla la password o il file.</string>
 </resources>

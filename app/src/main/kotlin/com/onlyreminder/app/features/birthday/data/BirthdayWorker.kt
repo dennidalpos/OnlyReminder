@@ -8,6 +8,8 @@ import com.onlyreminder.app.core.notifications.NotificationHelper
 import com.onlyreminder.app.data.database.entities.BirthdayRunEntity
 import com.onlyreminder.app.data.database.entities.BirthdayRunItemEntity
 import com.onlyreminder.app.data.repository.MainRepositoryImpl
+import com.onlyreminder.app.domain.model.BirthdayItemStatus
+import com.onlyreminder.app.domain.model.BirthdayRunStatus
 import com.onlyreminder.app.features.birthday.domain.BirthdayScanner
 import com.onlyreminder.app.features.templates.domain.TemplateEngine
 import dagger.assisted.Assisted
@@ -31,8 +33,8 @@ class BirthdayWorker @AssistedInject constructor(
         // Mark previous runs as NOT_REVIEWED if they are still PENDING
         val allRuns = mainRepository.getAllBirthdayRuns().first()
         allRuns.forEach { run ->
-            if ((run.date != dateStr) && (run.status == "PENDING")) {
-                mainRepository.createBirthdayRun(run.copy(status = "NOT_REVIEWED"))
+            if ((run.date != dateStr) && (run.status == BirthdayRunStatus.PENDING)) {
+                mainRepository.createBirthdayRun(run.copy(status = BirthdayRunStatus.NOT_REVIEWED))
             }
         }
 
@@ -57,7 +59,7 @@ class BirthdayWorker @AssistedInject constructor(
         val runId = mainRepository.createBirthdayRun(
             BirthdayRunEntity(
                 date = dateStr,
-                status = "PENDING",
+                status = BirthdayRunStatus.PENDING,
                 totalFound = contacts.size,
                 totalSelected = contacts.size,
                 totalSkipped = 0,
@@ -77,7 +79,7 @@ class BirthdayWorker @AssistedInject constructor(
                 BirthdayRunItemEntity(
                     birthdayRunId = runId,
                     contactId = contact.id,
-                    status = "PENDING",
+                    status = BirthdayItemStatus.PENDING,
                     generatedMessagePreview = message,
                     errorMessage = null
                 )

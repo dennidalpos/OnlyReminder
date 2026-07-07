@@ -6,6 +6,7 @@ import com.onlyreminder.app.data.database.entities.BirthdayRunItemEntity
 import com.onlyreminder.app.data.database.entities.MessageLogEntity
 import com.onlyreminder.app.data.database.entities.TaskEntity
 import com.onlyreminder.app.data.database.entities.TemplateEntity
+import com.onlyreminder.app.domain.model.TaskStatus
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
 import java.time.LocalDateTime
@@ -40,16 +41,18 @@ class MainRepositoryImpl @Inject constructor(
 
     // Tasks
     fun getAllTasks(): Flow<List<TaskEntity>> = mainDao.getAllTasks()
-    fun getTasksByStatus(status: String): Flow<List<TaskEntity>> = mainDao.getTasksByStatus(status)
+    fun getTasksByStatus(status: TaskStatus): Flow<List<TaskEntity>> =
+        mainDao.getTasksByStatus(status)
+
     fun getTasksForContact(contactId: Long): Flow<List<TaskEntity>> =
         mainDao.getTasksForContact(contactId)
 
     suspend fun getTaskById(id: Long): TaskEntity? = mainDao.getTaskById(id)
     suspend fun saveTask(task: TaskEntity): Long = mainDao.insertTask(task)
     suspend fun deleteTask(task: TaskEntity) = mainDao.deleteTask(task)
-    suspend fun updateTaskStatus(taskId: Long, status: String) {
+    suspend fun updateTaskStatus(taskId: Long, status: TaskStatus) {
         mainDao.getTaskById(taskId)?.let { task ->
-            val completedAt = if (status == "COMPLETED") LocalDateTime.now() else null
+            val completedAt = if (status == TaskStatus.COMPLETED) LocalDateTime.now() else null
             mainDao.insertTask(task.copy(status = status, completedAt = completedAt))
         }
     }

@@ -6,6 +6,7 @@ import androidx.lifecycle.viewModelScope
 import com.onlyreminder.app.data.database.entities.ContactEntity
 import com.onlyreminder.app.data.database.entities.GroupEntity
 import com.onlyreminder.app.data.repository.ContactRepositoryImpl
+import com.onlyreminder.app.domain.model.ContactStatus
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -151,5 +152,5 @@ data class ContactEditUiState(
     val groupId: Long? = null,
     val notes: String = "",
     val tags: String = "",
-    val status: String = "ACTIVE"
+    val status: ContactStatus = ContactStatus.ACTIVE
 )

@@ -4,6 +4,7 @@ import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import com.onlyreminder.app.data.repository.MainRepositoryImpl
+import com.onlyreminder.app.domain.model.TaskStatus
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -24,7 +25,7 @@ class ReminderReceiver : BroadcastReceiver() {
 
         CoroutineScope(Dispatchers.IO).launch {
             val task = repository.getTaskById(taskId)
-            if (task != null && task.status == "PENDING") {
+            if (task != null && task.status == TaskStatus.PENDING) {
                 notificationHelper.showTaskNotification(
                     taskId = task.id,
                     title = "Reminder: ${task.title}",

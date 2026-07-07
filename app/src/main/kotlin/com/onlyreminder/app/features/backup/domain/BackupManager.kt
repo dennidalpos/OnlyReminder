@@ -27,8 +27,8 @@ class BackupManager @Inject constructor(
     suspend fun createBackup(password: String): File? =
         withContext(Dispatchers.IO) {
             try {
-                // Ensure data is consistent - this is a bit hacky, maybe use checkpoint
-                // db.mainDao().getAllTemplates().first() 
+                // Ensure WAL is checkpointed to the main DB file
+                db.openHelper.writableDatabase.query("PRAGMA wal_checkpoint(FULL)").close()
 
                 val dbFile = context.getDatabasePath(AppDatabase.DB_NAME)
                 val dbBytes = dbFile.readBytes()

@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OnlyReminder - Privacy-First Birthday Manager</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #6750A4;
+            --primary-container: #EADDFF;
+            --on-primary-container: #21005D;
+            --secondary: #625B71;
+            --background: #FFFBFE;
+            --surface: #FFFFFF;
+            --on-surface: #1C1B1F;
+            --on-surface-variant: #49454F;
+            --outline: #79747E;
+            --card-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+            --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        [data-theme="dark"] {
+            --background: #1C1B1F;
+            --surface: #2B2930;
+            --on-surface: #E6E1E5;
+            --on-surface-variant: #CAC4D0;
+            --primary: #D0BCFF;
+            --primary-container: #4F378B;
+            --on-primary-container: #EADDFF;
+            --card-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+        }
+
+        * {
+            box-sizing: border-box;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            margin: 0;
+            background-color: var(--background);
+            color: var(--on-surface);
+            line-height: 1.6;
+            transition: background-color 0.3s ease;
+        }
+
+        .container {
+            max-width: 1100px;
+            margin: 0 auto;
+            padding: 0 24px;
+        }
+
+        header {
+            padding: 1.5rem 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            background: rgba(var(--background), 0.8);
+            backdrop-filter: blur(10px);
+            z-index: 100;
+        }
+
+        .logo {
+            font-weight: 800;
+            font-size: 1.5rem;
+            color: var(--primary);
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .nav-actions {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+        }
+
+        .icon-btn {
+            background: var(--primary-container);
+            color: var(--on-primary-container);
+            border: none;
+            padding: 8px 16px;
+            border-radius: 100px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 0.9rem;
+            transition: var(--transition);
+        }
+
+        .icon-btn:hover {
+            filter: brightness(0.9);
+            transform: translateY(-1px);
+        }
+
+        .hero {
+            padding: 100px 0 60px;
+            text-align: center;
+        }
+
+        .hero h1 {
+            font-size: clamp(2.5rem, 8vw, 4rem);
+            font-weight: 800;
+            margin: 0;
+            letter-spacing: -0.03em;
+            line-height: 1.1;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .hero p {
+            font-size: 1.25rem;
+            color: var(--on-surface-variant);
+            max-width: 650px;
+            margin: 24px auto;
+        }
+
+        .cta-group {
+            display: flex;
+            gap: 16px;
+            justify-content: center;
+            margin-top: 40px;
+        }
+
+        .btn {
+            padding: 14px 32px;
+            border-radius: 100px;
+            text-decoration: none;
+            font-weight: 700;
+            transition: var(--transition);
+            display: inline-block;
+        }
+
+        .btn-primary {
+            background: var(--primary);
+            color: var(--background);
+            box-shadow: 0 8px 16px rgba(103, 80, 164, 0.2);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 24px rgba(103, 80, 164, 0.3);
+        }
+
+        .btn-secondary {
+            background: transparent;
+            color: var(--primary);
+            border: 2px solid var(--primary);
+        }
+
+        .btn-secondary:hover {
+            background: var(--primary-container);
+        }
+
+        .features {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 24px;
+            padding: 80px 0;
+        }
+
+        .card {
+            background: var(--surface);
+            padding: 40px;
+            border-radius: 28px;
+            border: 1px solid rgba(0,0,0,0.05);
+            box-shadow: var(--card-shadow);
+            transition: var(--transition);
+        }
+
+        .card:hover {
+            transform: translateY(-8px);
+            border-color: var(--primary);
+        }
+
+        .card-icon {
+            width: 48px;
+            height: 48px;
+            background: var(--primary-container);
+            border-radius: 12px;
+            margin-bottom: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+        }
+
+        .card h3 {
+            margin: 0 0 12px 0;
+            font-size: 1.5rem;
+            font-weight: 700;
+        }
+
+        .card p {
+            margin: 0;
+            color: var(--on-surface-variant);
+        }
+
+        .privacy-box {
+            background: var(--primary-container);
+            color: var(--on-primary-container);
+            padding: 60px 40px;
+            border-radius: 32px;
+            margin: 40px 0;
+            text-align: center;
+        }
+
+        .privacy-box h2 {
+            font-size: 2.5rem;
+            font-weight: 800;
+            margin-top: 0;
+        }
+
+        .privacy-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 24px;
+            margin-top: 40px;
+            text-align: left;
+        }
+
+        .privacy-item h4 { margin: 0 0 8px 0; font-weight: 700; }
+        .privacy-item p { margin: 0; font-size: 0.95rem; opacity: 0.9; }
+
+        footer {
+            text-align: center;
+            padding: 60px 0;
+            color: var(--on-surface-variant);
+            font-size: 0.9rem;
+            border-top: 1px solid rgba(0,0,0,0.05);
+        }
+
+        /* Language Switch Logic */
+        [lang="en"] .it, [lang="en"] .lang-it { display: none !important; }
+        [lang="it"] .en, [lang="it"] .lang-en { display: none !important; }
+
+        @media (max-width: 768px) {
+            .hero { padding: 60px 0 40px; }
+            .cta-group { flex-direction: column; }
+            .btn { text-align: center; }
+        }
+    </style>
+</head>
+<body lang="it">
+
+<div class="container">
+    <header>
+        <a href="#" class="logo">OnlyReminder</a>
+        <div class="nav-actions">
+            <button class="icon-btn" onclick="toggleLang()">
+                <span class="en">🇮🇹 IT</span>
+                <span class="it">🇺🇸 EN</span>
+            </button>
+            <button class="icon-btn" onclick="toggleTheme()" id="theme-toggle">🌓</button>
+        </div>
+    </header>
+
+    <main>
+        <section class="hero">
+            <h1 class="en">Your contacts, <br>truly private.</h1>
+            <h1 class="it">I tuoi contatti, <br>davvero privati.</h1>
+
+            <p class="en">The Material 3 birthday manager that keeps everything on your device. No cloud, no tracking, just your memories.</p>
+            <p class="it">Il gestore di compleanni in stile Material 3 che tiene tutto sul tuo dispositivo. Niente cloud, niente tracking, solo i tuoi ricordi.</p>
+
+            <div class="cta-group">
+                <a href="https://github.com/OnlyReminder/OnlyReminder/releases" class="btn btn-primary">
+                    <span class="en">Download APK</span>
+                    <span class="it">Scarica l'App</span>
+                </a>
+                <a href="privacy.html" class="btn btn-secondary">
+                    <span class="en">Privacy Policy</span>
+                    <span class="it">Informativa Privacy</span>
+                </a>
+            </div>
+        </section>
+
+        <section class="features">
+            <div class="card">
+                <div class="card-icon">🔐</div>
+                <h3 class="en">SQLCipher Storage</h3>
+                <h3 class="it">Sicurezza SQLCipher</h3>
+                <p class="en">Every bit of data is encrypted with AES-256. Your contacts are safe even if your phone is unlocked.</p>
+                <p class="it">Ogni dato è cifrato con AES-256. I tuoi contatti sono al sicuro anche se il telefono viene sbloccato.</p>
+            </div>
+            <div class="card">
+                <div class="card-icon">📱</div>
+                <h3 class="en">Local-First</h3>
+                <h3 class="it">100% Locale</h3>
+                <p class="en">No remote servers, no cloud sync, no data mining. Your network is yours alone.</p>
+                <p class="it">Nessun server remoto, nessuna sincronizzazione cloud, nessun data mining. La tua rete è solo tua.</p>
+            </div>
+            <div class="card">
+                <div class="card-icon">💬</div>
+                <h3 class="en">Human-Led</h3>
+                <h3 class="it">Controllo Umano</h3>
+                <p class="en">No automated spam. Review reminders and send personalized WhatsApp messages with a single tap.</p>
+                <p class="it">Nessun invio automatico. Revisiona i promemoria e invia messaggi WhatsApp personalizzati in un tocco.</p>
+            </div>
+        </section>
+
+    </main>
+
+    <footer>
+        <p>&copy; 2024 OnlyReminder. Designed with ❤️ for Privacy.</p>
+    </footer>
+</div>
+
+<script>
+    function toggleLang() {
+        const body = document.body;
+        const currentLang = body.getAttribute('lang');
+        const newLang = currentLang === 'en' ? 'it' : 'en';
+        body.setAttribute('lang', newLang);
+        localStorage.setItem('preferredLang', newLang);
+    }
+
+    function toggleTheme() {
+        const body = document.body;
+        const currentTheme = body.getAttribute('data-theme');
+        const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+        body.setAttribute('data-theme', newTheme);
+        localStorage.setItem('preferredTheme', newTheme);
+    }
+
+    // Initialize
+    window.addEventListener('DOMContentLoaded', () => {
+        // Lang
+        const savedLang = localStorage.getItem('preferredLang') || (navigator.language.startsWith('it') ? 'it' : 'en');
+        document.body.setAttribute('lang', savedLang);
+
+        // Theme
+        const savedTheme = localStorage.getItem('preferredTheme') || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+        document.body.setAttribute('data-theme', savedTheme);
+    });
+</script>
+
+</body>
+</html>

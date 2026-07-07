@@ -14,8 +14,8 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.filled.FileUpload
 import androidx.compose.material.icons.filled.FilterList
@@ -47,13 +47,14 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.onlyreminder.app.R
 import com.onlyreminder.app.core.navigation.Route
 import com.onlyreminder.app.core.ui.components.EmptyState
 import com.onlyreminder.app.core.ui.components.OnlyReminderTopBar
 import com.onlyreminder.app.data.database.entities.ContactEntity
+import com.onlyreminder.app.domain.model.ContactStatus
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -79,7 +80,7 @@ fun ContactsScreen(
                 navigationIcon = {
                     IconButton(onClick = { navController.navigateUp() }) {
                         Icon(
-                            imageVector = Icons.Default.ArrowBack,
+                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                             contentDescription = stringResource(id = R.string.back)
                         )
                     }
@@ -209,7 +210,7 @@ fun ContactItem(
         headlineContent = { Text(text = contact.displayName, fontWeight = FontWeight.SemiBold) },
         supportingContent = { Text(text = contact.phone.ifEmpty { contact.email }) },
         overlineContent = {
-            if (contact.status == "ARCHIVED") {
+            if (contact.status == ContactStatus.ARCHIVED) {
                 Text(
                     text = stringResource(id = R.string.archived).uppercase(),
                     color = MaterialTheme.colorScheme.error,
@@ -242,10 +243,10 @@ fun FilterBottomSheet(
     groups: List<com.onlyreminder.app.data.database.entities.GroupEntity>,
     tags: List<String>,
     selectedGroupId: Long?,
-    selectedStatus: String?,
+    selectedStatus: ContactStatus?,
     selectedTag: String?,
     onGroupSelected: (Long?) -> Unit,
-    onStatusSelected: (String?) -> Unit,
+    onStatusSelected: (ContactStatus?) -> Unit,
     onTagSelected: (String?) -> Unit,
     onDismiss: () -> Unit
 ) {
@@ -294,14 +295,14 @@ fun FilterBottomSheet(
                 )
                 Spacer(modifier = Modifier.width(8.dp))
                 FilterChip(
-                    selected = selectedStatus == "ACTIVE",
-                    onClick = { onStatusSelected("ACTIVE") },
+                    selected = selectedStatus == ContactStatus.ACTIVE,
+                    onClick = { onStatusSelected(ContactStatus.ACTIVE) },
                     label = { Text(stringResource(id = R.string.active)) }
                 )
                 Spacer(modifier = Modifier.width(8.dp))
                 FilterChip(
-                    selected = selectedStatus == "ARCHIVED",
-                    onClick = { onStatusSelected("ARCHIVED") },
+                    selected = selectedStatus == ContactStatus.ARCHIVED,
+                    onClick = { onStatusSelected(ContactStatus.ARCHIVED) },
                     label = { Text(stringResource(id = R.string.archived)) }
                 )
             }

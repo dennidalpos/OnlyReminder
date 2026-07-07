@@ -7,6 +7,7 @@ import com.onlyreminder.app.data.database.entities.ContactEntity
 import com.onlyreminder.app.data.database.entities.GroupEntity
 import com.onlyreminder.app.data.database.entities.TagEntity
 import com.onlyreminder.app.data.repository.ContactRepositoryImpl
+import com.onlyreminder.app.features.whatsapp.domain.WhatsAppManualManager
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -16,6 +17,7 @@ import javax.inject.Inject
 @HiltViewModel
 class ContactDetailViewModel @Inject constructor(
     private val repository: ContactRepositoryImpl,
+    private val whatsappManager: WhatsAppManualManager,
     savedStateHandle: SavedStateHandle
 ) : ViewModel() {
 
@@ -61,5 +63,10 @@ class ContactDetailViewModel @Inject constructor(
                 onDeleted()
             }
         }
+    }
+
+    fun openWhatsApp(context: android.content.Context) {
+        val c = _contact.value ?: return
+        whatsappManager.openWhatsAppChat(context, c.phone, "Hi ${c.firstName}, how are you?")
     }
 }
