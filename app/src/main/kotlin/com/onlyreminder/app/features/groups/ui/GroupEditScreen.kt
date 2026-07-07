@@ -1,13 +1,10 @@
 package com.onlyreminder.app.features.groups.ui
 
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -41,7 +38,6 @@ import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.onlyreminder.app.R
 import com.onlyreminder.app.core.ui.components.OnlyReminderTopBar
-import com.onlyreminder.app.data.database.entities.ContactEntity
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -59,7 +55,9 @@ fun GroupEditScreen(
     Scaffold(
         topBar = {
             OnlyReminderTopBar(
-                title = if (name.isEmpty()) stringResource(id = R.string.new_group) else stringResource(id = R.string.edit_group),
+                title = if (name.isEmpty()) stringResource(id = R.string.new_group) else stringResource(
+                    id = R.string.edit_group
+                ),
                 navigationIcon = {
                     IconButton(onClick = { navController.navigateUp() }) {
                         Icon(
@@ -70,7 +68,10 @@ fun GroupEditScreen(
                 },
                 actions = {
                     IconButton(onClick = { viewModel.saveGroup { navController.navigateUp() } }) {
-                        Icon(imageVector = Icons.Default.Check, contentDescription = stringResource(id = R.string.save))
+                        Icon(
+                            imageVector = Icons.Default.Check,
+                            contentDescription = stringResource(id = R.string.save)
+                        )
                     }
                 }
             )
@@ -105,9 +106,15 @@ fun GroupEditScreen(
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Text(text = stringResource(id = R.string.members_title), style = MaterialTheme.typography.titleMedium)
+                    Text(
+                        text = stringResource(id = R.string.members_title),
+                        style = MaterialTheme.typography.titleMedium
+                    )
                     IconButton(onClick = { showAddMemberDialog = true }) {
-                        Icon(Icons.Default.Add, contentDescription = stringResource(id = R.string.add_member))
+                        Icon(
+                            Icons.Default.Add,
+                            contentDescription = stringResource(id = R.string.add_member)
+                        )
                     }
                 }
 
@@ -118,7 +125,11 @@ fun GroupEditScreen(
                             supportingContent = { Text(contact.phone) },
                             trailingContent = {
                                 IconButton(onClick = { viewModel.removeContactFromGroup(contact) }) {
-                                    Icon(Icons.Default.Delete, contentDescription = stringResource(id = R.string.remove), tint = MaterialTheme.colorScheme.error)
+                                    Icon(
+                                        Icons.Default.Delete,
+                                        contentDescription = stringResource(id = R.string.remove),
+                                        tint = MaterialTheme.colorScheme.error
+                                    )
                                 }
                             }
                         )
@@ -144,7 +155,10 @@ fun GroupEditScreen(
                                         IconButton(onClick = {
                                             viewModel.addContactToGroup(contact)
                                         }) {
-                                            Icon(Icons.Default.Add, contentDescription = stringResource(id = R.string.add_member))
+                                            Icon(
+                                                Icons.Default.Add,
+                                                contentDescription = stringResource(id = R.string.add_member)
+                                            )
                                         }
                                     }
                                 )

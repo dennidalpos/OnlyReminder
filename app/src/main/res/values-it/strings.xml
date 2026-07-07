@@ -101,8 +101,20 @@
     <string name="confirm_import">Conferma Importazione</string>
     <string name="import_success">Importazione Completata!</string>
     <string name="back_to_contacts">Torna ai Contatti</string>
+    <string name="error_title">Errore</string>
     <string name="error_reading_file">Errore lettura file: %1$s</string>
     <string name="file_empty">Il file è vuoto o il formato non è riconosciuto.</string>
+    <string name="error_opening_file">Impossibile aprire il file.</string>
+    <string name="missing_display_name">Nome visualizzato mancante</string>
+    <string name="missing_phone_number">Numero di telefono mancante</string>
+    <string name="error_processing_data">Errore elaborazione dati: %1$s</string>
+    <string name="error_saving_contacts">Errore salvataggio contatti: %1$s</string>
+
+    <!-- Lock Screen -->
+    <string name="app_locked">App Bloccata</string>
+    <string name="enter_pin">Inserisci PIN</string>
+    <string name="incorrect_pin">PIN Errato</string>
+    <string name="use_biometrics">Usa Biometria</string>
 
     <!-- Navigation & Titles -->
     <string name="tasks_title">Promemoria</string>
@@ -145,6 +157,27 @@
     <string name="proceed">Procedi</string>
     <string name="not_set">Non impostato</string>
     <string name="none">Nessuno</string>
+    <string name="retry">Riprova</string>
+
+    <!-- Birthday Review -->
+    <string name="no_birthday_runs">Nessuna scansione compleanni trovata.</string>
+    <string name="delete_contact">Elimina Contatto</string>
+    <string name="skip">Salta</string>
+    <string name="prepare_send">Prepara Invio</string>
+    <string name="skip_all">Salta Tutti</string>
+    <string name="send_selected">Invia Selezionati</string>
+    <string name="scan_date">Data Scansione: %1$s</string>
+    <string name="contacts_found">Contatti Trovati: %1$d</string>
+
+    <!-- WhatsApp Manual -->
+    <string name="whatsapp_manual_send">Invio Manuale WhatsApp</string>
+    <string name="no_pending_messages">Nessun messaggio in coda.</string>
+    <string name="all_messages_processed">Tutti i messaggi elaborati!</string>
+    <string name="back_to_review">Torna alla Revisione</string>
+    <string name="sending_status">Invio %1$d di %2$d</string>
+    <string name="message_preview">Anteprima Messaggio</string>
+    <string name="open_whatsapp">Apri WhatsApp</string>
+    <string name="copy_to_clipboard">Copia messaggio negli appunti</string>
 
     <!-- Schermata Backup -->
     <string name="backup_description">Proteggi i tuoi contatti creando backup criptati. Avrai bisogno di una password per ripristinarli.</string>

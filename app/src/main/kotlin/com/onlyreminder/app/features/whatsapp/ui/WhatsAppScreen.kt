@@ -29,9 +29,11 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.navigation.NavController
+import com.onlyreminder.app.R
 import com.onlyreminder.app.core.ui.components.OnlyReminderTopBar
 import com.onlyreminder.app.features.whatsapp.domain.WhatsAppManualManager
 import com.onlyreminder.app.features.whatsapp.domain.WhatsAppResult
@@ -51,12 +53,12 @@ fun WhatsAppScreen(
     Scaffold(
         topBar = {
             OnlyReminderTopBar(
-                title = "WhatsApp Manual Send",
+                title = stringResource(id = R.string.whatsapp_manual_send),
                 navigationIcon = {
                     IconButton(onClick = { navController.navigateUp() }) {
                         Icon(
                             imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                            contentDescription = "Back"
+                            contentDescription = stringResource(id = R.string.back)
                         )
                     }
                 }
@@ -69,16 +71,22 @@ fun WhatsAppScreen(
                 .padding(paddingValues)
         ) {
             if (queue.isEmpty()) {
-                Text("No pending messages in queue.", modifier = Modifier.align(Alignment.Center))
+                Text(
+                    text = stringResource(id = R.string.no_pending_messages),
+                    modifier = Modifier.align(Alignment.Center)
+                )
             } else if (currentIndex >= queue.size) {
                 Column(
                     modifier = Modifier.align(Alignment.Center),
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
-                    Text("All messages processed!", style = MaterialTheme.typography.headlineSmall)
+                    Text(
+                        text = stringResource(id = R.string.all_messages_processed),
+                        style = MaterialTheme.typography.headlineSmall
+                    )
                     Spacer(modifier = Modifier.height(16.dp))
                     Button(onClick = { navController.navigateUp() }) {
-                        Text("Back to Review")
+                        Text(stringResource(id = R.string.back_to_review))
                     }
                 }
             } else {
@@ -96,18 +104,24 @@ fun WhatsAppScreen(
                         )
 
                         Text(
-                            text = "Sending ${currentIndex + 1} of ${queue.size}",
+                            text = stringResource(
+                                id = R.string.sending_status,
+                                currentIndex + 1,
+                                queue.size
+                            ),
                             style = MaterialTheme.typography.bodySmall
                         )
 
                         Card(modifier = Modifier.fillMaxWidth()) {
                             Column(modifier = Modifier.padding(16.dp)) {
                                 Text(
-                                    text = item.contact?.displayName ?: "Unknown",
+                                    text = item.contact?.displayName
+                                        ?: stringResource(id = R.string.none),
                                     style = MaterialTheme.typography.titleLarge
                                 )
                                 Text(
-                                    text = item.contact?.phone ?: "No Phone",
+                                    text = item.contact?.phone
+                                        ?: stringResource(id = R.string.not_set),
                                     style = MaterialTheme.typography.bodyMedium
                                 )
                             }
@@ -117,7 +131,7 @@ fun WhatsAppScreen(
                             value = item.item.generatedMessagePreview,
                             onValueChange = {},
                             readOnly = true,
-                            label = { Text("Message Preview") },
+                            label = { Text(stringResource(id = R.string.message_preview)) },
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .height(150.dp)
@@ -131,7 +145,7 @@ fun WhatsAppScreen(
                                 onClick = { viewModel.skipCurrent() },
                                 modifier = Modifier.weight(1f)
                             ) {
-                                Text("Skip")
+                                Text(stringResource(id = R.string.skip))
                             }
 
                             Button(
@@ -147,7 +161,7 @@ fun WhatsAppScreen(
                                 },
                                 modifier = Modifier.weight(1f)
                             ) {
-                                Text("Open WhatsApp")
+                                Text(stringResource(id = R.string.open_whatsapp))
                             }
                         }
 
@@ -160,7 +174,7 @@ fun WhatsAppScreen(
                             },
                             modifier = Modifier.align(Alignment.CenterHorizontally)
                         ) {
-                            Text("Copy message to clipboard")
+                            Text(stringResource(id = R.string.copy_to_clipboard))
                         }
                     }
                 }

@@ -21,10 +21,15 @@ data class ImportContact(
     val privacyConsent: Boolean = false,
     val isSelected: Boolean = true,
     val isValid: Boolean = true,
-    val validationErrors: List<String> = emptyList(),
+    val validationErrors: List<ImportError> = emptyList(),
     val isDuplicate: Boolean = false,
     val duplicateReason: String? = null
 )
+
+enum class ImportError {
+    MISSING_DISPLAY_NAME,
+    MISSING_PHONE_NUMBER
+}
 
 enum class ContactField(val displayName: String) {
     FIRST_NAME("First Name"),

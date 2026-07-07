@@ -93,7 +93,7 @@ fun ErrorState(
             modifier = Modifier.padding(16.dp)
         )
         Button(onClick = onRetry) {
-            Text(text = "Retry")
+            Text(text = stringResource(id = R.string.retry))
         }
     }
 }

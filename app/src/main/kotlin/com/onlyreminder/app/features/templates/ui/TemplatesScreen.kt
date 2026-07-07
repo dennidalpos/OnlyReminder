@@ -111,7 +111,10 @@ fun TemplatesScreen(
         floatingActionButton = {
             if (!isSelectionMode) {
                 FloatingActionButton(onClick = { navController.navigate(Route.TemplateEdit()) }) {
-                    Icon(Icons.Default.Add, contentDescription = stringResource(id = R.string.add_template))
+                    Icon(
+                        Icons.Default.Add,
+                        contentDescription = stringResource(id = R.string.add_template)
+                    )
                 }
             }
         }
@@ -245,7 +248,10 @@ fun TemplateItem(
                 Spacer(modifier = Modifier.height(8.dp))
                 Row(horizontalArrangement = Arrangement.End, modifier = Modifier.fillMaxWidth()) {
                     IconButton(onClick = onDuplicate) {
-                        Icon(Icons.Default.ContentCopy, contentDescription = stringResource(id = R.string.duplicate))
+                        Icon(
+                            Icons.Default.ContentCopy,
+                            contentDescription = stringResource(id = R.string.duplicate)
+                        )
                     }
                     IconButton(onClick = onDelete) {
                         Icon(

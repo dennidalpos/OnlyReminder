@@ -25,7 +25,6 @@ import androidx.compose.material.icons.filled.NotificationsActive
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.Task
-import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -231,8 +230,10 @@ fun ActionRequiredBanner(
                 val message = when {
                     birthdayReviewRequired && pendingTasksCount > 0 ->
                         "You have birthdays to review and $pendingTasksCount pending tasks."
+
                     birthdayReviewRequired ->
                         "You have birthdays to review."
+
                     else ->
                         "You have $pendingTasksCount pending tasks."
                 }

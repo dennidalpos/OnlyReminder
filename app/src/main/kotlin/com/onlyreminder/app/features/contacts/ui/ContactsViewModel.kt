@@ -9,7 +9,6 @@ import com.onlyreminder.app.data.database.entities.TaskEntity
 import com.onlyreminder.app.data.repository.ContactRepositoryImpl
 import com.onlyreminder.app.domain.model.ContactStatus
 import com.onlyreminder.app.domain.model.TaskStatus
-import java.time.LocalDateTime
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -21,6 +20,7 @@ import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
+import java.time.LocalDateTime
 import javax.inject.Inject
 
 @HiltViewModel
@@ -153,7 +153,12 @@ class ContactsViewModel @Inject constructor(
             val idsToUpdate = _selectedContactIds.value
             idsToUpdate.forEach { id ->
                 repository.getContactById(id)?.let { contact ->
-                    repository.saveContact(contact.copy(groupId = groupId, updatedAt = LocalDateTime.now()))
+                    repository.saveContact(
+                        contact.copy(
+                            groupId = groupId,
+                            updatedAt = LocalDateTime.now()
+                        )
+                    )
                 }
             }
             clearSelection()

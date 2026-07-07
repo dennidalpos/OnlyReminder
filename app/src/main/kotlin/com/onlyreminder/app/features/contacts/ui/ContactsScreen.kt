@@ -4,7 +4,6 @@ import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.combinedClickable
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -58,7 +57,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import java.time.LocalDateTime
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.onlyreminder.app.R
@@ -67,6 +65,7 @@ import com.onlyreminder.app.core.ui.components.EmptyState
 import com.onlyreminder.app.core.ui.components.OnlyReminderTopBar
 import com.onlyreminder.app.data.database.entities.ContactEntity
 import com.onlyreminder.app.domain.model.ContactStatus
+import java.time.LocalDateTime
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -155,7 +154,10 @@ fun ContactsScreen(
                         }
                         Box {
                             IconButton(onClick = { showMenu = true }) {
-                                Icon(imageVector = Icons.Default.MoreVert, contentDescription = null)
+                                Icon(
+                                    imageVector = Icons.Default.MoreVert,
+                                    contentDescription = null
+                                )
                             }
                             DropdownMenu(
                                 expanded = showMenu,
@@ -274,7 +276,11 @@ fun ContactsScreen(
         if (showAssignTaskDialog) {
             AssignTaskDialog(
                 onAssign = { title: String, description: String ->
-                    viewModel.assignTaskToSelected(title, description, LocalDateTime.now().plusDays(1))
+                    viewModel.assignTaskToSelected(
+                        title,
+                        description,
+                        LocalDateTime.now().plusDays(1)
+                    )
                     showAssignTaskDialog = false
                 },
                 onDismiss = { showAssignTaskDialog = false },

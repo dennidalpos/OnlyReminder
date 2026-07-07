@@ -101,8 +101,20 @@
     <string name="confirm_import">Confirm Import</string>
     <string name="import_success">Import Completed Successfully!</string>
     <string name="back_to_contacts">Back to Contacts</string>
+    <string name="error_title">Error</string>
     <string name="error_reading_file">Error reading file: %1$s</string>
     <string name="file_empty">The file is empty or format not recognized.</string>
+    <string name="error_opening_file">Could not open the file.</string>
+    <string name="missing_display_name">Missing display name</string>
+    <string name="missing_phone_number">Missing phone number</string>
+    <string name="error_processing_data">Error processing data: %1$s</string>
+    <string name="error_saving_contacts">Error saving contacts: %1$s</string>
+
+    <!-- Lock Screen -->
+    <string name="app_locked">App Locked</string>
+    <string name="enter_pin">Enter PIN</string>
+    <string name="incorrect_pin">Incorrect PIN</string>
+    <string name="use_biometrics">Use Biometrics</string>
 
     <!-- Navigation & Titles -->
     <string name="tasks_title">Tasks</string>
@@ -145,6 +157,27 @@
     <string name="proceed">Proceed</string>
     <string name="not_set">Not set</string>
     <string name="none">None</string>
+    <string name="retry">Retry</string>
+
+    <!-- Birthday Review -->
+    <string name="no_birthday_runs">No birthday runs found.</string>
+    <string name="delete_contact">Delete Contact</string>
+    <string name="skip">Skip</string>
+    <string name="prepare_send">Prepare Send</string>
+    <string name="skip_all">Skip All</string>
+    <string name="send_selected">Send Selected</string>
+    <string name="scan_date">Scan Date: %1$s</string>
+    <string name="contacts_found">Contacts Found: %1$d</string>
+
+    <!-- WhatsApp Manual -->
+    <string name="whatsapp_manual_send">WhatsApp Manual Send</string>
+    <string name="no_pending_messages">No pending messages in queue.</string>
+    <string name="all_messages_processed">All messages processed!</string>
+    <string name="back_to_review">Back to Review</string>
+    <string name="sending_status">Sending %1$d of %2$d</string>
+    <string name="message_preview">Message Preview</string>
+    <string name="open_whatsapp">Open WhatsApp</string>
+    <string name="copy_to_clipboard">Copy message to clipboard</string>
 
     <!-- Backup Screen -->
     <string name="backup_description">Keep your contacts safe by creating encrypted backups. You will need a password to restore them.</string>

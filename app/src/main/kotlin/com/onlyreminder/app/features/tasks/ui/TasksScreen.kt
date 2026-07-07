@@ -49,9 +49,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import com.onlyreminder.app.R
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.navigation.NavController
+import com.onlyreminder.app.R
 import com.onlyreminder.app.core.navigation.Route
 import com.onlyreminder.app.core.ui.components.OnlyReminderTopBar
 import com.onlyreminder.app.data.database.entities.TaskEntity
@@ -88,10 +88,16 @@ fun TasksScreen(
                     },
                     actions = {
                         IconButton(onClick = { viewModel.selectAllTasks() }) {
-                            Icon(Icons.Default.SelectAll, contentDescription = stringResource(id = R.string.select_all))
+                            Icon(
+                                Icons.Default.SelectAll,
+                                contentDescription = stringResource(id = R.string.select_all)
+                            )
                         }
                         IconButton(onClick = { showDeleteDialog = true }) {
-                            Icon(Icons.Default.Delete, contentDescription = stringResource(id = R.string.delete_selected))
+                            Icon(
+                                Icons.Default.Delete,
+                                contentDescription = stringResource(id = R.string.delete_selected)
+                            )
                         }
                     }
                 )
@@ -123,12 +129,14 @@ fun TasksScreen(
                             DropdownMenuItem(
                                 text = { Text(TaskStatus.COMPLETED.name) },
                                 onClick = {
-                                    viewModel.setFilterStatus(TaskStatus.COMPLETED); expanded = false
+                                    viewModel.setFilterStatus(TaskStatus.COMPLETED); expanded =
+                                    false
                                 })
                             DropdownMenuItem(
                                 text = { Text(TaskStatus.CANCELLED.name) },
                                 onClick = {
-                                    viewModel.setFilterStatus(TaskStatus.CANCELLED); expanded = false
+                                    viewModel.setFilterStatus(TaskStatus.CANCELLED); expanded =
+                                    false
                                 })
                         }
                     }
@@ -223,7 +231,8 @@ fun TaskItem(
     onSkip: () -> Unit
 ) {
     val dateTimeFormatter = remember { DateTimeFormatter.ofPattern("dd MMM yyyy, HH:mm") }
-    val isPast = (task.dueDateTime.isBefore(LocalDateTime.now()) && task.status == TaskStatus.PENDING)
+    val isPast =
+        (task.dueDateTime.isBefore(LocalDateTime.now()) && task.status == TaskStatus.PENDING)
 
     Card(
         modifier = Modifier

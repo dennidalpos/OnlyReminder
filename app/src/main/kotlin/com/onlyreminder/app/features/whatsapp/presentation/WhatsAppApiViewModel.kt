@@ -11,21 +11,17 @@ import com.onlyreminder.app.features.whatsapp.data.WhatsAppLanguage
 import com.onlyreminder.app.features.whatsapp.data.WhatsAppMessageRequest
 import com.onlyreminder.app.features.whatsapp.data.WhatsAppTemplate
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
-import okhttp3.OkHttpClient
-import okhttp3.logging.HttpLoggingInterceptor
-import retrofit2.Retrofit
-import retrofit2.converter.gson.GsonConverterFactory
 import javax.inject.Inject
 
 @HiltViewModel
 class WhatsAppApiViewModel @Inject constructor(
     @param:SecurePrefs private val sharedPreferences: SharedPreferences,
-    private val mainRepository: MainRepositoryImpl
+    private val mainRepository: MainRepositoryImpl,
+    private val apiService: WhatsAppApiService
 ) : ViewModel() {
 
     private val _phoneNumberId =
@@ -55,51 +51,32 @@ class WhatsAppApiViewModel @Inject constructor(
         }
     }
 
-    private val apiService: WhatsAppApiService by lazy {
-        val logging = HttpLoggingInterceptor().apply { level = HttpLoggingInterceptor.Level.BODY }
-        val client = OkHttpClient.Builder().addInterceptor(logging).build()
-
-        Retrofit.Builder()
-            .baseUrl("https://graph.facebook.com/v17.0/")
-            .addConverterFactory(GsonConverterFactory.create())
-            .client(client)
-            .build()
-            .create(WhatsAppApiService::class.java)
-    }
-
-    fun sendBatch(contacts: List<com.onlyreminder.app.data.database.entities.ContactEntity>) {
+    fun sendMessage(contact: com.onlyreminder.app.data.database.entities.ContactEntity) {
         viewModelScope.launch {
             _isSending.value = true
-            for (contact in contacts) {
-                if (!_isSending.value) break
-
-                try {
-                    val request = WhatsAppMessageRequest(
-                        to = contact.phone,
-                        template = WhatsAppTemplate(
-                            name = _templateName.value,
-                            language = WhatsAppLanguage(code = "it")
-                        )
+            try {
+                val request = WhatsAppMessageRequest(
+                    to = contact.phone,
+                    template = WhatsAppTemplate(
+                        name = _templateName.value,
+                        language = WhatsAppLanguage(code = "it")
                     )
+                )
 
-                    val response = apiService.sendMessage(
-                        _phoneNumberId.value,
-                        "Bearer ${_accessToken.value}",
-                        request
-                    )
+                val response = apiService.sendMessage(
+                    _phoneNumberId.value,
+                    "Bearer ${_accessToken.value}",
+                    request
+                )
 
-                    if (response.isSuccessful) {
-                        // Success
-                    } else {
-                        // Error
-                    }
-                } catch (e: Exception) {
-                    // Log error
+                if (response.isSuccessful) {
+                    // Success logic
                 }
-
-                delay(3000) // 3 seconds delay
+            } catch (e: Exception) {
+                // Error logic
+            } finally {
+                _isSending.value = false
             }
-            _isSending.value = false
         }
     }
 

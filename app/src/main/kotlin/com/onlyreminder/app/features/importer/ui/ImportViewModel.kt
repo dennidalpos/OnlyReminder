@@ -4,6 +4,9 @@ import android.content.Context
 import android.net.Uri
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.onlyreminder.app.BuildConfig
+import com.onlyreminder.app.R
+import com.onlyreminder.app.core.ui.UiText
 import com.onlyreminder.app.data.database.entities.ContactEntity
 import com.onlyreminder.app.data.repository.ContactRepositoryImpl
 import com.onlyreminder.app.domain.model.ContactStatus
@@ -13,6 +16,7 @@ import com.onlyreminder.app.features.importer.data.XlsxParser
 import com.onlyreminder.app.features.importer.data.XmlParser
 import com.onlyreminder.app.features.importer.domain.ContactField
 import com.onlyreminder.app.features.importer.domain.ImportContact
+import com.onlyreminder.app.features.importer.domain.ImportError
 import com.onlyreminder.app.features.importer.domain.ImportReport
 import com.onlyreminder.app.features.importer.domain.RawImportRow
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -53,7 +57,7 @@ class ImportViewModel @Inject constructor(
     private val _isLoading = MutableStateFlow(false)
     val isLoading = _isLoading.asStateFlow()
 
-    private val _error = MutableStateFlow<String?>(null)
+    private val _error = MutableStateFlow<UiText?>(null)
     val error = _error.asStateFlow()
 
     fun loadFile(uri: Uri) {
@@ -90,17 +94,23 @@ class ImportViewModel @Inject constructor(
                         }
 
                         if (rows.isNotEmpty()) {
+                            // Demo limit check
+                            val finalRows = if (BuildConfig.FLAVOR == "demo") {
+                                rows.take(11) // Header + 10 rows
+                            } else {
+                                rows
+                            }
                             _currentStep.value =
-                                ImportStep.PreviewAndMapping(rows, extension.ifBlank { "csv" })
+                                ImportStep.PreviewAndMapping(finalRows, extension.ifBlank { "csv" })
                         } else {
-                            _error.value = "The file is empty or format not recognized."
+                            _error.value = UiText.StringResource(R.string.file_empty)
                         }
                     } ?: run {
-                        _error.value = "Could not open the file."
+                        _error.value = UiText.StringResource(R.string.error_opening_file)
                     }
                 }
             } catch (e: Exception) {
-                _error.value = "Error reading file: ${e.message}"
+                _error.value = UiText.StringResource(R.string.error_reading_file, e.message ?: "")
             } finally {
                 _isLoading.value = false
             }
@@ -185,7 +195,8 @@ class ImportViewModel @Inject constructor(
                 val finalContacts = detectDuplicates(contacts)
                 _currentStep.value = ImportStep.ValidationAndDeduplication(finalContacts)
             } catch (e: Exception) {
-                _error.value = "Error processing data: ${e.message}"
+                _error.value =
+                    UiText.StringResource(R.string.error_processing_data, e.message ?: "")
             } finally {
                 _isLoading.value = false
             }
@@ -193,11 +204,11 @@ class ImportViewModel @Inject constructor(
     }
 
     private fun validateAndNormalize(contact: ImportContact): ImportContact {
-        val errors = mutableListOf<String>()
+        val errors = mutableListOf<ImportError>()
         val normalizedPhone = normalizePhone(contact.phone)
 
-        if (contact.displayName.isBlank()) errors.add("Missing display name")
-        if (contact.phone.isBlank()) errors.add("Missing phone number")
+        if (contact.displayName.isBlank()) errors.add(ImportError.MISSING_DISPLAY_NAME)
+        if (contact.phone.isBlank()) errors.add(ImportError.MISSING_PHONE_NUMBER)
 
         return contact.copy(
             phone = normalizedPhone,
@@ -270,7 +281,8 @@ class ImportViewModel @Inject constructor(
                 }
                 _currentStep.value = ImportStep.Success
             } catch (e: Exception) {
-                _error.value = "Error saving contacts: ${e.message}"
+                _error.value =
+                    UiText.StringResource(R.string.error_saving_contacts, e.message ?: "")
             } finally {
                 _isLoading.value = false
             }

@@ -54,7 +54,16 @@ import com.onlyreminder.app.R
 import com.onlyreminder.app.core.ui.components.OnlyReminderTopBar
 import com.onlyreminder.app.features.importer.domain.ContactField
 import com.onlyreminder.app.features.importer.domain.ImportContact
+import com.onlyreminder.app.features.importer.domain.ImportError
 import com.onlyreminder.app.features.importer.domain.RawImportRow
+
+@Composable
+fun ImportError.toDisplayName(): String {
+    return when (this) {
+        ImportError.MISSING_DISPLAY_NAME -> stringResource(id = R.string.missing_display_name)
+        ImportError.MISSING_PHONE_NUMBER -> stringResource(id = R.string.missing_phone_number)
+    }
+}
 
 @Composable
 fun ImportScreen(
@@ -133,11 +142,11 @@ fun ImportScreen(
             error?.let {
                 AlertDialog(
                     onDismissRequest = { viewModel.reset() },
-                    title = { Text(stringResource(id = R.string.delete_contact_confirm_title)) }, // Reuse generic title or add new
-                    text = { Text(it) },
+                    title = { Text(stringResource(id = R.string.error_title)) },
+                    text = { Text(it.asString()) },
                     confirmButton = {
                         Button(onClick = { viewModel.reset() }) {
-                            Text("OK")
+                            Text(stringResource(id = R.string.ok))
                         }
                     }
                 )
@@ -325,11 +334,13 @@ fun ValidationStep(contacts: List<ImportContact>, onConfirm: (Boolean) -> Unit) 
                                 )
                             }
                             if (!contact.isValid) {
-                                Text(
-                                    contact.validationErrors.joinToString(),
-                                    color = MaterialTheme.colorScheme.error,
-                                    style = MaterialTheme.typography.bodySmall
-                                )
+                                contact.validationErrors.forEach { error ->
+                                    Text(
+                                        text = error.toDisplayName(),
+                                        color = MaterialTheme.colorScheme.error,
+                                        style = MaterialTheme.typography.bodySmall
+                                    )
+                                }
                             }
                         }
                     },

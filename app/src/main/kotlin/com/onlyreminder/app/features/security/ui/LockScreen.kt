@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.systemBarsPadding
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -20,9 +21,11 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
+import com.onlyreminder.app.R
 import com.onlyreminder.app.core.security.BiometricHelper
 import com.onlyreminder.app.domain.security.SecurityRepository
 
@@ -51,11 +54,15 @@ fun LockScreen(
     Column(
         modifier = Modifier
             .fillMaxSize()
+            .systemBarsPadding()
             .padding(16.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {
-        Text(text = "App Locked", style = MaterialTheme.typography.headlineMedium)
+        Text(
+            text = stringResource(id = R.string.app_locked),
+            style = MaterialTheme.typography.headlineMedium
+        )
         Spacer(modifier = Modifier.height(16.dp))
         TextField(
             value = pinInput,
@@ -73,14 +80,14 @@ fun LockScreen(
                     }
                 }
             },
-            label = { Text("Enter PIN") },
+            label = { Text(stringResource(id = R.string.enter_pin)) },
             isError = error,
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.NumberPassword),
             visualTransformation = PasswordVisualTransformation()
         )
         if (error) {
             Text(
-                text = "Incorrect PIN",
+                text = stringResource(id = R.string.incorrect_pin),
                 color = MaterialTheme.colorScheme.error,
                 modifier = Modifier.padding(top = 8.dp)
             )
@@ -98,7 +105,7 @@ fun LockScreen(
                     )
                 }
             }) {
-                Text("Use Biometrics")
+                Text(stringResource(id = R.string.use_biometrics))
             }
         }
     }

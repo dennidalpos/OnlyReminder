@@ -38,9 +38,11 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.navigation.NavController
+import com.onlyreminder.app.R
 import com.onlyreminder.app.core.navigation.Route
 import com.onlyreminder.app.core.ui.components.OnlyReminderTopBar
 import com.onlyreminder.app.domain.model.BirthdayItemStatus
@@ -58,12 +60,12 @@ fun BirthdayReviewScreen(
     Scaffold(
         topBar = {
             OnlyReminderTopBar(
-                title = "Birthday Review",
+                title = stringResource(id = R.string.birthday_review_title),
                 navigationIcon = {
                     IconButton(onClick = { navController.navigateUp() }) {
                         Icon(
                             imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                            contentDescription = "Back"
+                            contentDescription = stringResource(id = R.string.back)
                         )
                     }
                 }
@@ -77,7 +79,7 @@ fun BirthdayReviewScreen(
                     .padding(paddingValues),
                 contentAlignment = Alignment.Center
             ) {
-                Text("No birthday runs found.")
+                Text(stringResource(id = R.string.no_birthday_runs))
             }
         } else {
             Column(
@@ -134,12 +136,18 @@ fun RunSummaryHeader(run: com.onlyreminder.app.data.database.entities.BirthdayRu
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.primaryContainer)
     ) {
         Column(modifier = Modifier.padding(16.dp)) {
-            Text(text = "Scan Date: ${run.date}", style = MaterialTheme.typography.titleMedium)
             Text(
-                text = "Contacts Found: ${run.totalFound}",
+                text = stringResource(id = R.string.scan_date, run.date),
+                style = MaterialTheme.typography.titleMedium
+            )
+            Text(
+                text = stringResource(id = R.string.contacts_found, run.totalFound),
                 style = MaterialTheme.typography.bodyMedium
             )
-            Text(text = "Status: ${run.status.name}", style = MaterialTheme.typography.bodySmall)
+            Text(
+                text = stringResource(id = R.string.status) + ": ${run.status.name}",
+                style = MaterialTheme.typography.bodySmall
+            )
         }
     }
 }
@@ -161,11 +169,11 @@ fun BirthdayReviewItem(
             ) {
                 Column {
                     Text(
-                        text = contact?.displayName ?: "Unknown",
+                        text = contact?.displayName ?: stringResource(id = R.string.none),
                         style = MaterialTheme.typography.titleMedium
                     )
                     Text(
-                        text = contact?.phone ?: "No phone",
+                        text = contact?.phone ?: stringResource(id = R.string.not_set),
                         style = MaterialTheme.typography.bodySmall
                     )
                 }
@@ -173,11 +181,11 @@ fun BirthdayReviewItem(
                 var showMenu by remember { mutableStateOf(false) }
                 Box {
                     IconButton(onClick = { showMenu = true }) {
-                        Icon(Icons.Default.MoreVert, contentDescription = "Options")
+                        Icon(Icons.Default.MoreVert, contentDescription = null)
                     }
                     DropdownMenu(expanded = showMenu, onDismissRequest = { showMenu = false }) {
                         DropdownMenuItem(
-                            text = { Text("Delete Contact") },
+                            text = { Text(stringResource(id = R.string.delete_contact)) },
                             onClick = { onDeleteContact(); showMenu = false },
                             leadingIcon = {
                                 Icon(
@@ -207,11 +215,11 @@ fun BirthdayReviewItem(
             Spacer(modifier = Modifier.height(8.dp))
             Row(horizontalArrangement = Arrangement.End, modifier = Modifier.fillMaxWidth()) {
                 TextButton(onClick = { onStatusChange(BirthdayItemStatus.SKIPPED) }) {
-                    Text("Skip")
+                    Text(stringResource(id = R.string.skip))
                 }
                 if (item.status == BirthdayItemStatus.PENDING) {
                     Button(onClick = { /* Navigate to WhatsApp Manual or Send via API */ }) {
-                        Text("Prepare Send")
+                        Text(stringResource(id = R.string.prepare_send))
                     }
                 } else {
                     Text(
@@ -234,10 +242,10 @@ fun BottomActionArea(onSendAll: () -> Unit, onSkipAll: () -> Unit) {
             horizontalArrangement = Arrangement.spacedBy(8.dp)
         ) {
             OutlinedButton(onClick = onSkipAll, modifier = Modifier.weight(1f)) {
-                Text("Skip All")
+                Text(stringResource(id = R.string.skip_all))
             }
             Button(onClick = onSendAll, modifier = Modifier.weight(1f)) {
-                Text("Send Selected")
+                Text(stringResource(id = R.string.send_selected))
             }
         }
     }

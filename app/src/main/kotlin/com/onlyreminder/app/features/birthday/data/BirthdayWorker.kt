@@ -44,8 +44,10 @@ class BirthdayWorker @AssistedInject constructor(
         }
 
         // Requirement: Until a task is defined with users in it, the app does nothing automatically.
-        val activeBirthdayTasks = mainRepository.getTasksByStatus(com.onlyreminder.app.domain.model.TaskStatus.PENDING).first()
-            .filter { it.type == "BIRTHDAY" }
+        val activeBirthdayTasks =
+            mainRepository.getTasksByStatus(com.onlyreminder.app.domain.model.TaskStatus.PENDING)
+                .first()
+                .filter { it.type == "BIRTHDAY" }
 
         if (activeBirthdayTasks.isEmpty()) {
             return Result.success()
