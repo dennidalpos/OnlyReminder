@@ -20,11 +20,11 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowForward
 import androidx.compose.material.icons.automirrored.filled.Assignment
-import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Backup
 import androidx.compose.material.icons.filled.Cake
 import androidx.compose.material.icons.filled.Description
 import androidx.compose.material.icons.filled.FileUpload
+import androidx.compose.material.icons.filled.Contacts
 import androidx.compose.material.icons.filled.Group
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.Card
@@ -58,31 +58,15 @@ import com.onlyreminder.app.features.home.presentation.HomeViewModel
 @Composable
 fun HomeScreen(
     navController: NavController,
-    viewModel: HomeViewModel = hiltViewModel()
+    viewModel: HomeViewModel = hiltViewModel(),
 ) {
     val uiState by viewModel.uiState.collectAsState()
 
     Scaffold(
         topBar = {
             OnlyReminderTopBar(
-                title = stringResource(id = R.string.app_name),
-                actions = {
-                    IconButton(onClick = { navController.navigate(Route.Settings) }) {
-                        Icon(
-                            Icons.Default.Settings,
-                            contentDescription = stringResource(id = R.string.settings_title)
-                        )
-                    }
-                }
+                title = stringResource(id = R.string.app_name)
             )
-        },
-        floatingActionButton = {
-            FloatingActionButton(onClick = { navController.navigate(Route.ContactEdit()) }) {
-                Icon(
-                    Icons.Default.Add,
-                    contentDescription = stringResource(id = R.string.add_contact)
-                )
-            }
         }
     ) { paddingValues ->
         LazyColumn(
@@ -110,7 +94,7 @@ fun HomeScreen(
             }
 
             // 2. Urgent Actions
-            if (uiState.birthdaysTodayCount > 0 || uiState.birthdaysTomorrowCount > 0) {
+            if ((uiState.birthdaysTodayCount > 0) || (uiState.birthdaysTomorrowCount > 0)) {
                 item {
                     ActionCard(
                         title = stringResource(R.string.birthday_review_title),
@@ -140,6 +124,26 @@ fun HomeScreen(
                         onClick = { navController.navigate(Route.Tasks) }
                     )
                 }
+            } else {
+                item {
+                    ActionCard(
+                        title = stringResource(R.string.tasks_title),
+                        description = stringResource(R.string.no_pending_tasks),
+                        icon = Icons.AutoMirrored.Filled.Assignment,
+                        containerColor = MaterialTheme.colorScheme.secondaryContainer,
+                        onClick = { navController.navigate(Route.Tasks) }
+                    )
+                }
+            }
+
+            item {
+                ActionCard(
+                    title = stringResource(R.string.contacts_title),
+                    description = stringResource(R.string.manage_contacts_desc),
+                    icon = Icons.Default.Contacts,
+                    containerColor = MaterialTheme.colorScheme.surfaceVariant,
+                    onClick = { navController.navigate(Route.Contacts) }
+                )
             }
 
             if (uiState.showBackupWarning) {
@@ -208,9 +212,9 @@ fun HomeScreen(
                         )
                         ToolItem(
                             modifier = Modifier.weight(1f),
-                            title = stringResource(R.string.settings_title),
-                            icon = Icons.Default.Settings,
-                            onClick = { navController.navigate(Route.Settings) }
+                            title = stringResource(R.string.backup_title),
+                            icon = Icons.Default.Backup,
+                            onClick = { navController.navigate(Route.Backup) }
                         )
                     }
                 }

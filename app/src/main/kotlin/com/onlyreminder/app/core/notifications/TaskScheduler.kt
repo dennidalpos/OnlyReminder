@@ -17,11 +17,11 @@ import javax.inject.Singleton
 
 @Singleton
 class TaskScheduler @Inject constructor(
-    @ApplicationContext private val context: Context
+    @param:ApplicationContext private val context: Context,
 ) {
 
     fun rescheduleBirthdayWorker(timeStr: String, policy: androidx.work.ExistingPeriodicWorkPolicy = androidx.work.ExistingPeriodicWorkPolicy.UPDATE) {
-        val time = try { LocalTime.parse(timeStr) } catch (e: Exception) { LocalTime.of(9, 0) }
+        val time = try { LocalTime.parse(timeStr) } catch (_: Exception) { LocalTime.of(9, 0) }
         val now = LocalTime.now()
         
         var initialDelay = java.time.Duration.between(now, time).toMinutes()

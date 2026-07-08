@@ -2,7 +2,7 @@ package com.onlyreminder.app.features.whatsapp.domain
 
 import android.content.Context
 import android.content.Intent
-import android.net.Uri
+import androidx.core.net.toUri
 import java.net.URLEncoder
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -20,7 +20,7 @@ class WhatsAppManualManager @Inject constructor() {
             val packageManager = context.packageManager
             val encodedMessage = URLEncoder.encode(message, "UTF-8")
             val url = "https://api.whatsapp.com/send?phone=$phoneNumber&text=$encodedMessage"
-            val uri = Uri.parse(url)
+            val uri = url.toUri()
 
             val intent = Intent(Intent.ACTION_VIEW, uri).apply {
                 setPackage("com.whatsapp")
@@ -53,7 +53,7 @@ class WhatsAppManualManager @Inject constructor() {
 }
 
 sealed class WhatsAppResult {
-    object Success : WhatsAppResult()
-    object ErrorWhatsAppNotInstalled : WhatsAppResult()
+    data object Success : WhatsAppResult()
+    data object ErrorWhatsAppNotInstalled : WhatsAppResult()
     data class Failure(val message: String) : WhatsAppResult()
 }

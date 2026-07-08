@@ -7,7 +7,6 @@ import com.onlyreminder.app.data.database.dao.TagDao
 import com.onlyreminder.app.data.database.entities.ContactEntity
 import com.onlyreminder.app.data.database.entities.ContactTagCrossRefEntity
 import com.onlyreminder.app.data.database.entities.GroupEntity
-import com.onlyreminder.app.data.database.entities.MessageLogEntity
 import com.onlyreminder.app.data.database.entities.TagEntity
 import com.onlyreminder.app.data.database.entities.TaskEntity
 import com.onlyreminder.app.data.database.entities.TemplateEntity
@@ -151,7 +150,7 @@ class DatabaseSeeder @Inject constructor(
                 status = TaskStatus.PENDING,
                 templateId = null,
                 sendMode = "REMINDER_ONLY",
-            )
+            ),
         )
 
         mainDao.insertTask(
@@ -167,7 +166,7 @@ class DatabaseSeeder @Inject constructor(
                 status = TaskStatus.PENDING,
                 templateId = bdayFriendsTemplate,
                 sendMode = "MANUAL_WHATSAPP",
-            )
+            ),
         )
 
         // 5. Seed Tags

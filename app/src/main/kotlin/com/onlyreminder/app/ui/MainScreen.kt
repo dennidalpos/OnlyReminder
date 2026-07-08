@@ -7,7 +7,6 @@ import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.Assignment
 import androidx.compose.material.icons.filled.Contacts
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Notifications
@@ -34,7 +33,7 @@ import com.onlyreminder.app.core.navigation.Route
 sealed class TopLevelDestination(
     val route: Any,
     val icon: ImageVector,
-    val labelId: Int
+    val labelId: Int,
 ) {
     data object Home : TopLevelDestination(Route.Home, Icons.Default.Home, R.string.home_nav)
     data object Notifications : TopLevelDestination(Route.BirthdayReview, Icons.Default.Notifications, R.string.notifications_nav)

@@ -20,7 +20,6 @@ import androidx.compose.material3.FilterChip
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
@@ -40,6 +39,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.onlyreminder.app.R
+import com.onlyreminder.app.domain.model.SendMode
 import com.onlyreminder.app.core.navigation.Route
 import com.onlyreminder.app.core.ui.components.OnlyReminderTopBar
 
@@ -51,6 +51,8 @@ fun OnboardingScreen(
     val currentStep by viewModel.currentStep.collectAsState()
     val language by viewModel.language.collectAsState()
     val isPinSet by viewModel.isPinSet.collectAsState()
+    val sendMode by viewModel.sendMode.collectAsState()
+    val backupUri by viewModel.backupFolderUri.collectAsState()
 
     Scaffold(
         topBar = {
@@ -80,9 +82,11 @@ fun OnboardingScreen(
         ) {
             when (currentStep) {
                 0 -> WelcomeStep()
-                1 -> LanguageStep(language, onLanguageSelected = { viewModel.setLanguage(it) })
-                2 -> SecurityStep(isPinSet, onPinSet = { viewModel.setPin(it) })
-                3 -> PrivacyStep()
+                1 -> LanguageStep(language) { viewModel.setLanguage(it) }
+                2 -> SecurityStep(isPinSet) { viewModel.setPin(it) }
+                3 -> SendModeStep(sendMode) { viewModel.setSendMode(it) }
+                4 -> BackupStep(backupUri) { viewModel.setBackupFolder(it) }
+                5 -> PrivacyStep()
                 else -> {
                     viewModel.completeOnboarding()
                     navController.navigate(Route.Home) {
@@ -100,9 +104,12 @@ fun OnboardingScreen(
                 Button(
                     onClick = { viewModel.nextStep() },
                     modifier = Modifier.weight(1f),
-                    enabled = currentStep != 2 || isPinSet
+                    enabled = when(currentStep) {
+                        2 -> isPinSet
+                        else -> true
+                    }
                 ) {
-                    Text(if (currentStep < 3) stringResource(R.string.next) else stringResource(R.string.finish))
+                    Text(if (currentStep < 5) stringResource(R.string.next) else stringResource(R.string.finish))
                 }
             }
         }
@@ -160,7 +167,7 @@ fun SecurityStep(isPinSet: Boolean, onPinSet: (String) -> Unit) {
         var pin by remember { mutableStateOf("") }
         TextField(
             value = pin,
-            onValueChange = { if (it.all { c -> c.isDigit() } && it.length <= 4) pin = it },
+            onValueChange = { if (it.all { c -> c.isDigit() } && (it.length <= 4)) pin = it },
             label = { Text(stringResource(id = R.string.set_pin_label)) },
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.NumberPassword),
             visualTransformation = PasswordVisualTransformation(),
@@ -192,4 +199,50 @@ fun PrivacyStep() {
         style = MaterialTheme.typography.bodyMedium,
         textAlign = androidx.compose.ui.text.style.TextAlign.Center
     )
+}
+
+@Composable
+fun SendModeStep(currentMode: SendMode, onSendModeSelected: (SendMode) -> Unit) {
+    val isDemo = androidx.compose.ui.platform.LocalContext.current.resources.getBoolean(R.bool.is_demo)
+    val modes = if (isDemo) SendMode.entries.filter { it != SendMode.WA_API } else SendMode.entries
+
+    Text(stringResource(R.string.send_mode_selection), style = MaterialTheme.typography.headlineSmall)
+    Spacer(modifier = Modifier.height(16.dp))
+    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+        modes.forEach { mode ->
+            FilterChip(
+                selected = currentMode == mode,
+                onClick = { onSendModeSelected(mode) },
+                label = {
+                    Text(
+                        when (mode) {
+                            SendMode.REMINDER_ONLY -> stringResource(R.string.send_mode_reminder_only)
+                            SendMode.MANUAL_WHATSAPP -> stringResource(R.string.send_mode_manual_wa)
+                            SendMode.WA_API -> stringResource(R.string.send_mode_wa_api)
+                        }
+                    )
+                },
+                modifier = Modifier.fillMaxWidth()
+            )
+        }
+    }
+}
+
+@Composable
+fun BackupStep(currentUri: String?, onBackupFolderSelected: (String) -> Unit) {
+    Text(stringResource(R.string.backup_setup), style = MaterialTheme.typography.headlineSmall)
+    Spacer(modifier = Modifier.height(16.dp))
+    val launcher = androidx.activity.compose.rememberLauncherForActivityResult(
+        androidx.activity.result.contract.ActivityResultContracts.OpenDocumentTree()
+    ) { uri ->
+        uri?.let { onBackupFolderSelected(it.toString()) }
+    }
+    
+    Button(onClick = { launcher.launch(null) }) {
+        Text(if (currentUri == null) stringResource(R.string.select_file) else stringResource(R.string.change))
+    }
+    if (currentUri != null) {
+        Spacer(modifier = Modifier.height(8.dp))
+        Text(currentUri, style = MaterialTheme.typography.labelSmall)
+    }
 }

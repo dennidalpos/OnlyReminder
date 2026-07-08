@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.onlyreminder.app.data.settings.SettingsDataStore
 import com.onlyreminder.app.domain.security.SecurityRepository
+import com.onlyreminder.app.domain.model.SendMode
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -16,7 +17,7 @@ import javax.inject.Inject
 @HiltViewModel
 class OnboardingViewModel @Inject constructor(
     private val settingsDataStore: SettingsDataStore,
-    private val securityRepository: SecurityRepository
+    private val securityRepository: SecurityRepository,
 ) : ViewModel() {
 
     private val _currentStep = MutableStateFlow(0)
@@ -26,6 +27,9 @@ class OnboardingViewModel @Inject constructor(
         settingsDataStore.language.stateIn(viewModelScope, SharingStarted.WhileSubscribed(), "en")
 
     val isPinSet = MutableStateFlow(securityRepository.isPinSet())
+
+    val sendMode = settingsDataStore.sendMode.stateIn(viewModelScope, SharingStarted.WhileSubscribed(), SendMode.REMINDER_ONLY)
+    val backupFolderUri = settingsDataStore.backupFolderUri.stateIn(viewModelScope, SharingStarted.WhileSubscribed(), null)
 
     fun nextStep() {
         _currentStep.value++
@@ -46,9 +50,21 @@ class OnboardingViewModel @Inject constructor(
         isPinSet.value = true
     }
 
+    fun setSendMode(mode: SendMode) {
+        viewModelScope.launch {
+            settingsDataStore.setSendMode(mode)
+        }
+    }
+
+    fun setBackupFolder(uri: String) {
+        viewModelScope.launch {
+            settingsDataStore.setBackupFolderUri(uri)
+        }
+    }
+
     fun completeOnboarding() {
         viewModelScope.launch {
-            settingsDataStore.setOnboardingCompleted(true)
+            settingsDataStore.setOnboardingCompleted(completed = true)
         }
     }
 }

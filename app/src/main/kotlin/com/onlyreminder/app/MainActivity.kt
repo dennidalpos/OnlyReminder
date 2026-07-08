@@ -57,7 +57,7 @@ class MainActivity : ComponentActivity() {
             OnlyReminderTheme {
                 Surface(
                     modifier = Modifier.fillMaxSize(),
-                    color = MaterialTheme.colorScheme.background
+                    color = MaterialTheme.colorScheme.background,
                 ) {
                     if (isLocked) {
                         LockScreen(

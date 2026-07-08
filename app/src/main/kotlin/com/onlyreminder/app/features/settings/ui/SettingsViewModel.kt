@@ -14,7 +14,7 @@ import javax.inject.Inject
 class SettingsViewModel @Inject constructor(
     private val settingsDataStore: SettingsDataStore,
     private val taskScheduler: com.onlyreminder.app.core.notifications.TaskScheduler,
-    private val mainRepository: com.onlyreminder.app.data.repository.MainRepositoryImpl
+    mainRepository: com.onlyreminder.app.data.repository.MainRepositoryImpl,
 ) : ViewModel() {
 
     val templates = mainRepository.getAllTemplates()
@@ -45,12 +45,17 @@ class SettingsViewModel @Inject constructor(
     val normalizePhone = settingsDataStore.normalizePhone.stateIn(
         viewModelScope,
         SharingStarted.WhileSubscribed(),
-        true
+        initialValue = true
     )
     val birthdayTemplateId = settingsDataStore.birthdayTemplateId.stateIn(
         viewModelScope,
         SharingStarted.WhileSubscribed(),
         null
+    )
+    val showBackupBanner = settingsDataStore.showBackupBanner.stateIn(
+        viewModelScope,
+        SharingStarted.WhileSubscribed(),
+        true
     )
 
     fun setLanguage(lang: String) {
@@ -82,5 +87,9 @@ class SettingsViewModel @Inject constructor(
 
     fun setBirthdayTemplateId(id: Long?) {
         viewModelScope.launch { settingsDataStore.setBirthdayTemplateId(id) }
+    }
+
+    fun setShowBackupBanner(show: Boolean) {
+        viewModelScope.launch { settingsDataStore.setShowBackupBanner(show) }
     }
 }

@@ -62,15 +62,7 @@ fun BirthdayReviewScreen(
     Scaffold(
         topBar = {
             OnlyReminderTopBar(
-                title = stringResource(id = R.string.birthday_review_title),
-                navigationIcon = {
-                    IconButton(onClick = { navController.navigateUp() }) {
-                        Icon(
-                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                            contentDescription = stringResource(id = R.string.back)
-                        )
-                    }
-                }
+                title = stringResource(id = R.string.birthday_review_title)
             )
         }
     ) { paddingValues ->

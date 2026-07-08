@@ -5,7 +5,6 @@ import android.app.NotificationManager
 import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
-import android.os.Build
 import androidx.core.app.NotificationCompat
 import com.onlyreminder.app.MainActivity
 
@@ -20,17 +19,15 @@ class NotificationHelper(private val context: Context) {
     }
 
     private fun createNotificationChannel() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            val importance = NotificationManager.IMPORTANCE_DEFAULT
-            val channel = NotificationChannel(
-                CHANNEL_ID,
-                context.getString(com.onlyreminder.app.R.string.notification_channel_tasks_name),
-                importance
-            )
-            val notificationManager =
-                context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-            notificationManager.createNotificationChannel(channel)
-        }
+        val importance = NotificationManager.IMPORTANCE_DEFAULT
+        val channel = NotificationChannel(
+            CHANNEL_ID,
+            context.getString(com.onlyreminder.app.R.string.notification_channel_tasks_name),
+            importance,
+        )
+        val notificationManager =
+            context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+        notificationManager.createNotificationChannel(channel)
     }
 
     fun showTaskNotification(taskId: Long, title: String, message: String) {

@@ -115,6 +115,14 @@ fun TasksScreen(
             } else {
                 OnlyReminderTopBar(
                     title = stringResource(id = R.string.tasks_title),
+                    navigationIcon = {
+                        IconButton(onClick = { navController.navigateUp() }) {
+                            Icon(
+                                imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                                contentDescription = stringResource(id = R.string.back)
+                            )
+                        }
+                    },
                     actions = {
                         var expanded by remember { mutableStateOf(false) }
                         IconButton(onClick = { expanded = true }) {

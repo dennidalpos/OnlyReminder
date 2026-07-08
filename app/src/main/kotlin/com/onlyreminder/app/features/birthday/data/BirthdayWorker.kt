@@ -24,7 +24,7 @@ class BirthdayWorker @AssistedInject constructor(
     @Assisted params: WorkerParameters,
     private val birthdayScanner: BirthdayScanner,
     private val mainRepository: MainRepositoryImpl,
-    private val settingsDataStore: com.onlyreminder.app.data.settings.SettingsDataStore
+    private val settingsDataStore: com.onlyreminder.app.data.settings.SettingsDataStore,
 ) : CoroutineWorker(context, params) {
 
     override suspend fun doWork(): Result {
@@ -68,24 +68,20 @@ class BirthdayWorker @AssistedInject constructor(
 
         // Check if run already exists for today, if so, we might update it or skip
         val existingRun = allRuns.find { it.date == dateStr }
-        val runId = if (existingRun != null) {
-            existingRun.id
-        } else {
-            mainRepository.createBirthdayRun(
-                BirthdayRunEntity(
-                    date = dateStr,
-                    status = BirthdayRunStatus.PENDING,
-                    totalFound = allRelevantContacts.size,
-                    totalSelected = allRelevantContacts.size,
-                    totalSkipped = 0,
-                    totalSent = 0,
-                    totalFailed = 0
-                )
+        val runId = existingRun?.id ?: mainRepository.createBirthdayRun(
+            BirthdayRunEntity(
+                date = dateStr,
+                status = BirthdayRunStatus.PENDING,
+                totalFound = allRelevantContacts.size,
+                totalSelected = allRelevantContacts.size,
+                totalSkipped = 0,
+                totalSent = 0,
+                totalFailed = 0
             )
-        }
+        )
 
         val existingItems = mainRepository.getItemsForRun(runId).first()
-        val existingContactIds = existingItems.map { it.contactId }.toSet()
+        val existingContactIds = existingItems.asSequence().map { it.contactId }.toSet()
 
         allRelevantContacts.forEach { contact ->
             if (!existingContactIds.contains(contact.id)) {

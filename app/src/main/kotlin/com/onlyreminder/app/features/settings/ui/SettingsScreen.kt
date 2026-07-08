@@ -4,7 +4,6 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
@@ -54,6 +53,7 @@ fun SettingsScreen(
     val normalizePhone by viewModel.normalizePhone.collectAsState()
     val templates by viewModel.templates.collectAsState()
     val birthdayTemplateId by viewModel.birthdayTemplateId.collectAsState()
+    val showBackupBanner by viewModel.showBackupBanner.collectAsState()
 
     var showTimePicker by remember { mutableStateOf(false) }
     var showCountryPicker by remember { mutableStateOf(false) }
@@ -210,6 +210,16 @@ fun SettingsScreen(
                     }
                 }
             )
+
+            ListItem(
+                headlineContent = { Text(stringResource(id = R.string.show_backup_banner)) },
+                supportingContent = { Text(stringResource(id = R.string.show_backup_banner_desc)) },
+                trailingContent = {
+                    Switch(
+                        checked = showBackupBanner,
+                        onCheckedChange = { viewModel.setShowBackupBanner(it) })
+                }
+            )
         }
     }
 
@@ -247,7 +257,7 @@ fun SettingsScreen(
     }
 
     if (showTimePicker) {
-        val currentTime = try { LocalTime.parse(notificationTime) } catch(e: Exception) { LocalTime.of(9, 0) }
+        val currentTime = try { LocalTime.parse(notificationTime) } catch(_: Exception) { LocalTime.of(9, 0) }
         val timePickerState = rememberTimePickerState(
             initialHour = currentTime.hour,
             initialMinute = currentTime.minute

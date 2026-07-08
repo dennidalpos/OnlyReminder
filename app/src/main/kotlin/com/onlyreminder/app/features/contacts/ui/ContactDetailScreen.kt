@@ -24,7 +24,6 @@ import androidx.compose.material.icons.filled.Dialpad
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Email
 import androidx.compose.material.icons.filled.Group
-import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Phone
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -52,7 +51,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalContext
@@ -77,7 +75,7 @@ fun ContactDetailScreen(
     val tags by viewModel.tags.collectAsState()
     val context = LocalContext.current
 
-    var showDeleteDialog by remember { mutableStateOf(false) }
+    var showDeleteDialog by remember { mutableStateOf(value = false) }
     val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior()
 
     Scaffold(
@@ -101,7 +99,7 @@ fun ContactDetailScreen(
                         Icon(Icons.Default.Delete, contentDescription = null)
                     }
                 },
-                scrollBehavior = scrollBehavior
+                scrollBehavior = scrollBehavior,
             )
         },
     ) { paddingValues ->
@@ -154,18 +152,15 @@ fun ContactDetailScreen(
                     QuickAction(
                         icon = Icons.AutoMirrored.Filled.Send,
                         label = stringResource(R.string.open_whatsapp),
-                        onClick = { viewModel.openWhatsApp(context) }
-                    )
+                    ) { viewModel.openWhatsApp(context) }
                     QuickAction(
                         icon = Icons.Default.Phone,
                         label = stringResource(R.string.phone),
-                        onClick = { /* Call logic */ }
-                    )
+                    ) { /* Call logic */ }
                     QuickAction(
                         icon = Icons.AutoMirrored.Filled.Assignment,
                         label = stringResource(R.string.create_task),
-                        onClick = { navController.navigate(Route.TaskEdit(contactId = c.id)) }
-                    )
+                    ) { navController.navigate(Route.TaskEdit(contactId = c.id)) }
                 }
 
                 Spacer(modifier = Modifier.height(8.dp))
@@ -177,7 +172,7 @@ fun ContactDetailScreen(
                 ) {
                     Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(16.dp)) {
                         DetailRow(Icons.Default.Phone, stringResource(R.string.phone), c.phone)
-                        if (c.normalizedPhone.isNotEmpty() && c.normalizedPhone != c.phone) {
+                        if (c.normalizedPhone.isNotEmpty() && (c.normalizedPhone != c.phone)) {
                             DetailRow(Icons.Default.Dialpad, stringResource(R.string.normalized), c.normalizedPhone)
                         }
                         DetailRow(Icons.Default.Email, stringResource(R.string.email), c.email)

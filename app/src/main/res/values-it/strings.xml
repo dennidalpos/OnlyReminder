@@ -1,4 +1,6 @@
 <resources>
+    <string name="no_pending_tasks">Nessun task per oggi.</string>
+    <string name="manage_contacts_desc">Visualizza e gestisci i tuoi contatti</string>
     <string name="home_nav">Home</string>
     <string name="notifications_nav">Notifiche</string>
     <string name="settings_nav">Impostazioni</string>
