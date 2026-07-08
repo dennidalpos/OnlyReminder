@@ -203,8 +203,7 @@ fun PrivacyStep() {
 
 @Composable
 fun SendModeStep(currentMode: SendMode, onSendModeSelected: (SendMode) -> Unit) {
-    val isDemo = androidx.compose.ui.platform.LocalContext.current.resources.getBoolean(R.bool.is_demo)
-    val modes = if (isDemo) SendMode.entries.filter { it != SendMode.WA_API } else SendMode.entries
+    val modes = SendMode.entries
 
     Text(stringResource(R.string.send_mode_selection), style = MaterialTheme.typography.headlineSmall)
     Spacer(modifier = Modifier.height(16.dp))

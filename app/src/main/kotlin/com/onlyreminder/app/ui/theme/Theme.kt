@@ -9,7 +9,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.SideEffect
 import androidx.compose.ui.platform.LocalView
 import androidx.core.view.WindowCompat
-import androidx.compose.ui.res.booleanResource
 import com.onlyreminder.app.R
 
 private val LightColorScheme = lightColorScheme(
@@ -76,35 +75,12 @@ private val DarkColorScheme = darkColorScheme(
     scrim = md_theme_dark_scrim,
 )
 
-private val DemoLightColorScheme = LightColorScheme.copy(
-    primary = demo_light_primary,
-    onPrimary = demo_light_onPrimary,
-    primaryContainer = demo_light_primaryContainer,
-    onPrimaryContainer = demo_light_onPrimaryContainer,
-    surfaceTint = demo_light_primary,
-)
-
-private val DemoDarkColorScheme = DarkColorScheme.copy(
-    primary = demo_dark_primary,
-    onPrimary = demo_dark_onPrimary,
-    primaryContainer = demo_dark_primaryContainer,
-    onPrimaryContainer = demo_dark_onPrimaryContainer,
-    surfaceTint = demo_dark_primary,
-)
-
 @Composable
 fun OnlyReminderTheme(
     darkTheme: Boolean = isSystemInDarkTheme(),
     content: @Composable () -> Unit
 ) {
-    val isDemo = booleanResource(R.bool.is_demo)
-
-    val colorScheme = when {
-        isDemo && darkTheme -> DemoDarkColorScheme
-        isDemo && !darkTheme -> DemoLightColorScheme
-        darkTheme -> DarkColorScheme
-        else -> LightColorScheme
-    }
+    val colorScheme = if (darkTheme) DarkColorScheme else LightColorScheme
 
     val view = LocalView.current
     if (!view.isInEditMode) {
