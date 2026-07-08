@@ -149,8 +149,6 @@ class ContactEditViewModel @Inject constructor(
                 notes = state.notes,
                 status = state.status,
                 lastContactDate = null,
-                marketingConsent = false,
-                privacyConsent = true
             )
 
             val id = if (contactId == null) {

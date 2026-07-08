@@ -17,8 +17,6 @@ data class ImportContact(
     val source: String = "",
     val notes: String = "",
     val status: ContactStatus = ContactStatus.ACTIVE,
-    val marketingConsent: Boolean = false,
-    val privacyConsent: Boolean = false,
     val isSelected: Boolean = true,
     val isValid: Boolean = true,
     val validationErrors: List<ImportError> = emptyList(),
@@ -44,8 +42,6 @@ enum class ContactField(val displayName: String) {
     SOURCE("Source"),
     NOTES("Notes"),
     STATUS("Status"),
-    MARKETING_CONSENT("Marketing Consent"),
-    PRIVACY_CONSENT("Privacy Consent"),
     IGNORE("Ignore")
 }
 

@@ -101,9 +101,7 @@ class TemplateEditViewModel @Inject constructor(
                     source = "MANUAL",
                     notes = "",
                     status = ContactStatus.ACTIVE,
-                    lastContactDate = null,
-                    marketingConsent = false,
-                    privacyConsent = false
+                    lastContactDate = null
                 )
 
             _previewText.value = templateEngine.render(currentBody, sampleContact)

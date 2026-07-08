@@ -46,6 +46,7 @@ import com.onlyreminder.app.R
 import com.onlyreminder.app.core.navigation.Route
 import com.onlyreminder.app.core.ui.components.OnlyReminderTopBar
 import com.onlyreminder.app.domain.model.BirthdayItemStatus
+import com.onlyreminder.app.domain.model.SendMode
 import com.onlyreminder.app.features.birthday.presentation.BirthdayReviewViewModel
 import com.onlyreminder.app.features.birthday.presentation.BirthdayRunItemWithContact
 
@@ -100,7 +101,7 @@ fun BirthdayReviewScreen(
                             itemWithContact = itemWithContact,
                             sendMode = sendMode,
                             onSendIndividual = {
-                                if (sendMode == "WA_API") {
+                                if (sendMode == SendMode.WA_API) {
                                     viewModel.sendItemViaApi(itemWithContact)
                                 } else {
                                     latestRun?.let { run ->
@@ -183,7 +184,7 @@ fun RunSummaryHeader(run: com.onlyreminder.app.data.database.entities.BirthdayRu
 @Composable
 fun BirthdayReviewItem(
     itemWithContact: BirthdayRunItemWithContact,
-    sendMode: String,
+    sendMode: SendMode,
     onSendIndividual: () -> Unit,
     onStatusChange: (BirthdayItemStatus) -> Unit,
     onDeleteContact: () -> Unit
@@ -250,7 +251,7 @@ fun BirthdayReviewItem(
                 if (item.status == BirthdayItemStatus.PENDING) {
                     Button(onClick = onSendIndividual) {
                         Text(
-                            if (sendMode == "WA_API") stringResource(R.string.send_now_api) else stringResource(
+                            if (sendMode == SendMode.WA_API) stringResource(R.string.send_now_api) else stringResource(
                                 id = R.string.prepare_send
                             )
                         )
@@ -264,7 +265,7 @@ fun BirthdayReviewItem(
 
                             BirthdayItemStatus.FAILED -> stringResource(id = R.string.status_failed)
                             BirthdayItemStatus.SKIPPED -> stringResource(id = R.string.status_skipped)
-                            else -> item.status.name
+                            BirthdayItemStatus.PENDING -> item.status.name
                         },
                         color = if (item.status == BirthdayItemStatus.SENT || item.status == BirthdayItemStatus.SENT_MANUAL) Color(
                             0xFF4CAF50

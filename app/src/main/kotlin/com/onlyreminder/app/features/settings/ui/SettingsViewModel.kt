@@ -3,6 +3,7 @@ package com.onlyreminder.app.features.settings.ui
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.onlyreminder.app.data.settings.SettingsDataStore
+import com.onlyreminder.app.domain.model.SendMode
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.stateIn
@@ -24,7 +25,7 @@ class SettingsViewModel @Inject constructor(
     val sendMode = settingsDataStore.sendMode.stateIn(
         viewModelScope,
         SharingStarted.WhileSubscribed(),
-        "REMINDER_ONLY"
+        SendMode.REMINDER_ONLY
     )
     val defaultCountryCode = settingsDataStore.defaultCountryCode.stateIn(
         viewModelScope,
@@ -56,7 +57,7 @@ class SettingsViewModel @Inject constructor(
         viewModelScope.launch { settingsDataStore.updateLanguage(lang) }
     }
 
-    fun setSendMode(mode: String) {
+    fun setSendMode(mode: SendMode) {
         viewModelScope.launch { settingsDataStore.setSendMode(mode) }
     }
 

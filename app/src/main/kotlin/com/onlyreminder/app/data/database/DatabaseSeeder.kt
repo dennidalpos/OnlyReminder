@@ -96,8 +96,6 @@ class DatabaseSeeder @Inject constructor(
                 status = ContactStatus.ACTIVE,
                 isBirthdayMonitored = true,
                 lastContactDate = LocalDateTime.now().minusDays(5),
-                marketingConsent = true,
-                privacyConsent = true,
             ),
         )
 
@@ -117,8 +115,6 @@ class DatabaseSeeder @Inject constructor(
                 status = ContactStatus.ACTIVE,
                 isBirthdayMonitored = true,
                 lastContactDate = LocalDateTime.now().minusDays(1),
-                marketingConsent = true,
-                privacyConsent = true,
             ),
         )
 
@@ -138,8 +134,6 @@ class DatabaseSeeder @Inject constructor(
                 status = ContactStatus.ACTIVE,
                 isBirthdayMonitored = false, // Monitoraggio disattivato
                 lastContactDate = LocalDateTime.now().minusMonths(1),
-                marketingConsent = false,
-                privacyConsent = true,
             ),
         )
 

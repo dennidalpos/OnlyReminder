@@ -1,7 +1,7 @@
 package com.onlyreminder.app.features.tasks.ui
 
 import androidx.activity.compose.BackHandler
-import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -13,15 +13,21 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.FilterList
+import androidx.compose.material.icons.filled.Group
+import androidx.compose.material.icons.filled.KeyboardArrowDown
+import androidx.compose.material.icons.filled.KeyboardArrowRight
+import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.SelectAll
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
@@ -31,8 +37,10 @@ import androidx.compose.material3.Checkbox
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.FloatingActionButton
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.ListItem
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
@@ -48,14 +56,17 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.onlyreminder.app.R
 import com.onlyreminder.app.core.navigation.Route
 import com.onlyreminder.app.core.ui.components.OnlyReminderTopBar
+import com.onlyreminder.app.data.database.entities.ContactEntity
 import com.onlyreminder.app.data.database.entities.TaskEntity
 import com.onlyreminder.app.domain.model.TaskStatus
+import com.onlyreminder.app.features.tasks.presentation.TaskUiModel
 import com.onlyreminder.app.features.tasks.presentation.TasksViewModel
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
@@ -65,7 +76,7 @@ fun TasksScreen(
     navController: NavController,
     viewModel: TasksViewModel = hiltViewModel()
 ) {
-    val tasks by viewModel.tasks.collectAsState()
+    val taskUiModels by viewModel.taskUiModels.collectAsState()
     val selectedTaskIds by viewModel.selectedTaskIds.collectAsState()
 
     var showDeleteDialog by remember { mutableStateOf(false) }
@@ -104,14 +115,6 @@ fun TasksScreen(
             } else {
                 OnlyReminderTopBar(
                     title = stringResource(id = R.string.tasks_title),
-                    navigationIcon = {
-                        IconButton(onClick = { navController.navigateUp() }) {
-                            Icon(
-                                imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                                contentDescription = stringResource(id = R.string.back)
-                            )
-                        }
-                    },
                     actions = {
                         var expanded by remember { mutableStateOf(false) }
                         IconButton(onClick = { expanded = true }) {
@@ -152,12 +155,12 @@ fun TasksScreen(
                     Icon(
                         Icons.Default.Add,
                         contentDescription = stringResource(id = R.string.add_contact)
-                    ) // Reusing add_contact or could use a new string
+                    )
                 }
             }
         }
     ) { paddingValues ->
-        if (tasks.isEmpty()) {
+        if (taskUiModels.isEmpty()) {
             Box(
                 modifier = Modifier
                     .fillMaxSize()
@@ -174,23 +177,71 @@ fun TasksScreen(
                 contentPadding = PaddingValues(16.dp),
                 verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
-                items(tasks) { task ->
-                    val isSelected = selectedTaskIds.contains(task.id)
-                    TaskItem(
-                        task = task,
-                        isSelected = isSelected,
-                        isSelectionMode = isSelectionMode,
-                        onClick = {
-                            if (isSelectionMode) {
-                                viewModel.toggleTaskSelection(task.id)
-                            } else {
-                                navController.navigate(Route.TaskEdit(task.id))
+                taskUiModels.forEach { uiModel ->
+                    item(key = "task_${uiModel.task.id}") {
+                        val isSelected = selectedTaskIds.contains(uiModel.task.id)
+                        TaskItem(
+                            uiModel = uiModel,
+                            isSelected = isSelected,
+                            isSelectionMode = isSelectionMode,
+                            onClick = {
+                                if (isSelectionMode) {
+                                    viewModel.toggleTaskSelection(uiModel.task.id)
+                                } else {
+                                    viewModel.toggleTaskExpansion(uiModel.task.id)
+                                }
+                            },
+                            onLongClick = { viewModel.toggleTaskSelection(uiModel.task.id) },
+                            onEditClick = { navController.navigate(Route.TaskEdit(uiModel.task.id)) },
+                            onComplete = { viewModel.updateTaskStatus(uiModel.task.id, TaskStatus.COMPLETED) },
+                            onSkip = {
+                                viewModel.updateTaskStatus(
+                                    uiModel.task.id,
+                                    TaskStatus.CANCELLED
+                                )
                             }
-                        },
-                        onLongClick = { viewModel.toggleTaskSelection(task.id) },
-                        onComplete = { viewModel.updateTaskStatus(task.id, TaskStatus.COMPLETED) },
-                        onSkip = { viewModel.updateTaskStatus(task.id, TaskStatus.CANCELLED) }
-                    )
+                        )
+                    }
+
+                    if (uiModel.isExpanded) {
+                        if (uiModel.group != null) {
+                            item(key = "task_${uiModel.task.id}_group") {
+                                GroupTreeNode(
+                                    groupName = uiModel.group.name,
+                                    isExpanded = uiModel.isGroupExpanded,
+                                    onClick = { viewModel.toggleGroupExpansion(uiModel.task.id) }
+                                )
+                            }
+                            if (uiModel.isGroupExpanded) {
+                                items(
+                                    uiModel.groupContacts,
+                                    key = { "task_${uiModel.task.id}_contact_${it.id}" }
+                                ) { contact ->
+                                    ContactTreeNode(contact = contact)
+                                }
+                            }
+                        }
+                        if (uiModel.contact != null) {
+                            item(key = "task_${uiModel.task.id}_solo_contact") {
+                                ContactTreeNode(contact = uiModel.contact)
+                            }
+                        }
+
+                        if ((uiModel.group == null) && (uiModel.contact == null)) {
+                            item(key = "task_${uiModel.task.id}_none") {
+                                Text(
+                                    text = stringResource(id = R.string.no_contact),
+                                    style = MaterialTheme.typography.bodySmall,
+                                    modifier = Modifier.padding(
+                                        start = 32.dp,
+                                        top = 4.dp,
+                                        bottom = 8.dp
+                                    ),
+                                    color = MaterialTheme.colorScheme.outline
+                                )
+                            }
+                        }
+                    }
                 }
             }
         }
@@ -225,17 +276,18 @@ fun TasksScreen(
     }
 }
 
-@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun TaskItem(
-    task: TaskEntity,
+    uiModel: TaskUiModel,
     isSelected: Boolean,
     isSelectionMode: Boolean,
     onClick: () -> Unit,
     onLongClick: () -> Unit,
+    onEditClick: () -> Unit,
     onComplete: () -> Unit,
     onSkip: () -> Unit
 ) {
+    val task = uiModel.task
     val dateTimeFormatter = remember { DateTimeFormatter.ofPattern("dd MMM yyyy, HH:mm") }
     val isPast =
         (task.dueDateTime.isBefore(LocalDateTime.now()) && task.status == TaskStatus.PENDING)
@@ -264,8 +316,17 @@ fun TaskItem(
                     Checkbox(checked = isSelected, onCheckedChange = { onClick() })
                     Spacer(modifier = Modifier.width(8.dp))
                 }
+                
+                Icon(
+                    imageVector = if (uiModel.isExpanded) Icons.Default.KeyboardArrowDown else Icons.AutoMirrored.Filled.KeyboardArrowRight,
+                    contentDescription = null,
+                    modifier = Modifier.size(20.dp),
+                    tint = MaterialTheme.colorScheme.primary
+                )
+                Spacer(modifier = Modifier.width(8.dp))
+
                 Column(modifier = Modifier.weight(1f)) {
-                    Text(text = task.title, style = MaterialTheme.typography.titleMedium)
+                    Text(text = task.title, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
                     Text(
                         text = task.dueDateTime.format(dateTimeFormatter),
                         style = MaterialTheme.typography.bodySmall,
@@ -281,13 +342,17 @@ fun TaskItem(
                 Text(
                     text = task.description,
                     style = MaterialTheme.typography.bodySmall,
-                    maxLines = 1
+                    maxLines = 2,
+                    modifier = Modifier.padding(start = 28.dp)
                 )
             }
 
             if (task.status == TaskStatus.PENDING) {
                 Spacer(modifier = Modifier.height(8.dp))
                 Row(horizontalArrangement = Arrangement.End, modifier = Modifier.fillMaxWidth()) {
+                    TextButton(onClick = onEditClick) {
+                        Text(stringResource(id = R.string.edit))
+                    }
                     TextButton(onClick = onSkip) {
                         Text(stringResource(id = R.string.cancel))
                     }
@@ -298,6 +363,51 @@ fun TaskItem(
             }
         }
     }
+}
+
+@Composable
+fun GroupTreeNode(
+    groupName: String,
+    isExpanded: Boolean,
+    onClick: () -> Unit
+) {
+    ListItem(
+        headlineContent = { Text(groupName, fontWeight = FontWeight.Medium) },
+        leadingContent = {
+            Icon(
+                imageVector = Icons.Default.Group,
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.secondary
+            )
+        },
+        trailingContent = {
+            Icon(
+                imageVector = if (isExpanded) Icons.Default.KeyboardArrowDown else Icons.AutoMirrored.Filled.KeyboardArrowRight,
+                contentDescription = null
+            )
+        },
+        modifier = Modifier
+            .padding(start = 16.dp)
+            .clickable(onClick = onClick)
+    )
+    HorizontalDivider(modifier = Modifier.padding(start = 56.dp))
+}
+
+@Composable
+fun ContactTreeNode(contact: ContactEntity) {
+    ListItem(
+        headlineContent = { Text(contact.displayName) },
+        supportingContent = { Text(contact.phone, style = MaterialTheme.typography.bodySmall) },
+        leadingContent = {
+            Icon(
+                imageVector = Icons.Default.Person,
+                contentDescription = null,
+                modifier = Modifier.size(20.dp),
+                tint = MaterialTheme.colorScheme.outline
+            )
+        },
+        modifier = Modifier.padding(start = 48.dp)
+    )
 }
 
 @Composable

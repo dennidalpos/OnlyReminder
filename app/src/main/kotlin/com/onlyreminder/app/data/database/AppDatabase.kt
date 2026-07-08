@@ -32,7 +32,7 @@ import com.onlyreminder.app.data.database.entities.TemplateEntity
         MessageLogEntity::class,
     ],
     version = 2,
-    exportSchema = false
+    exportSchema = true
 )
 @TypeConverters(Converters::class)
 abstract class AppDatabase : RoomDatabase() {

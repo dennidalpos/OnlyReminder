@@ -5,8 +5,7 @@ import androidx.lifecycle.viewModelScope
 import com.onlyreminder.app.data.database.entities.ContactEntity
 import com.onlyreminder.app.data.database.entities.GroupEntity
 import com.onlyreminder.app.data.database.entities.TaskEntity
-import com.onlyreminder.app.data.repository.ContactRepositoryImpl
-import com.onlyreminder.app.data.repository.MainRepositoryImpl
+import com.onlyreminder.app.domain.repository.MainRepository
 import com.onlyreminder.app.domain.model.TaskStatus
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -23,24 +22,22 @@ data class TaskUiModel(
     val contact: ContactEntity? = null,
     val groupContacts: List<ContactEntity> = emptyList(),
     val isExpanded: Boolean = false,
-    val isGroupExpanded: Boolean = false
+    val isGroupExpanded: Boolean = false,
 )
 
 @HiltViewModel
 class TasksViewModel @Inject constructor(
-    private val repository: MainRepositoryImpl,
-    private val contactRepository: ContactRepositoryImpl,
-    private val taskScheduler: com.onlyreminder.app.core.notifications.TaskScheduler
+    private val repository: MainRepository,
+    private val taskScheduler: com.onlyreminder.app.core.notifications.TaskScheduler,
 ) : ViewModel() {
 
     private val _taskUiModels = MutableStateFlow<List<TaskUiModel>>(emptyList())
     val taskUiModels: StateFlow<List<TaskUiModel>> = _taskUiModels.asStateFlow()
 
     private val _selectedTaskIds = MutableStateFlow<Set<Long>>(emptySet())
-    val selectedTaskIds = _selectedTaskIds.asStateFlow()
+    val selectedTaskIds: StateFlow<Set<Long>> = _selectedTaskIds.asStateFlow()
 
     private val _filterStatus = MutableStateFlow<TaskStatus?>(null)
-    val filterStatus: StateFlow<TaskStatus?> = _filterStatus.asStateFlow()
 
     private val _expandedTaskIds = MutableStateFlow<Set<Long>>(emptySet())
     private val _expandedGroupTaskIds = MutableStateFlow<Set<Long>>(emptySet())
@@ -52,22 +49,30 @@ class TasksViewModel @Inject constructor(
     private fun loadTasks() {
         viewModelScope.launch {
             _filterStatus.collectLatest { status ->
-                val tasksFlow = if (status == null) repository.getAllTasks() else repository.getTasksByStatus(status)
-                
+                val tasksFlow = if (status == null) {
+                    repository.getAllTasks()
+                } else {
+                    repository.getTasksByStatus(status)
+                }
+
                 combine(
                     tasksFlow,
                     _expandedTaskIds,
                     _expandedGroupTaskIds,
-                    contactRepository.getAllGroups(),
-                    contactRepository.getAllContacts()
+                    repository.getAllGroups(),
+                    repository.getAllContacts()
                 ) { tasks, expandedTasks, expandedGroups, groups, contacts ->
+                    val contactsByGroup = contacts.groupBy { it.groupId }
+
                     tasks.map { task ->
                         val group = groups.find { it.id == task.groupId }
                         val contact = contacts.find { it.id == task.contactId }
-                        
+
                         val groupContacts = if (expandedGroups.contains(task.id) && group != null) {
-                            contacts.filter { it.groupId == group.id }
-                        } else emptyList()
+                            contactsByGroup[group.id] ?: emptyList()
+                        } else {
+                            emptyList()
+                        }
 
                         TaskUiModel(
                             task = task,
@@ -91,25 +96,33 @@ class TasksViewModel @Inject constructor(
 
     fun toggleTaskSelection(taskId: Long) {
         val current = _selectedTaskIds.value
-        if (current.contains(taskId)) {
-            _selectedTaskIds.value = current - taskId
+        _selectedTaskIds.value = if (current.contains(taskId)) {
+            current - taskId
         } else {
-            _selectedTaskIds.value = current + taskId
+            current + taskId
         }
     }
 
     fun toggleTaskExpansion(taskId: Long) {
         val current = _expandedTaskIds.value
-        _expandedTaskIds.value = if (current.contains(taskId)) current - taskId else current + taskId
+        _expandedTaskIds.value = if (current.contains(taskId)) {
+            current - taskId
+        } else {
+            current + taskId
+        }
     }
 
     fun toggleGroupExpansion(taskId: Long) {
         val current = _expandedGroupTaskIds.value
-        _expandedGroupTaskIds.value = if (current.contains(taskId)) current - taskId else current + taskId
+        _expandedGroupTaskIds.value = if (current.contains(taskId)) {
+            current - taskId
+        } else {
+            current + taskId
+        }
     }
 
     fun selectAllTasks() {
-        _selectedTaskIds.value = _taskUiModels.value.map { it.task.id }.toSet()
+        _selectedTaskIds.value = _taskUiModels.value.asSequence().map { it.task.id }.toSet()
     }
 
     fun clearSelection() {
@@ -131,18 +144,9 @@ class TasksViewModel @Inject constructor(
         viewModelScope.launch {
             repository.updateTaskStatus(taskId, status)
             val task = repository.getTaskById(taskId)
-            if (task != null) {
-                if (status == TaskStatus.COMPLETED) {
-                    taskScheduler.cancelTask(task)
-                }
+            if (task != null && status == TaskStatus.COMPLETED) {
+                taskScheduler.cancelTask(task)
             }
-        }
-    }
-
-    fun deleteTask(task: TaskEntity) {
-        viewModelScope.launch {
-            taskScheduler.cancelTask(task)
-            repository.deleteTask(task)
         }
     }
 }

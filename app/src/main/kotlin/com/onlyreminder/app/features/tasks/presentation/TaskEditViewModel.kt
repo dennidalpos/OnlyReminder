@@ -7,8 +7,7 @@ import com.onlyreminder.app.data.database.entities.ContactEntity
 import com.onlyreminder.app.data.database.entities.GroupEntity
 import com.onlyreminder.app.data.database.entities.TaskEntity
 import com.onlyreminder.app.data.database.entities.TemplateEntity
-import com.onlyreminder.app.data.repository.ContactRepositoryImpl
-import com.onlyreminder.app.data.repository.MainRepositoryImpl
+import com.onlyreminder.app.domain.repository.MainRepository
 import com.onlyreminder.app.domain.model.TaskStatus
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -23,8 +22,7 @@ import javax.inject.Inject
 
 @HiltViewModel
 class TaskEditViewModel @Inject constructor(
-    private val mainRepository: MainRepositoryImpl,
-    private val contactRepository: ContactRepositoryImpl,
+    private val repository: MainRepository,
     private val taskScheduler: com.onlyreminder.app.core.notifications.TaskScheduler,
     savedStateHandle: SavedStateHandle
 ) : ViewModel() {
@@ -52,12 +50,12 @@ class TaskEditViewModel @Inject constructor(
 
     init {
         viewModelScope.launch {
-            _contacts.value = contactRepository.getAllContacts().first()
-            _groups.value = contactRepository.getAllGroups().first()
-            _templates.value = mainRepository.getAllTemplates().first()
+            _contacts.value = repository.getAllContacts().first()
+            _groups.value = repository.getAllGroups().first()
+            _templates.value = repository.getAllTemplates().first()
 
             val entity = if (taskId != null) {
-                mainRepository.getTaskById(taskId)
+                repository.getTaskById(taskId)
             } else {
                 TaskEntity(
                     title = "",
@@ -123,7 +121,7 @@ class TaskEditViewModel @Inject constructor(
         if (currentTask.title.isBlank()) return
 
         viewModelScope.launch {
-            val savedId = mainRepository.saveTask(currentTask)
+            val savedId = repository.saveTask(currentTask)
             val savedTask = currentTask.copy(id = savedId)
             taskScheduler.scheduleTask(savedTask)
             onSuccess()

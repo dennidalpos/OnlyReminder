@@ -47,6 +47,7 @@ fun SettingsScreen(
     viewModel: SettingsViewModel = hiltViewModel(),
 ) {
     val language by viewModel.language.collectAsState()
+    val sendMode by viewModel.sendMode.collectAsState()
     val countryCode by viewModel.defaultCountryCode.collectAsState()
     val notificationTime by viewModel.birthdayNotificationTime.collectAsState()
     val backupUri by viewModel.backupFolderUri.collectAsState()
@@ -57,19 +58,12 @@ fun SettingsScreen(
     var showTimePicker by remember { mutableStateOf(false) }
     var showCountryPicker by remember { mutableStateOf(false) }
     var showTemplatePicker by remember { mutableStateOf(false) }
+    var showSendModePicker by remember { mutableStateOf(false) }
 
     Scaffold(
         topBar = {
             OnlyReminderTopBar(
-                title = stringResource(id = R.string.settings_title),
-                navigationIcon = {
-                    IconButton(onClick = { navController.navigateUp() }) {
-                        Icon(
-                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                            contentDescription = stringResource(id = R.string.back)
-                        )
-                    }
-                }
+                title = stringResource(id = R.string.settings_title)
             )
         }
     ) { paddingValues ->
@@ -123,6 +117,24 @@ fun SettingsScreen(
                     }
                 )
             }
+
+            ListItem(
+                headlineContent = { Text(stringResource(id = R.string.send_mode_selection)) },
+                supportingContent = {
+                    Text(
+                        when (sendMode) {
+                            com.onlyreminder.app.domain.model.SendMode.REMINDER_ONLY -> stringResource(id = R.string.send_mode_reminder_only)
+                            com.onlyreminder.app.domain.model.SendMode.MANUAL_WHATSAPP -> stringResource(id = R.string.send_mode_manual_wa)
+                            com.onlyreminder.app.domain.model.SendMode.WA_API -> stringResource(id = R.string.send_mode_wa_api)
+                        }
+                    )
+                },
+                trailingContent = {
+                    TextButton(onClick = { showSendModePicker = true }) {
+                        Text(stringResource(id = R.string.change))
+                    }
+                }
+            )
 
             HorizontalDivider()
             Text(
@@ -199,6 +211,39 @@ fun SettingsScreen(
                 }
             )
         }
+    }
+
+    if (showSendModePicker) {
+        androidx.compose.material3.AlertDialog(
+            onDismissRequest = { showSendModePicker = false },
+            title = { Text(stringResource(id = R.string.send_mode_selection)) },
+            text = {
+                Column {
+                    com.onlyreminder.app.domain.model.SendMode.entries.forEach { mode ->
+                        ListItem(
+                            headlineContent = {
+                                Text(
+                                    when (mode) {
+                                        com.onlyreminder.app.domain.model.SendMode.REMINDER_ONLY -> stringResource(id = R.string.send_mode_reminder_only)
+                                        com.onlyreminder.app.domain.model.SendMode.MANUAL_WHATSAPP -> stringResource(id = R.string.send_mode_manual_wa)
+                                        com.onlyreminder.app.domain.model.SendMode.WA_API -> stringResource(id = R.string.send_mode_wa_api)
+                                    }
+                                )
+                            },
+                            modifier = Modifier.clickable {
+                                viewModel.setSendMode(mode)
+                                showSendModePicker = false
+                            }
+                        )
+                    }
+                }
+            },
+            confirmButton = {
+                TextButton(onClick = { showSendModePicker = false }) {
+                    Text(stringResource(id = R.string.cancel))
+                }
+            }
+        )
     }
 
     if (showTimePicker) {

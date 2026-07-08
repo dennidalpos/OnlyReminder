@@ -1,4 +1,9 @@
 <resources>
+    <string name="home_nav">Home</string>
+    <string name="notifications_nav">Notifications</string>
+    <string name="settings_nav">Settings</string>
+    <string name="show_backup_banner">Show Backup Reminder</string>
+    <string name="show_backup_banner_desc">Show a banner on home when backup is needed</string>
     <string name="app_name">OnlyReminder</string>
     <string name="onboarding_title">Setup OnlyReminder</string>
     <string name="welcome_message">Welcome to OnlyReminder</string>
@@ -208,6 +213,7 @@
 
     <!-- WhatsApp Manual -->
     <string name="whatsapp_manual_send">WhatsApp Manual Send</string>
+    <string name="whatsapp_greeting">Hello %1$s, how are you?</string>
     <string name="no_pending_messages">No pending messages in queue.</string>
     <string name="all_messages_processed">All messages processed!</string>
     <string name="back_to_review">Back to Review</string>
@@ -286,4 +292,12 @@
     <string name="wipe_security_data_confirm_title">Wipe Security Data?</string>
     <string name="wipe_security_data_confirm_msg">This will disable PIN and biometric lock. This action cannot be undone.</string>
     <string name="wipe">Wipe</string>
+
+    <!-- New Strings from Audit -->
+    <string name="notification_channel_tasks_name">Tasks and Reminders</string>
+    <string name="reminder_notification_title">Reminder: %1$s</string>
+    <string name="reminder_notification_default_message">You have a pending task.</string>
+    <string name="birthday_check_notification_title">OnlyReminder: Birthday Check</string>
+    <string name="birthday_check_notification_message">Today/Tomorrow: %1$d birthdays found.</string>
+    <string name="birthday_fallback_message">Happy Birthday %1$s!</string>
 </resources>

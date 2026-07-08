@@ -20,6 +20,7 @@ import androidx.compose.material3.DatePicker
 import androidx.compose.material3.DatePickerDialog
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ExposedDropdownMenuAnchorType
 import androidx.compose.material3.ExposedDropdownMenuBox
 import androidx.compose.material3.ExposedDropdownMenuDefaults
 import androidx.compose.material3.Icon
@@ -56,7 +57,7 @@ import java.time.format.DateTimeFormatter
 @Composable
 fun TaskEditScreen(
     navController: NavController,
-    viewModel: TaskEditViewModel = hiltViewModel()
+    viewModel: TaskEditViewModel = hiltViewModel(),
 ) {
     val task by viewModel.task.collectAsState()
     val contacts by viewModel.contacts.collectAsState()
@@ -137,13 +138,17 @@ fun TaskEditScreen(
                     onExpandedChange = { typeExpanded = it }
                 ) {
                     OutlinedTextField(
-                        value = t.type,
+                        value = when (t.type) {
+                            "REMINDER" -> stringResource(id = R.string.tasks_title)
+                            "BIRTHDAY" -> stringResource(id = R.string.birthday)
+                            else -> t.type
+                        },
                         onValueChange = {},
                         readOnly = true,
                         label = { Text(stringResource(id = R.string.event_type)) },
                         trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = typeExpanded) },
                         modifier = Modifier
-                            .menuAnchor()
+                            .menuAnchor(ExposedDropdownMenuAnchorType.PrimaryNotEditable)
                             .fillMaxWidth()
                     )
                     ExposedDropdownMenu(
@@ -152,95 +157,108 @@ fun TaskEditScreen(
                     ) {
                         listOf("REMINDER", "BIRTHDAY").forEach { type ->
                             DropdownMenuItem(
-                                text = { Text(type) },
+                                text = {
+                                    Text(
+                                        when (type) {
+                                            "REMINDER" -> stringResource(id = R.string.tasks_title)
+                                            "BIRTHDAY" -> stringResource(id = R.string.birthday)
+                                            else -> type
+                                        }
+                                    )
+                                },
                                 onClick = { viewModel.updateType(type); typeExpanded = false }
                             )
                         }
                     }
                 }
 
-                Row(modifier = Modifier.fillMaxWidth()) {
-                    // Contact Picker
-                    var contactExpanded by remember { mutableStateOf(false) }
-                    val selectedContact = contacts.find { it.id == t.contactId }
-                    ExposedDropdownMenuBox(
-                        expanded = contactExpanded,
-                        onExpandedChange = { contactExpanded = it },
-                        modifier = Modifier.weight(1f)
-                    ) {
-                        OutlinedTextField(
-                            value = selectedContact?.displayName
-                                ?: stringResource(id = R.string.no_contact),
-                            onValueChange = {},
-                            readOnly = true,
-                            label = { Text(stringResource(id = R.string.link_contact)) },
-                            trailingIcon = {
-                                ExposedDropdownMenuDefaults.TrailingIcon(
-                                    expanded = contactExpanded
-                                )
-                            },
-                            modifier = Modifier
-                                .menuAnchor()
-                                .fillMaxWidth()
-                        )
-                        ExposedDropdownMenu(
+                if (t.type == "REMINDER") {
+                    Row(modifier = Modifier.fillMaxWidth()) {
+                        // Contact Picker
+                        var contactExpanded by remember { mutableStateOf(false) }
+                        val selectedContact = contacts.find { it.id == t.contactId }
+                        ExposedDropdownMenuBox(
                             expanded = contactExpanded,
-                            onDismissRequest = { contactExpanded = false }
+                            onExpandedChange = { contactExpanded = it },
+                            modifier = Modifier.weight(1f)
                         ) {
-                            DropdownMenuItem(
-                                text = { Text(stringResource(id = R.string.no_contact)) },
-                                onClick = {
-                                    viewModel.updateContact(null); contactExpanded = false
-                                })
-                            contacts.forEach { contact ->
+                            OutlinedTextField(
+                                value = selectedContact?.displayName
+                                    ?: stringResource(id = R.string.no_contact),
+                                onValueChange = {},
+                                readOnly = true,
+                                label = { Text(stringResource(id = R.string.link_contact)) },
+                                trailingIcon = {
+                                    ExposedDropdownMenuDefaults.TrailingIcon(
+                                        expanded = contactExpanded
+                                    )
+                                },
+                                modifier = Modifier
+                                    .menuAnchor(ExposedDropdownMenuAnchorType.PrimaryNotEditable)
+                                    .fillMaxWidth()
+                            )
+                            ExposedDropdownMenu(
+                                expanded = contactExpanded,
+                                onDismissRequest = { contactExpanded = false }
+                            ) {
                                 DropdownMenuItem(
-                                    text = { Text(contact.displayName) },
+                                    text = { Text(stringResource(id = R.string.no_contact)) },
                                     onClick = {
-                                        viewModel.updateContact(contact.id); contactExpanded = false
-                                    }
-                                )
+                                        viewModel.updateContact(null); contactExpanded = false
+                                    })
+                                contacts.forEach { contact ->
+                                    DropdownMenuItem(
+                                        text = { Text(contact.displayName) },
+                                        onClick = {
+                                            viewModel.updateContact(contact.id); contactExpanded =
+                                            false
+                                        }
+                                    )
+                                }
                             }
                         }
-                    }
 
-                    Spacer(modifier = Modifier.width(8.dp))
+                        Spacer(modifier = Modifier.width(8.dp))
 
-                    // Group Picker
-                    var groupExpanded by remember { mutableStateOf(false) }
-                    val selectedGroup = groups.find { it.id == t.groupId }
-                    ExposedDropdownMenuBox(
-                        expanded = groupExpanded,
-                        onExpandedChange = { groupExpanded = it },
-                        modifier = Modifier.weight(1f)
-                    ) {
-                        OutlinedTextField(
-                            value = selectedGroup?.name ?: stringResource(id = R.string.no_group),
-                            onValueChange = {},
-                            readOnly = true,
-                            label = { Text(stringResource(id = R.string.link_group)) },
-                            trailingIcon = {
-                                ExposedDropdownMenuDefaults.TrailingIcon(
-                                    expanded = groupExpanded
-                                )
-                            },
-                            modifier = Modifier
-                                .menuAnchor()
-                                .fillMaxWidth()
-                        )
-                        ExposedDropdownMenu(
+                        // Group Picker
+                        var groupExpanded by remember { mutableStateOf(false) }
+                        val selectedGroup = groups.find { it.id == t.groupId }
+                        ExposedDropdownMenuBox(
                             expanded = groupExpanded,
-                            onDismissRequest = { groupExpanded = false }
+                            onExpandedChange = { groupExpanded = it },
+                            modifier = Modifier.weight(1f)
                         ) {
-                            DropdownMenuItem(
-                                text = { Text(stringResource(id = R.string.no_group)) },
-                                onClick = { viewModel.updateGroup(null); groupExpanded = false })
-                            groups.forEach { group ->
+                            OutlinedTextField(
+                                value = selectedGroup?.name ?: stringResource(id = R.string.no_group),
+                                onValueChange = {},
+                                readOnly = true,
+                                label = { Text(stringResource(id = R.string.link_group)) },
+                                trailingIcon = {
+                                    ExposedDropdownMenuDefaults.TrailingIcon(
+                                        expanded = groupExpanded
+                                    )
+                                },
+                                modifier = Modifier
+                                    .menuAnchor(ExposedDropdownMenuAnchorType.PrimaryNotEditable)
+                                    .fillMaxWidth()
+                            )
+                            ExposedDropdownMenu(
+                                expanded = groupExpanded,
+                                onDismissRequest = { groupExpanded = false }
+                            ) {
                                 DropdownMenuItem(
-                                    text = { Text(group.name) },
+                                    text = { Text(stringResource(id = R.string.no_group)) },
                                     onClick = {
-                                        viewModel.updateGroup(group.id); groupExpanded = false
-                                    }
-                                )
+                                        viewModel.updateGroup(null); groupExpanded = false
+                                    })
+                                groups.forEach { group ->
+                                    DropdownMenuItem(
+                                        text = { Text(group.name) },
+                                        onClick = {
+                                            viewModel.updateGroup(group.id); groupExpanded = false
+                                        }
+                                    )
+                                }
                             }
                         }
                     }
@@ -253,13 +271,17 @@ fun TaskEditScreen(
                     onExpandedChange = { modeExpanded = it }
                 ) {
                     OutlinedTextField(
-                        value = t.sendMode,
+                        value = when (t.sendMode) {
+                            "REMINDER_ONLY" -> stringResource(id = R.string.send_mode_reminder_only)
+                            "MANUAL_WHATSAPP" -> stringResource(id = R.string.send_mode_manual_wa)
+                            else -> t.sendMode
+                        },
                         onValueChange = {},
                         readOnly = true,
                         label = { Text(stringResource(id = R.string.send_mode_selection)) },
                         trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = modeExpanded) },
                         modifier = Modifier
-                            .menuAnchor()
+                            .menuAnchor(ExposedDropdownMenuAnchorType.PrimaryNotEditable)
                             .fillMaxWidth()
                     )
                     ExposedDropdownMenu(
@@ -271,46 +293,56 @@ fun TaskEditScreen(
                             "MANUAL_WHATSAPP"
                         ).forEach { mode ->
                             DropdownMenuItem(
-                                text = { Text(mode) },
+                                text = {
+                                    Text(
+                                        when (mode) {
+                                            "REMINDER_ONLY" -> stringResource(id = R.string.send_mode_reminder_only)
+                                            "MANUAL_WHATSAPP" -> stringResource(id = R.string.send_mode_manual_wa)
+                                            else -> mode
+                                        }
+                                    )
+                                },
                                 onClick = { viewModel.updateSendMode(mode); modeExpanded = false })
                         }
                     }
                 }
 
-                // Template Picker
-                var templateExpanded by remember { mutableStateOf(false) }
-                val selectedTemplate = templates.find { it.id == t.templateId }
-                ExposedDropdownMenuBox(
-                    expanded = templateExpanded,
-                    onExpandedChange = { templateExpanded = it }
-                ) {
-                    OutlinedTextField(
-                        value = selectedTemplate?.name ?: stringResource(id = R.string.no_template),
-                        onValueChange = {},
-                        readOnly = true,
-                        label = { Text(stringResource(id = R.string.message_template)) },
-                        trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = templateExpanded) },
-                        modifier = Modifier
-                            .menuAnchor()
-                            .fillMaxWidth()
-                    )
-                    ExposedDropdownMenu(
+                // Template Picker - Hidden if REMINDER_ONLY
+                if (t.sendMode != "REMINDER_ONLY") {
+                    var templateExpanded by remember { mutableStateOf(false) }
+                    val selectedTemplate = templates.find { it.id == t.templateId }
+                    ExposedDropdownMenuBox(
                         expanded = templateExpanded,
-                        onDismissRequest = { templateExpanded = false }
+                        onExpandedChange = { templateExpanded = it }
                     ) {
-                        DropdownMenuItem(
-                            text = { Text(stringResource(id = R.string.no_template)) },
-                            onClick = {
-                                viewModel.updateTemplate(null); templateExpanded = false
-                            })
-                        templates.forEach { template ->
+                        OutlinedTextField(
+                            value = selectedTemplate?.name ?: stringResource(id = R.string.no_template),
+                            onValueChange = {},
+                            readOnly = true,
+                            label = { Text(stringResource(id = R.string.message_template)) },
+                            trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = templateExpanded) },
+                            modifier = Modifier
+                                .menuAnchor(ExposedDropdownMenuAnchorType.PrimaryNotEditable)
+                                .fillMaxWidth()
+                        )
+                        ExposedDropdownMenu(
+                            expanded = templateExpanded,
+                            onDismissRequest = { templateExpanded = false }
+                        ) {
                             DropdownMenuItem(
-                                text = { Text(template.name) },
+                                text = { Text(stringResource(id = R.string.no_template)) },
                                 onClick = {
-                                    viewModel.updateTemplate(template.id); templateExpanded =
-                                    false
-                                }
-                            )
+                                    viewModel.updateTemplate(null); templateExpanded = false
+                                })
+                            templates.forEach { template ->
+                                DropdownMenuItem(
+                                    text = { Text(template.name) },
+                                    onClick = {
+                                        viewModel.updateTemplate(template.id); templateExpanded =
+                                        false
+                                    }
+                                )
+                            }
                         }
                     }
                 }

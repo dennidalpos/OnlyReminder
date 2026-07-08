@@ -6,10 +6,10 @@ import androidx.lifecycle.viewModelScope
 import com.onlyreminder.app.data.database.entities.BirthdayRunEntity
 import com.onlyreminder.app.data.database.entities.BirthdayRunItemEntity
 import com.onlyreminder.app.data.database.entities.ContactEntity
-import com.onlyreminder.app.data.repository.ContactRepositoryImpl
-import com.onlyreminder.app.data.repository.MainRepositoryImpl
+import com.onlyreminder.app.domain.repository.MainRepository
 import com.onlyreminder.app.domain.model.BirthdayItemStatus
 import com.onlyreminder.app.domain.model.BirthdayRunStatus
+import com.onlyreminder.app.domain.model.SendMode
 import com.onlyreminder.app.features.whatsapp.data.WhatsAppRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
@@ -17,7 +17,6 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
@@ -25,8 +24,7 @@ import javax.inject.Inject
 
 @HiltViewModel
 class BirthdayReviewViewModel @Inject constructor(
-    private val mainRepository: MainRepositoryImpl,
-    private val contactRepository: ContactRepositoryImpl,
+    private val repository: MainRepository,
     private val settingsDataStore: com.onlyreminder.app.data.settings.SettingsDataStore,
     private val whatsappRepository: WhatsAppRepository,
     private val birthdayScanner: com.onlyreminder.app.features.birthday.domain.BirthdayScanner,
@@ -36,7 +34,7 @@ class BirthdayReviewViewModel @Inject constructor(
     val sendMode = settingsDataStore.sendMode.stateIn(
         viewModelScope,
         SharingStarted.WhileSubscribed(),
-        "REMINDER_ONLY"
+        SendMode.REMINDER_ONLY
     )
 
     private val _latestRun = MutableStateFlow<BirthdayRunEntity?>(null)
@@ -51,7 +49,7 @@ class BirthdayReviewViewModel @Inject constructor(
 
     private fun loadLatestRun() {
         viewModelScope.launch {
-            mainRepository.getAllBirthdayRuns().collect { runs ->
+            repository.getAllBirthdayRuns().collect { runs ->
                 val today = java.time.LocalDate.now()
                 val dateStr = today.format(java.time.format.DateTimeFormatter.ISO_LOCAL_DATE)
                 
@@ -81,8 +79,8 @@ class BirthdayReviewViewModel @Inject constructor(
     private fun loadItemsForRun(runId: Long) {
         itemsJob?.cancel()
         itemsJob = viewModelScope.launch {
-            mainRepository.getItemsForRun(runId).collect { runItems ->
-                val contacts = contactRepository.getAllContacts().first()
+            repository.getItemsForRun(runId).collect { runItems ->
+                val contacts = repository.getAllContacts().first()
                 _items.value = runItems.map { item ->
                     BirthdayRunItemWithContact(
                         item = item,
@@ -102,14 +100,10 @@ class BirthdayReviewViewModel @Inject constructor(
         }
     }
 
-    // Add this to get Context in ViewModel if needed, but Hilt usually handles it.
-    // Actually, I can't easily get application context here without changing constructor.
-    // I'll use a different approach: call the mainRepository to trigger logic.
-
     fun updateItemStatus(itemId: Long, status: BirthdayItemStatus) {
         viewModelScope.launch {
             val item = _items.value.find { it.item.id == itemId }?.item ?: return@launch
-            mainRepository.addRunItem(
+            repository.addRunItem(
                 item.copy(
                     status = status,
                     updatedAt = java.time.LocalDateTime.now()
@@ -121,7 +115,7 @@ class BirthdayReviewViewModel @Inject constructor(
     fun sendItemViaApi(itemWithContact: BirthdayRunItemWithContact) {
         val contact = itemWithContact.contact ?: return
         viewModelScope.launch {
-            val templates = mainRepository.getAllTemplates().first()
+            val templates = repository.getAllTemplates().first()
             val templateId = settingsDataStore.birthdayTemplateId.first()
             val appLanguage = settingsDataStore.language.first()
 
@@ -137,7 +131,7 @@ class BirthdayReviewViewModel @Inject constructor(
             val overrideName = birthdayTemplate?.whatsappApprovedTemplateName
 
             val success = whatsappRepository.sendMessage(contact, overrideName)
-            mainRepository.addRunItem(
+            repository.addRunItem(
                 itemWithContact.item.copy(
                     status = if (success) BirthdayItemStatus.SENT else BirthdayItemStatus.FAILED,
                     updatedAt = java.time.LocalDateTime.now()
@@ -148,7 +142,7 @@ class BirthdayReviewViewModel @Inject constructor(
 
     fun deleteContact(contact: ContactEntity) {
         viewModelScope.launch {
-            contactRepository.hardDeleteContact(contact)
+            repository.hardDeleteContact(contact)
         }
     }
 
@@ -156,7 +150,7 @@ class BirthdayReviewViewModel @Inject constructor(
         viewModelScope.launch {
             _items.value.forEach { itemWithContact ->
                 if (itemWithContact.item.status == BirthdayItemStatus.PENDING) {
-                    mainRepository.addRunItem(
+                    repository.addRunItem(
                         itemWithContact.item.copy(
                             status = BirthdayItemStatus.SKIPPED,
                             updatedAt = java.time.LocalDateTime.now()
@@ -170,7 +164,7 @@ class BirthdayReviewViewModel @Inject constructor(
     fun completeRun() {
         viewModelScope.launch {
             _latestRun.value?.let { run ->
-                mainRepository.createBirthdayRun(
+                repository.createBirthdayRun(
                     run.copy(
                         status = BirthdayRunStatus.COMPLETED,
                         completedAt = java.time.LocalDateTime.now()

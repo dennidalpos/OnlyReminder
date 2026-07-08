@@ -1,4 +1,9 @@
 <resources>
+    <string name="home_nav">Home</string>
+    <string name="notifications_nav">Notifiche</string>
+    <string name="settings_nav">Impostazioni</string>
+    <string name="show_backup_banner">Mostra promemoria backup</string>
+    <string name="show_backup_banner_desc">Mostra un banner in home quando è necessario un backup</string>
     <string name="app_name">OnlyReminder</string>
     <string name="onboarding_title">Configura OnlyReminder</string>
     <string name="welcome_message">Benvenuto in OnlyReminder</string>
@@ -18,7 +23,7 @@
     <string name="privacy_text">OnlyReminder conserva i dati localmente e cripta database e backup. Sei responsabile di trattare i contatti importati in modo lecito e di inviare messaggi solo quando appropriato.</string>
     <string name="app_lock_enable">Attiva App Lock (PIN)</string>
     <string name="biometric_enable">Attiva Autenticazione Biometrica</string>
-    <string name="send_mode_reminder_only">Solo Promemoria</string>
+    <string name="send_mode_reminder_only">Solo Task</string>
     <string name="send_mode_manual_wa">WhatsApp Manuale</string>
     <string name="send_mode_wa_api">WhatsApp Business API</string>
 
@@ -138,7 +143,7 @@
     <string name="use_biometrics">Usa Biometria</string>
 
     <!-- Navigation & Titles -->
-    <string name="tasks_title">Promemoria</string>
+    <string name="tasks_title">Task</string>
     <string name="templates_title">Template</string>
     <string name="birthday_review_title">Compleanni da revisionare</string>
     <string name="backup_title">Backup e Ripristino</string>
@@ -208,6 +213,7 @@
 
     <!-- WhatsApp Manual -->
     <string name="whatsapp_manual_send">Invio Manuale WhatsApp</string>
+    <string name="whatsapp_greeting">Ciao %1$s, come stai?</string>
     <string name="no_pending_messages">Nessun messaggio in coda.</string>
     <string name="all_messages_processed">Tutti i messaggi elaborati!</string>
     <string name="back_to_review">Torna alla Revisione</string>
@@ -263,7 +269,7 @@
     <string name="hello">Ciao!</string>
     <string name="start_by_adding_contacts">Inizia aggiungendo dei contatti.</string>
     <string name="saved_contacts_count_new">Hai %1$d contatti salvati.</string>
-    <string name="pending_tasks_summary">Hai %1$d attività da completare oggi.</string>
+    <string name="pending_tasks_summary">Hai %1$d task da completare oggi.</string>
     <string name="birthdays_today_count">Oggi: %1$d</string>
     <string name="birthdays_tomorrow_count">Domani: %1$d</string>
     <string name="backup_required_title">Backup Consigliato</string>
@@ -286,4 +292,12 @@
     <string name="wipe_security_data_confirm_title">Cancellare dati sicurezza?</string>
     <string name="wipe_security_data_confirm_msg">Questo disabiliterà il PIN e il blocco biometrico. L\'azione non può essere annullata.</string>
     <string name="wipe">Cancella</string>
+
+    <!-- Nuove stringhe dall'Audit -->
+    <string name="notification_channel_tasks_name">Task e Promemoria</string>
+    <string name="reminder_notification_title">Promemoria: %1$s</string>
+    <string name="reminder_notification_default_message">Hai un task in sospeso.</string>
+    <string name="birthday_check_notification_title">OnlyReminder: Controllo Compleanni</string>
+    <string name="birthday_check_notification_message">Oggi/Domani: %1$d compleanni trovati.</string>
+    <string name="birthday_fallback_message">Buon compleanno %1$s!</string>
 </resources>

@@ -8,6 +8,7 @@ import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.intPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
+import com.onlyreminder.app.domain.model.SendMode
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
@@ -34,6 +35,7 @@ class SettingsDataStore @Inject constructor(
         val NORMALIZE_PHONE = booleanPreferencesKey("normalize_phone")
         val LAST_BACKUP_TIME = stringPreferencesKey("last_backup_time")
         val BIRTHDAY_TEMPLATE_ID = intPreferencesKey("birthday_template_id")
+        val SHOW_BACKUP_BANNER = booleanPreferencesKey("show_backup_banner")
 
         // WhatsApp API Settings (Encrypted by EncryptedPrefs usually, but for UI state we might use DataStore for non-sensitive ones)
         val WA_BUSINESS_ACCOUNT_ID = stringPreferencesKey("wa_business_account_id")
@@ -52,18 +54,25 @@ class SettingsDataStore @Inject constructor(
         dataStore.data.map { it[Keys.BACKUP_RETENTION_COUNT] ?: 10 }
     val onboardingCompleted: Flow<Boolean> =
         dataStore.data.map { it[Keys.ONBOARDING_COMPLETED] ?: false }
-    val sendMode: Flow<String> = dataStore.data.map { it[Keys.SEND_MODE] ?: "REMINDER_ONLY" }
+    val sendMode: Flow<SendMode> = dataStore.data.map {
+        try {
+            SendMode.valueOf(it[Keys.SEND_MODE] ?: SendMode.REMINDER_ONLY.name)
+        } catch (e: Exception) {
+            SendMode.REMINDER_ONLY
+        }
+    }
     val backupFolderUri: Flow<String?> = dataStore.data.map { it[Keys.BACKUP_FOLDER_URI] }
     val normalizePhone: Flow<Boolean> = dataStore.data.map { it[Keys.NORMALIZE_PHONE] ?: true }
     val lastBackupTime: Flow<String?> = dataStore.data.map { it[Keys.LAST_BACKUP_TIME] }
     val birthdayTemplateId: Flow<Long?> = dataStore.data.map { it[Keys.BIRTHDAY_TEMPLATE_ID]?.toLong() }
+    val showBackupBanner: Flow<Boolean> = dataStore.data.map { it[Keys.SHOW_BACKUP_BANNER] ?: true }
 
     suspend fun setOnboardingCompleted(completed: Boolean) {
         dataStore.edit { it[Keys.ONBOARDING_COMPLETED] = completed }
     }
 
-    suspend fun setSendMode(mode: String) {
-        dataStore.edit { it[Keys.SEND_MODE] = mode }
+    suspend fun setSendMode(mode: SendMode) {
+        dataStore.edit { it[Keys.SEND_MODE] = mode.name }
     }
 
     suspend fun setBackupFolderUri(uri: String) {
@@ -103,5 +112,9 @@ class SettingsDataStore @Inject constructor(
             if (id == null) it.remove(Keys.BIRTHDAY_TEMPLATE_ID)
             else it[Keys.BIRTHDAY_TEMPLATE_ID] = id.toInt()
         }
+    }
+
+    suspend fun setShowBackupBanner(show: Boolean) {
+        dataStore.edit { it[Keys.SHOW_BACKUP_BANNER] = show }
     }
 }

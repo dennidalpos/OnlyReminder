@@ -134,14 +134,6 @@ fun ContactsScreen(
             } else {
                 OnlyReminderTopBar(
                     title = stringResource(id = R.string.contacts_title),
-                    navigationIcon = {
-                        IconButton(onClick = { navController.navigateUp() }) {
-                            Icon(
-                                imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                                contentDescription = stringResource(id = R.string.back)
-                            )
-                        }
-                    },
                     actions = {
                         IconButton(onClick = { showFilterSheet = true }) {
                             val isFiltered =

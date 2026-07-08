@@ -242,14 +242,6 @@ class ImportViewModel @Inject constructor(
                                         }
                                     )
 
-                                    ContactField.MARKETING_CONSENT -> importContact.copy(
-                                        marketingConsent = value.lowercase() == "true" || value == "1"
-                                    )
-
-                                    ContactField.PRIVACY_CONSENT -> importContact.copy(
-                                        privacyConsent = value.lowercase() == "true" || value == "1"
-                                    )
-
                                     ContactField.IGNORE -> importContact
                                 }
                             }
@@ -297,7 +289,7 @@ class ImportViewModel @Inject constructor(
     }
 
     private fun normalizePhone(phone: String, defaultCode: String): String {
-        var clean = phone.replace(Regex("[\\s\\-\\(\\)]"), "")
+        var clean = phone.replace(Regex("[\\s\\-()]"), "")
         if (clean.startsWith("00")) {
             clean = "+" + clean.substring(2)
         }
@@ -349,8 +341,6 @@ class ImportViewModel @Inject constructor(
                                 source = importContact.source.ifBlank { "CSV Import" },
                                 notes = importContact.notes,
                                 status = importContact.status,
-                                marketingConsent = importContact.marketingConsent,
-                                privacyConsent = importContact.privacyConsent,
                                 lastContactDate = null
                             )
                             val contactId = repository.saveContact(entity)

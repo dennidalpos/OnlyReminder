@@ -6,7 +6,7 @@ import com.onlyreminder.app.data.database.entities.ContactEntity
 import com.onlyreminder.app.data.database.entities.GroupEntity
 import com.onlyreminder.app.data.database.entities.TagEntity
 import com.onlyreminder.app.data.database.entities.TaskEntity
-import com.onlyreminder.app.data.repository.ContactRepositoryImpl
+import com.onlyreminder.app.domain.repository.MainRepository
 import com.onlyreminder.app.domain.model.ContactStatus
 import com.onlyreminder.app.domain.model.TaskStatus
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -25,8 +25,7 @@ import javax.inject.Inject
 
 @HiltViewModel
 class ContactsViewModel @Inject constructor(
-    private val repository: ContactRepositoryImpl,
-    private val mainRepository: com.onlyreminder.app.data.repository.MainRepositoryImpl,
+    private val repository: MainRepository,
     private val taskScheduler: com.onlyreminder.app.core.notifications.TaskScheduler
 ) : ViewModel() {
 
@@ -88,7 +87,7 @@ class ContactsViewModel @Inject constructor(
     @OptIn(ExperimentalCoroutinesApi::class)
     val contactUiModels: StateFlow<List<ContactUiModel>> = combine(
         contacts,
-        mainRepository.getAllTasks()
+        repository.getAllTasks()
     ) { contactList, taskList ->
         contactList.map { contact ->
             ContactUiModel(
@@ -182,7 +181,7 @@ class ContactsViewModel @Inject constructor(
                     templateId = null,
                     sendMode = "REMINDER_ONLY"
                 )
-                val savedId = mainRepository.saveTask(task)
+                val savedId = repository.saveTask(task)
                 taskScheduler.scheduleTask(task.copy(id = savedId))
             }
             clearSelection()

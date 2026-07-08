@@ -3,8 +3,6 @@ package com.onlyreminder.app.features.contacts.ui
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.ExperimentalLayoutApi
-import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -14,11 +12,11 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.Assignment
-import androidx.compose.material.icons.automirrored.filled.Notes
 import androidx.compose.material.icons.automirrored.filled.Send
 import androidx.compose.material.icons.filled.Cake
 import androidx.compose.material.icons.filled.Delete
@@ -30,17 +28,22 @@ import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Phone
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FilledTonalIconButton
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.LargeTopAppBar
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SuggestionChip
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -51,6 +54,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -60,10 +64,9 @@ import androidx.navigation.NavController
 import com.onlyreminder.app.R
 import com.onlyreminder.app.core.navigation.Route
 import com.onlyreminder.app.core.ui.components.DestructiveConfirmationDialog
-import com.onlyreminder.app.core.ui.components.OnlyReminderTopBar
 import com.onlyreminder.app.domain.model.ContactStatus
 
-@OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ContactDetailScreen(
     navController: NavController,
@@ -74,12 +77,14 @@ fun ContactDetailScreen(
     val tags by viewModel.tags.collectAsState()
     val context = LocalContext.current
 
-    var showDeleteDialog by remember { mutableStateOf(value = false) }
+    var showDeleteDialog by remember { mutableStateOf(false) }
+    val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior()
 
     Scaffold(
+        modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
         topBar = {
-            OnlyReminderTopBar(
-                title = stringResource(id = R.string.contact_details),
+            LargeTopAppBar(
+                title = { Text(contact?.displayName ?: "") },
                 navigationIcon = {
                     IconButton(onClick = { navController.navigateUp() }) {
                         Icon(
@@ -89,25 +94,14 @@ fun ContactDetailScreen(
                     }
                 },
                 actions = {
-                    IconButton(
-                        onClick = {
-                            navController.navigate(Route.ContactEdit(contact?.id))
-                        },
-                    ) {
-                        Icon(
-                            imageVector = Icons.Default.Edit,
-                            contentDescription = stringResource(id = R.string.edit),
-                        )
+                    IconButton(onClick = { navController.navigate(Route.ContactEdit(contact?.id)) }) {
+                        Icon(Icons.Default.Edit, contentDescription = null)
                     }
-                    IconButton(
-                        onClick = { showDeleteDialog = true },
-                    ) {
-                        Icon(
-                            imageVector = Icons.Default.Delete,
-                            contentDescription = stringResource(id = R.string.delete),
-                        )
+                    IconButton(onClick = { showDeleteDialog = true }) {
+                        Icon(Icons.Default.Delete, contentDescription = null)
                     }
                 },
+                scrollBehavior = scrollBehavior
             )
         },
     ) { paddingValues ->
@@ -118,159 +112,140 @@ fun ContactDetailScreen(
                     .fillMaxSize()
                     .verticalScroll(rememberScrollState())
                     .padding(16.dp),
+                verticalArrangement = Arrangement.spacedBy(16.dp)
             ) {
-                // Header with initials
-                Surface(
-                    shape = MaterialTheme.shapes.medium,
-                    color = MaterialTheme.colorScheme.primaryContainer,
-                    modifier = Modifier
-                        .size(80.dp)
-                        .align(Alignment.CenterHorizontally),
+                // Hero Section
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.Center,
+                    verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Box(contentAlignment = Alignment.Center) {
-                        Text(
-                            text = c.displayName.take(1).uppercase(),
-                            style = MaterialTheme.typography.displaySmall,
-                            color = MaterialTheme.colorScheme.onPrimaryContainer,
-                        )
+                    Surface(
+                        shape = CircleShape,
+                        color = MaterialTheme.colorScheme.primaryContainer,
+                        modifier = Modifier.size(100.dp)
+                    ) {
+                        Box(contentAlignment = Alignment.Center) {
+                            Text(
+                                text = c.displayName.take(1).uppercase(),
+                                style = MaterialTheme.typography.displayMedium,
+                                color = MaterialTheme.colorScheme.onPrimaryContainer,
+                            )
+                        }
                     }
                 }
 
-                Spacer(modifier = Modifier.height(16.dp))
-                Text(
-                    text = c.displayName,
-                    style = MaterialTheme.typography.headlineMedium,
-                    fontWeight = FontWeight.Bold,
-                    modifier = Modifier.align(Alignment.CenterHorizontally),
-                )
                 if (c.company.isNotEmpty()) {
                     Text(
                         text = c.company,
-                        style = MaterialTheme.typography.bodyLarge,
+                        style = MaterialTheme.typography.titleMedium,
                         color = MaterialTheme.colorScheme.secondary,
-                        modifier = Modifier.align(Alignment.CenterHorizontally),
+                        modifier = Modifier.align(Alignment.CenterHorizontally)
                     )
                 }
 
-                Spacer(modifier = Modifier.height(24.dp))
+                Spacer(modifier = Modifier.height(8.dp))
 
-                DetailItem(
-                    icon = Icons.Default.Phone,
-                    label = stringResource(id = R.string.phone),
-                    value = c.phone,
-                )
-                if (c.normalizedPhone.isNotEmpty() && (c.normalizedPhone != c.phone)) {
-                    DetailItem(
-                        icon = Icons.Default.Dialpad,
-                        label = stringResource(id = R.string.normalized),
-                        value = c.normalizedPhone,
-                    )
-                }
-                DetailItem(
-                    icon = Icons.Default.Email,
-                    label = stringResource(id = R.string.email),
-                    value = c.email,
-                )
-                DetailItem(
-                    icon = Icons.Default.Cake,
-                    label = stringResource(id = R.string.birthday),
-                    value = c.birthday ?: stringResource(id = R.string.not_set),
-                )
-
-                // Birthday Monitoring Toggle
+                // Primary Quick Actions
                 Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(vertical = 8.dp),
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.SpaceBetween
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceEvenly
                 ) {
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        Icon(
-                            imageVector = Icons.Default.Cake,
-                            contentDescription = null,
-                            tint = if (c.isBirthdayMonitored) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.outline,
-                            modifier = Modifier.size(24.dp)
-                        )
-                        Spacer(modifier = Modifier.width(16.dp))
-                        Column {
-                            Text(
-                                text = stringResource(id = R.string.birthday_monitoring),
-                                style = MaterialTheme.typography.bodyLarge,
-                                fontWeight = FontWeight.Medium
-                            )
-                            Text(
-                                text = if (c.isBirthdayMonitored) stringResource(R.string.monitoring_enabled) else stringResource(R.string.monitoring_disabled),
-                                style = MaterialTheme.typography.bodySmall,
-                                color = MaterialTheme.colorScheme.secondary
-                            )
-                        }
-                    }
-                    Switch(
-                        checked = c.isBirthdayMonitored,
-                        onCheckedChange = { viewModel.toggleBirthdayMonitoring() }
+                    QuickAction(
+                        icon = Icons.AutoMirrored.Filled.Send,
+                        label = stringResource(R.string.open_whatsapp),
+                        onClick = { viewModel.openWhatsApp(context) }
+                    )
+                    QuickAction(
+                        icon = Icons.Default.Phone,
+                        label = stringResource(R.string.phone),
+                        onClick = { /* Call logic */ }
+                    )
+                    QuickAction(
+                        icon = Icons.AutoMirrored.Filled.Assignment,
+                        label = stringResource(R.string.create_task),
+                        onClick = { navController.navigate(Route.TaskEdit(contactId = c.id)) }
                     )
                 }
-                DetailItem(
-                    icon = Icons.Default.Group,
-                    label = stringResource(id = R.string.group),
-                    value = group?.name ?: stringResource(id = R.string.none),
-                )
+
+                Spacer(modifier = Modifier.height(8.dp))
+
+                // Information Section
+                Card(
+                    modifier = Modifier.fillMaxWidth(),
+                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f))
+                ) {
+                    Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(16.dp)) {
+                        DetailRow(Icons.Default.Phone, stringResource(R.string.phone), c.phone)
+                        if (c.normalizedPhone.isNotEmpty() && c.normalizedPhone != c.phone) {
+                            DetailRow(Icons.Default.Dialpad, stringResource(R.string.normalized), c.normalizedPhone)
+                        }
+                        DetailRow(Icons.Default.Email, stringResource(R.string.email), c.email)
+                        DetailRow(
+                            Icons.Default.Cake,
+                            stringResource(R.string.birthday),
+                            c.birthday ?: stringResource(R.string.not_set)
+                        )
+                        DetailRow(
+                            Icons.Default.Group,
+                            stringResource(R.string.group),
+                            group?.name ?: stringResource(R.string.none)
+                        )
+                    }
+                }
+
+                // Monitoring Card
+                Card(
+                    modifier = Modifier.fillMaxWidth(),
+                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.2f))
+                ) {
+                    Row(
+                        modifier = Modifier
+                            .padding(16.dp)
+                            .fillMaxWidth(),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.SpaceBetween
+                    ) {
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Icon(Icons.Default.Cake, contentDescription = null, tint = MaterialTheme.colorScheme.primary)
+                            Spacer(modifier = Modifier.width(16.dp))
+                            Column {
+                                Text(
+                                    stringResource(R.string.birthday_monitoring),
+                                    style = MaterialTheme.typography.bodyLarge,
+                                    fontWeight = FontWeight.Bold
+                                )
+                                Text(
+                                    if (c.isBirthdayMonitored) stringResource(R.string.monitoring_enabled) else stringResource(R.string.monitoring_disabled),
+                                    style = MaterialTheme.typography.bodySmall
+                                )
+                            }
+                        }
+                        Switch(checked = c.isBirthdayMonitored, onCheckedChange = { viewModel.toggleBirthdayMonitoring() })
+                    }
+                }
+
+                if (c.notes.isNotEmpty()) {
+                    Text(stringResource(R.string.notes), style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
+                    Text(c.notes, style = MaterialTheme.typography.bodyLarge)
+                }
 
                 if (tags.isNotEmpty()) {
-                    Spacer(modifier = Modifier.height(16.dp))
-                    Text(
-                        text = stringResource(id = R.string.tags),
-                        style = MaterialTheme.typography.labelLarge,
-                    )
-                    FlowRow(
-                        modifier = Modifier.padding(vertical = 8.dp),
-                        horizontalArrangement = Arrangement.spacedBy(8.dp),
-                    ) {
+                    Text(stringResource(R.string.tags), style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
+                    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                         tags.forEach { tag ->
-                            SuggestionChip(onClick = { }, label = { Text(tag.name) })
+                            SuggestionChip(onClick = {}, label = { Text(tag.name) })
                         }
                     }
                 }
-
-                DetailItem(
-                    icon = Icons.AutoMirrored.Filled.Notes,
-                    label = stringResource(id = R.string.notes),
-                    value = c.notes
-                )
-                DetailItem(
-                    icon = Icons.Default.Info,
-                    label = stringResource(id = R.string.status),
-                    value = when (c.status) {
-                        ContactStatus.ACTIVE -> stringResource(id = R.string.active)
-                        ContactStatus.ARCHIVED -> stringResource(id = R.string.archived)
-                    }
-                )
 
                 Spacer(modifier = Modifier.height(24.dp))
                 HorizontalDivider()
-                Spacer(modifier = Modifier.height(24.dp))
-
-                // Actions
-                DetailAction(
-                    label = stringResource(id = R.string.create_task),
-                    icon = Icons.AutoMirrored.Filled.Assignment,
-                ) {
-                    navController.navigate(Route.TaskEdit(contactId = c.id))
-                }
-                DetailAction(
-                    label = stringResource(id = R.string.send_wa),
-                    icon = Icons.AutoMirrored.Filled.Send,
-                ) {
-                    viewModel.openWhatsApp(context)
-                }
 
                 if (c.status != ContactStatus.ARCHIVED) {
                     Button(
                         onClick = { viewModel.archiveContact() },
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(vertical = 8.dp),
+                        modifier = Modifier.fillMaxWidth(),
                         colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.secondary)
                     ) {
                         Text(stringResource(id = R.string.archive_contact))
@@ -278,9 +253,7 @@ fun ContactDetailScreen(
                 } else {
                     Button(
                         onClick = { viewModel.restoreContact() },
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(vertical = 8.dp),
+                        modifier = Modifier.fillMaxWidth(),
                         colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.tertiary)
                     ) {
                         Text(stringResource(id = R.string.restore_contact))
@@ -307,58 +280,25 @@ fun ContactDetailScreen(
 }
 
 @Composable
-fun DetailItem(icon: ImageVector, label: String, value: String) {
-    if (value.isNotEmpty()) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(vertical = 8.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Icon(
-                imageVector = icon,
-                contentDescription = null,
-                tint = MaterialTheme.colorScheme.primary,
-                modifier = Modifier.size(24.dp)
-            )
-            Spacer(modifier = Modifier.width(16.dp))
-            Column {
-                Text(
-                    text = label,
-                    style = MaterialTheme.typography.labelSmall,
-                    color = MaterialTheme.colorScheme.secondary
-                )
-                Text(text = value, style = MaterialTheme.typography.bodyLarge)
-            }
+fun QuickAction(icon: ImageVector, label: String, onClick: () -> Unit) {
+    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+        FilledTonalIconButton(onClick = onClick, modifier = Modifier.size(56.dp)) {
+            Icon(icon, contentDescription = label)
         }
+        Text(label, style = MaterialTheme.typography.labelSmall, modifier = Modifier.padding(top = 4.dp))
     }
 }
 
 @Composable
-fun DetailAction(label: String, icon: ImageVector, onClick: () -> Unit) {
-    Surface(
-        onClick = onClick,
-        modifier = Modifier.fillMaxWidth(),
-        color = Color.Transparent
-    ) {
-        Row(
-            modifier = Modifier
-                .padding(vertical = 12.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Icon(
-                imageVector = icon,
-                contentDescription = null,
-                tint = MaterialTheme.colorScheme.primary,
-                modifier = Modifier.size(24.dp)
-            )
+fun DetailRow(icon: ImageVector, label: String, value: String) {
+    if (value.isNotEmpty()) {
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Icon(icon, contentDescription = null, modifier = Modifier.size(20.dp), tint = MaterialTheme.colorScheme.primary)
             Spacer(modifier = Modifier.width(16.dp))
-            Text(
-                text = label,
-                style = MaterialTheme.typography.bodyLarge,
-                color = MaterialTheme.colorScheme.primary,
-                fontWeight = FontWeight.Medium
-            )
+            Column {
+                Text(label, style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.secondary)
+                Text(value, style = MaterialTheme.typography.bodyLarge)
+            }
         }
     }
 }

@@ -6,7 +6,7 @@ import androidx.lifecycle.viewModelScope
 import com.onlyreminder.app.data.database.entities.ContactEntity
 import com.onlyreminder.app.data.database.entities.GroupEntity
 import com.onlyreminder.app.data.database.entities.TagEntity
-import com.onlyreminder.app.data.repository.ContactRepositoryImpl
+import com.onlyreminder.app.domain.repository.MainRepository
 import com.onlyreminder.app.features.whatsapp.domain.WhatsAppManualManager
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -16,7 +16,7 @@ import javax.inject.Inject
 
 @HiltViewModel
 class ContactDetailViewModel @Inject constructor(
-    private val repository: ContactRepositoryImpl,
+    private val repository: MainRepository,
     private val whatsappManager: WhatsAppManualManager,
     savedStateHandle: SavedStateHandle
 ) : ViewModel() {
@@ -84,6 +84,7 @@ class ContactDetailViewModel @Inject constructor(
 
     fun openWhatsApp(context: android.content.Context) {
         val c = _contact.value ?: return
-        whatsappManager.openWhatsAppChat(context, c.phone, "Hi ${c.firstName}, how are you?")
+        val greeting = context.getString(com.onlyreminder.app.R.string.whatsapp_greeting, c.firstName)
+        whatsappManager.openWhatsAppChat(context, c.phone, greeting)
     }
 }

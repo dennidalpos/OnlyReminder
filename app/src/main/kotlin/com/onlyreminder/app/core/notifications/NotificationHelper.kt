@@ -13,7 +13,6 @@ class NotificationHelper(private val context: Context) {
 
     companion object {
         const val CHANNEL_ID = "onlyreminder_tasks"
-        const val CHANNEL_NAME = "Tasks and Reminders"
     }
 
     init {
@@ -23,7 +22,11 @@ class NotificationHelper(private val context: Context) {
     private fun createNotificationChannel() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             val importance = NotificationManager.IMPORTANCE_DEFAULT
-            val channel = NotificationChannel(CHANNEL_ID, CHANNEL_NAME, importance)
+            val channel = NotificationChannel(
+                CHANNEL_ID,
+                context.getString(com.onlyreminder.app.R.string.notification_channel_tasks_name),
+                importance
+            )
             val notificationManager =
                 context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
             notificationManager.createNotificationChannel(channel)

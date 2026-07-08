@@ -92,7 +92,7 @@ class BirthdayWorker @AssistedInject constructor(
                 val message = if (selectedTemplate != null) {
                     templateEngine.render(selectedTemplate.body, contact)
                 } else {
-                    "Happy Birthday ${contact.firstName}!"
+                    applicationContext.getString(com.onlyreminder.app.R.string.birthday_fallback_message, contact.firstName)
                 }
 
                 mainRepository.addRunItem(
@@ -111,8 +111,8 @@ class BirthdayWorker @AssistedInject constructor(
         val notificationHelper = NotificationHelper(applicationContext)
         notificationHelper.showTaskNotification(
             taskId = 999999 + runId,
-            title = "OnlyReminder: Birthday Check",
-            message = "Today/Tomorrow: ${allRelevantContacts.size} birthdays found."
+            title = applicationContext.getString(com.onlyreminder.app.R.string.birthday_check_notification_title),
+            message = applicationContext.getString(com.onlyreminder.app.R.string.birthday_check_notification_message, allRelevantContacts.size)
         )
 
         return Result.success()

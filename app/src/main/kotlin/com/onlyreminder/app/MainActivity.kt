@@ -1,10 +1,10 @@
 package com.onlyreminder.app
 
 import android.os.Bundle
+import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
-import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
@@ -13,19 +13,18 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.LifecycleOwner
-import androidx.navigation.compose.rememberNavController
-import com.onlyreminder.app.core.navigation.OnlyReminderNavGraph
 import com.onlyreminder.app.core.navigation.Route
 import com.onlyreminder.app.core.security.SecurityManager
 import com.onlyreminder.app.domain.security.SecurityRepository
 import com.onlyreminder.app.features.security.ui.LockScreen
+import com.onlyreminder.app.ui.MainScreen
 import com.onlyreminder.app.ui.MainViewModel
 import com.onlyreminder.app.ui.theme.OnlyReminderTheme
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
 
 @AndroidEntryPoint
-class MainActivity : AppCompatActivity() {
+class MainActivity : ComponentActivity() {
 
     @Inject
     lateinit var securityManager: SecurityManager
@@ -67,11 +66,9 @@ class MainActivity : AppCompatActivity() {
                             securityManager.unlock()
                         }
                     } else {
-                        val navController = rememberNavController()
                         val startDestination =
                             if (onboardingCompleted) Route.Home else Route.Onboarding
-                        OnlyReminderNavGraph(
-                            navController = navController,
+                        MainScreen(
                             startDestination = startDestination
                         )
                     }

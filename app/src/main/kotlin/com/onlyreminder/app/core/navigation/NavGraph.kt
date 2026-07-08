@@ -23,15 +23,18 @@ import com.onlyreminder.app.features.templates.ui.TemplateEditScreen
 import com.onlyreminder.app.features.templates.ui.TemplatesScreen
 import com.onlyreminder.app.features.whatsapp.ui.WhatsAppApiScreen
 import com.onlyreminder.app.features.whatsapp.ui.WhatsAppScreen
+import androidx.compose.ui.Modifier
 
 @Composable
 fun OnlyReminderNavGraph(
     navController: NavHostController,
+    modifier: Modifier = Modifier,
     startDestination: Route = Route.Home,
 ) {
     NavHost(
         navController = navController,
-        startDestination = startDestination
+        startDestination = startDestination,
+        modifier = modifier
     ) {
         composable<Route.Onboarding> { OnboardingScreen(navController) }
         composable<Route.Home> { HomeScreen(navController) }

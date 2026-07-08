@@ -4,9 +4,9 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.onlyreminder.app.data.database.entities.ContactEntity
 import com.onlyreminder.app.data.database.entities.TaskEntity
-import com.onlyreminder.app.data.repository.ContactRepositoryImpl
-import com.onlyreminder.app.data.repository.MainRepositoryImpl
+import com.onlyreminder.app.domain.repository.MainRepository
 import com.onlyreminder.app.data.settings.SettingsDataStore
+import com.onlyreminder.app.domain.model.SendMode
 import com.onlyreminder.app.domain.model.TaskStatus
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.SharingStarted
@@ -22,21 +22,20 @@ data class HomeUiState(
     val birthdaysTomorrowCount: Int = 0,
     val pendingTasks: List<TaskEntity> = emptyList(),
     val birthdayReviewRequired: Boolean = false,
-    val sendMode: String = "REMINDER_ONLY",
+    val sendMode: SendMode = SendMode.REMINDER_ONLY,
     val showBackupWarning: Boolean = false
 )
 
 @HiltViewModel
 class HomeViewModel @Inject constructor(
-    private val contactRepository: ContactRepositoryImpl,
-    private val mainRepository: MainRepositoryImpl,
+    private val repository: MainRepository,
     private val settingsDataStore: SettingsDataStore
 ) : ViewModel() {
 
     val uiState: StateFlow<HomeUiState> = combine(
-        contactRepository.getAllContacts(),
-        mainRepository.getTasksByStatus(TaskStatus.PENDING),
-        mainRepository.getAllBirthdayRuns(),
+        repository.getAllContacts(),
+        repository.getTasksByStatus(TaskStatus.PENDING),
+        repository.getAllBirthdayRuns(),
         settingsDataStore.sendMode,
         settingsDataStore.lastBackupTime
     ) { contacts, tasks, birthdayRuns, sendMode, lastBackupTime ->
