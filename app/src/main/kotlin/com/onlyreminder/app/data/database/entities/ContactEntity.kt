@@ -20,6 +20,7 @@ data class ContactEntity(
     val source: String,
     val notes: String,
     val status: ContactStatus,
+    val isBirthdayMonitored: Boolean = true,
     val lastContactDate: LocalDateTime?,
     val marketingConsent: Boolean,
     val privacyConsent: Boolean,

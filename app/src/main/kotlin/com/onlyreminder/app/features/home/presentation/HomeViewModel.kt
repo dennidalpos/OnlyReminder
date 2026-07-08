@@ -19,9 +19,11 @@ data class HomeUiState(
     val contactCount: Int = 0,
     val upcomingBirthdays: List<ContactEntity> = emptyList(),
     val birthdaysTodayCount: Int = 0,
+    val birthdaysTomorrowCount: Int = 0,
     val pendingTasks: List<TaskEntity> = emptyList(),
     val birthdayReviewRequired: Boolean = false,
-    val sendMode: String = "REMINDER_ONLY"
+    val sendMode: String = "REMINDER_ONLY",
+    val showBackupWarning: Boolean = false
 )
 
 @HiltViewModel
@@ -35,18 +37,30 @@ class HomeViewModel @Inject constructor(
         contactRepository.getAllContacts(),
         mainRepository.getTasksByStatus(TaskStatus.PENDING),
         mainRepository.getAllBirthdayRuns(),
-        settingsDataStore.sendMode
-    ) { contacts, tasks, birthdayRuns, sendMode ->
+        settingsDataStore.sendMode,
+        settingsDataStore.lastBackupTime
+    ) { contacts, tasks, birthdayRuns, sendMode, lastBackupTime ->
         val today = java.time.LocalDate.now()
-        val birthdaysToday = contacts.filter { isBirthdayToday(it.birthday, today) }
+        val tomorrow = today.plusDays(1)
+        
+        val monitoredContacts = contacts.filter { it.isBirthdayMonitored }
+        val birthdaysToday = monitoredContacts.filter { isBirthdayOn(it.birthday, today) }
+        val birthdaysTomorrow = monitoredContacts.filter { isBirthdayOn(it.birthday, tomorrow) }
+
+        val backupWarning = if (lastBackupTime == null) true else {
+            val lastBackup = java.time.LocalDateTime.parse(lastBackupTime)
+            java.time.temporal.ChronoUnit.DAYS.between(lastBackup, java.time.LocalDateTime.now()) > 7
+        }
 
         HomeUiState(
             contactCount = contacts.size,
-            upcomingBirthdays = contacts.filter { isBirthdaySoon(it.birthday, today) }.take(5),
+            upcomingBirthdays = monitoredContacts.filter { isBirthdaySoon(it.birthday, today) }.take(5),
             birthdaysTodayCount = birthdaysToday.size,
+            birthdaysTomorrowCount = birthdaysTomorrow.size,
             pendingTasks = tasks,
             birthdayReviewRequired = birthdayRuns.any { it.status == com.onlyreminder.app.domain.model.BirthdayRunStatus.PENDING },
-            sendMode = sendMode
+            sendMode = sendMode,
+            showBackupWarning = contacts.isNotEmpty() && backupWarning
         )
     }
         .stateIn(
@@ -55,11 +69,11 @@ class HomeViewModel @Inject constructor(
             initialValue = HomeUiState()
         )
 
-    private fun isBirthdayToday(birthday: String?, today: java.time.LocalDate): Boolean {
+    private fun isBirthdayOn(birthday: String?, date: java.time.LocalDate): Boolean {
         if (birthday == null) return false
         return try {
-            val date = java.time.LocalDate.parse(birthday)
-            date.monthValue == today.monthValue && date.dayOfMonth == today.dayOfMonth
+            val bDate = java.time.LocalDate.parse(birthday)
+            bDate.monthValue == date.monthValue && bDate.dayOfMonth == date.dayOfMonth
         } catch (e: Exception) {
             false
         }

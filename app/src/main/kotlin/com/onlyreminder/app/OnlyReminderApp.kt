@@ -6,11 +6,14 @@ import androidx.work.Configuration
 import androidx.work.ExistingPeriodicWorkPolicy
 import androidx.work.PeriodicWorkRequestBuilder
 import androidx.work.WorkManager
+import com.onlyreminder.app.core.notifications.TaskScheduler
 import com.onlyreminder.app.data.database.DatabaseSeeder
+import com.onlyreminder.app.data.settings.SettingsDataStore
 import com.onlyreminder.app.features.birthday.data.BirthdayWorker
 import dagger.hilt.android.HiltAndroidApp
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import java.util.concurrent.TimeUnit
 import javax.inject.Inject
@@ -24,6 +27,12 @@ class OnlyReminderApp : Application(), Configuration.Provider {
     @Inject
     lateinit var seeder: DatabaseSeeder
 
+    @Inject
+    lateinit var settingsDataStore: SettingsDataStore
+
+    @Inject
+    lateinit var taskScheduler: TaskScheduler
+
     override val workManagerConfiguration: Configuration
         get() = Configuration.Builder()
             .setWorkerFactory(workerFactory)
@@ -32,26 +41,19 @@ class OnlyReminderApp : Application(), Configuration.Provider {
     override fun onCreate() {
         super.onCreate()
 
-        if (resources.getBoolean(R.bool.is_demo)) {
-            CoroutineScope(Dispatchers.IO).launch {
+        CoroutineScope(Dispatchers.IO).launch {
+            if (resources.getBoolean(R.bool.is_demo)) {
                 seeder.seedDemoData()
             }
+            
+            val notificationTime = settingsDataStore.birthdayNotificationTime.first()
+            taskScheduler.rescheduleBirthdayWorker(notificationTime, androidx.work.ExistingPeriodicWorkPolicy.KEEP)
+            
+            scheduleBackupWorker()
         }
-
-        scheduleBirthdayWorker()
     }
 
-    private fun scheduleBirthdayWorker() {
-        val birthdayRequest = PeriodicWorkRequestBuilder<BirthdayWorker>(1, TimeUnit.DAYS)
-            .addTag("birthday_scan")
-            .build()
-
-        WorkManager.getInstance(this).enqueueUniquePeriodicWork(
-            "birthday_scan",
-            ExistingPeriodicWorkPolicy.KEEP,
-            birthdayRequest,
-        )
-
+    private fun scheduleBackupWorker() {
         val backupRequest =
             PeriodicWorkRequestBuilder<com.onlyreminder.app.features.backup.data.BackupWorker>(
                 1,

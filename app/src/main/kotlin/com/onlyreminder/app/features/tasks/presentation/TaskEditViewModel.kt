@@ -31,6 +31,7 @@ class TaskEditViewModel @Inject constructor(
 
     private val taskId: Long? = savedStateHandle["id"]
     private val initialContactId: Long? = savedStateHandle["contactId"]
+    private val initialGroupId: Long? = savedStateHandle["groupId"]
 
     private val _task = MutableStateFlow<TaskEntity?>(null)
     val task: StateFlow<TaskEntity?> = _task.asStateFlow()
@@ -62,7 +63,7 @@ class TaskEditViewModel @Inject constructor(
                     title = "",
                     description = "",
                     contactId = initialContactId,
-                    groupId = null,
+                    groupId = initialGroupId,
                     type = "REMINDER",
                     dueDateTime = LocalDateTime.now().plusHours(1),
                     repeatRule = null,

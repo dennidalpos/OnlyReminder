@@ -1,5 +1,6 @@
 package com.onlyreminder.app.features.birthday.presentation
 
+import android.content.Context
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.onlyreminder.app.data.database.entities.BirthdayRunEntity
@@ -11,6 +12,7 @@ import com.onlyreminder.app.domain.model.BirthdayItemStatus
 import com.onlyreminder.app.domain.model.BirthdayRunStatus
 import com.onlyreminder.app.features.whatsapp.data.WhatsAppRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
+import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -26,7 +28,9 @@ class BirthdayReviewViewModel @Inject constructor(
     private val mainRepository: MainRepositoryImpl,
     private val contactRepository: ContactRepositoryImpl,
     private val settingsDataStore: com.onlyreminder.app.data.settings.SettingsDataStore,
-    private val whatsappRepository: WhatsAppRepository
+    private val whatsappRepository: WhatsAppRepository,
+    private val birthdayScanner: com.onlyreminder.app.features.birthday.domain.BirthdayScanner,
+    @ApplicationContext private val context: Context
 ) : ViewModel() {
 
     val sendMode = settingsDataStore.sendMode.stateIn(
@@ -47,25 +51,60 @@ class BirthdayReviewViewModel @Inject constructor(
 
     private fun loadLatestRun() {
         viewModelScope.launch {
-            mainRepository.getAllBirthdayRuns().collectLatest { runs ->
-                val latest = runs.firstOrNull { it.status == BirthdayRunStatus.PENDING }
-                    ?: runs.firstOrNull()
+            mainRepository.getAllBirthdayRuns().collect { runs ->
+                val today = java.time.LocalDate.now()
+                val dateStr = today.format(java.time.format.DateTimeFormatter.ISO_LOCAL_DATE)
+                
+                val latest = runs.find { it.date == dateStr }
+                    ?: runs.find { it.status == BirthdayRunStatus.PENDING }
+
                 _latestRun.value = latest
 
                 if (latest != null) {
-                    mainRepository.getItemsForRun(latest.id).collectLatest { runItems ->
-                        val contacts = contactRepository.getAllContacts().first()
-                        _items.value = runItems.map { item ->
-                            BirthdayRunItemWithContact(
-                                item = item,
-                                contact = contacts.find { it.id == item.contactId }
-                            )
-                        }
+                    loadItemsForRun(latest.id)
+                } else {
+                    val contactsToday = birthdayScanner.findBirthdaysForDate(today)
+                    val tomorrow = today.plusDays(1)
+                    val contactsTomorrow = birthdayScanner.findBirthdaysForDate(tomorrow)
+                    val all = (contactsToday + contactsTomorrow).distinctBy { it.id }
+                    
+                    if (all.isNotEmpty()) {
+                        triggerSync()
                     }
                 }
             }
         }
     }
+
+    private var itemsJob: kotlinx.coroutines.Job? = null
+    
+    private fun loadItemsForRun(runId: Long) {
+        itemsJob?.cancel()
+        itemsJob = viewModelScope.launch {
+            mainRepository.getItemsForRun(runId).collect { runItems ->
+                val contacts = contactRepository.getAllContacts().first()
+                _items.value = runItems.map { item ->
+                    BirthdayRunItemWithContact(
+                        item = item,
+                        contact = contacts.find { it.id == item.contactId }
+                    )
+                }
+            }
+        }
+    }
+
+    private fun triggerSync() {
+        viewModelScope.launch {
+            val workManager = androidx.work.WorkManager.getInstance(context)
+            val request = androidx.work.OneTimeWorkRequestBuilder<com.onlyreminder.app.features.birthday.data.BirthdayWorker>()
+                .build()
+            workManager.enqueue(request)
+        }
+    }
+
+    // Add this to get Context in ViewModel if needed, but Hilt usually handles it.
+    // Actually, I can't easily get application context here without changing constructor.
+    // I'll use a different approach: call the mainRepository to trigger logic.
 
     fun updateItemStatus(itemId: Long, status: BirthdayItemStatus) {
         viewModelScope.launch {
@@ -83,9 +122,17 @@ class BirthdayReviewViewModel @Inject constructor(
         val contact = itemWithContact.contact ?: return
         viewModelScope.launch {
             val templates = mainRepository.getAllTemplates().first()
-            val birthdayTemplate =
-                templates.find { it.isDefault && it.name.contains("Birthday", ignoreCase = true) }
+            val templateId = settingsDataStore.birthdayTemplateId.first()
+            val appLanguage = settingsDataStore.language.first()
+
+            val birthdayTemplate = if (templateId != null) {
+                templates.find { it.id == templateId }
+            } else {
+                templates.find { it.isDefault && it.language.equals(appLanguage, ignoreCase = true) && it.name.contains("Birthday", ignoreCase = true) }
+                    ?: templates.find { it.isDefault && it.name.contains("Birthday", ignoreCase = true) }
+                    ?: templates.find { it.language.equals(appLanguage, ignoreCase = true) && it.name.contains("Birthday", ignoreCase = true) }
                     ?: templates.find { it.name.contains("Birthday", ignoreCase = true) }
+            }
 
             val overrideName = birthdayTemplate?.whatsappApprovedTemplateName
 

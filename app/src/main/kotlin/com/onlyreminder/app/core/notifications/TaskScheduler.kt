@@ -7,8 +7,11 @@ import android.content.Intent
 import android.os.Build
 import com.onlyreminder.app.data.database.entities.TaskEntity
 import com.onlyreminder.app.domain.model.TaskStatus
+import com.onlyreminder.app.features.birthday.data.BirthdayWorker
 import dagger.hilt.android.qualifiers.ApplicationContext
+import java.time.LocalTime
 import java.time.ZoneId
+import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -16,6 +19,28 @@ import javax.inject.Singleton
 class TaskScheduler @Inject constructor(
     @ApplicationContext private val context: Context
 ) {
+
+    fun rescheduleBirthdayWorker(timeStr: String, policy: androidx.work.ExistingPeriodicWorkPolicy = androidx.work.ExistingPeriodicWorkPolicy.UPDATE) {
+        val time = try { LocalTime.parse(timeStr) } catch (e: Exception) { LocalTime.of(9, 0) }
+        val now = LocalTime.now()
+        
+        var initialDelay = java.time.Duration.between(now, time).toMinutes()
+        if (initialDelay < 0) {
+            initialDelay += 24 * 60
+        }
+
+        val workManager = androidx.work.WorkManager.getInstance(context)
+        val birthdayRequest = androidx.work.PeriodicWorkRequestBuilder<BirthdayWorker>(1, TimeUnit.DAYS)
+            .setInitialDelay(initialDelay, TimeUnit.MINUTES)
+            .addTag("birthday_scan")
+            .build()
+
+        workManager.enqueueUniquePeriodicWork(
+            "birthday_scan",
+            policy,
+            birthdayRequest
+        )
+    }
 
     fun scheduleTask(task: TaskEntity) {
         if (task.status != TaskStatus.PENDING) return

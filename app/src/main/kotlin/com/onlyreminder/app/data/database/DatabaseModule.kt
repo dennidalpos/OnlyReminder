@@ -59,6 +59,7 @@ object DatabaseModule {
             AppDatabase.DB_NAME,
         )
             .openHelperFactory(factory)
+            .fallbackToDestructiveMigration()
             .build()
     }
 

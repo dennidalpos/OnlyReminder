@@ -4,6 +4,9 @@
     <string name="welcome_message">Welcome to OnlyReminder</string>
     <string name="welcome_description">Manage your professional network, keep track of birthdays, and send personalized messages securely and privately.</string>
     <string name="next">Next</string>
+    <string name="birthday_monitoring">Birthday Monitoring</string>
+    <string name="monitoring_enabled">Enabled</string>
+    <string name="monitoring_disabled">Disabled</string>
     <string name="back">Back</string>
     <string name="finish">Finish</string>
     <string name="language_selection">Language</string>
@@ -103,6 +106,8 @@
     <!-- Step 08 & 09: Import -->
     <string name="import_contacts">Import Contacts</string>
     <string name="import_file">Import File</string>
+    <string name="error_reading_contacts">Error reading system contacts: %1$s</string>
+    <string name="import_from_phone">Import from Phone</string>
     <string name="select_file">Select a file (CSV, XLSX, JSON, XML) to import contacts</string>
     <string name="pick_file">Pick File</string>
     <string name="map_columns">Map Columns</string>
@@ -148,6 +153,12 @@
     <string name="sending_mode_header">Sending Mode</string>
     <string name="birthdays_header">Birthdays</string>
     <string name="notification_time">Notification Time</string>
+    <string name="birthday_template">Birthday Template</string>
+    <string name="select_template">Select Template</string>
+    <string name="normalize_phone_label">Normalize Phone Numbers</string>
+    <string name="normalize_phone_desc">Automatically add country code and clean format</string>
+    <string name="select_country_code">Select Country Code</string>
+    <string name="change_pin">Change PIN</string>
     <string name="backup_header">Backup</string>
     <string name="backup_location">Backup Location</string>
     <string name="select">Select</string>
@@ -253,7 +264,10 @@
     <string name="start_by_adding_contacts">Start by adding some contacts.</string>
     <string name="saved_contacts_count_new">You have %1$d saved contacts.</string>
     <string name="pending_tasks_summary">You have %1$d tasks to complete today.</string>
-    <string name="birthdays_today_count">Today is the birthday of %1$d contacts!</string>
+    <string name="birthdays_today_count">Today: %1$d</string>
+    <string name="birthdays_tomorrow_count">Tomorrow: %1$d</string>
+    <string name="backup_required_title">Backup Recommended</string>
+    <string name="backup_required_desc">Your data hasn\'t been backed up recently. Protect it from accidental deletion.</string>
     <string name="report_finale">Final Report</string>
     <string name="summary">Summary</string>
     <string name="total_found">Total Found</string>

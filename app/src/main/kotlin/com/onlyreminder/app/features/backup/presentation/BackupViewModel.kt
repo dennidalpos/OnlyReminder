@@ -15,7 +15,8 @@ import javax.inject.Inject
 
 @HiltViewModel
 class BackupViewModel @Inject constructor(
-    private val backupManager: BackupManager
+    private val backupManager: BackupManager,
+    private val settingsDataStore: com.onlyreminder.app.data.settings.SettingsDataStore
 ) : ViewModel() {
 
     private val _isLoading = MutableStateFlow(false)
@@ -29,6 +30,7 @@ class BackupViewModel @Inject constructor(
             _isLoading.value = true
             val file = backupManager.createBackup(password)
             if (file != null) {
+                settingsDataStore.updateLastBackupTime(java.time.LocalDateTime.now().toString())
                 _status.value = UiText.StringResource(R.string.backup_create_success, file.name)
             } else {
                 _status.value = UiText.StringResource(R.string.backup_create_failed)

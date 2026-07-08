@@ -268,8 +268,7 @@ fun TaskEditScreen(
                     ) {
                         listOf(
                             "REMINDER_ONLY",
-                            "MANUAL_WHATSAPP",
-                            "WHATSAPP_BUSINESS_API"
+                            "MANUAL_WHATSAPP"
                         ).forEach { mode ->
                             DropdownMenuItem(
                                 text = { Text(mode) },

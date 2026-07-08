@@ -97,18 +97,10 @@ fun OnboardingScreen(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) {
-                if (currentStep == 2 && !isPinSet) {
-                    OutlinedButton(
-                        onClick = { viewModel.nextStep() },
-                        modifier = Modifier.weight(1f)
-                    ) {
-                        Text(stringResource(R.string.skip))
-                    }
-                }
-
                 Button(
                     onClick = { viewModel.nextStep() },
-                    modifier = Modifier.weight(1f)
+                    modifier = Modifier.weight(1f),
+                    enabled = currentStep != 2 || isPinSet
                 ) {
                     Text(if (currentStep < 3) stringResource(R.string.next) else stringResource(R.string.finish))
                 }

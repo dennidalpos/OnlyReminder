@@ -27,6 +27,8 @@ class DatabaseSeeder @Inject constructor(
     suspend fun seedDemoData() {
         // Check if already seeded
         if (contactDao.getContactById(1) != null) return
+        
+        // 1. Seed Groups
         val familyGroupId = groupDao.insertGroup(
             GroupEntity(
                 name = "Famiglia",
@@ -48,40 +50,27 @@ class DatabaseSeeder @Inject constructor(
                 color = 0xFF4CAF50.toInt(),
             ),
         )
-        val vipGroupId = groupDao.insertGroup(
-            GroupEntity(
-                name = "Clienti VIP",
-                description = "Clienti con priorità alta",
-                color = 0xFFFFD700.toInt(),
-            ),
-        )
-        val sportGroupId = groupDao.insertGroup(
-            GroupEntity(
-                name = "Sport",
-                description = "Compagni di squadra e allenatori",
-                color = 0xFFFF9800.toInt(),
-            ),
-        )
 
         // 2. Seed Templates
-        mainDao.insertTemplate(
+        val bdayFriendsTemplate = mainDao.insertTemplate(
             TemplateEntity(
-                name = "Auguri Compleanno Formale",
+                name = "Compleanno Amici",
                 language = "it",
-                channel = "WHATSAPP",
-                body = "Gentile {nome}, Le auguro un felice compleanno. Cordiali saluti.",
-                variables = "nome",
+                channel = "WHATSAPP_MANUAL",
+                body = "Ehi {first_name}! Tanti auguri di buon compleanno! 🎂 Ci vediamo presto!",
+                variables = "first_name",
                 isDefault = true,
                 whatsappApprovedTemplateName = null,
             ),
         )
+        
         mainDao.insertTemplate(
             TemplateEntity(
-                name = "Auguri Compleanno Amici",
+                name = "Compleanno Formale",
                 language = "it",
-                channel = "WHATSAPP",
-                body = "Ehi {nome}! Tanti auguri di buon compleanno! Ci vediamo presto per festeggiare! 🎂",
-                variables = "nome",
+                channel = "WHATSAPP_MANUAL",
+                body = "Gentile {first_name}, Le auguro un felice compleanno. Cordiali saluti.",
+                variables = "first_name",
                 isDefault = false,
                 whatsappApprovedTemplateName = null,
             ),
@@ -89,6 +78,7 @@ class DatabaseSeeder @Inject constructor(
 
         // 3. Seed Contacts
         val today = LocalDate.now()
+        val tomorrow = today.plusDays(1)
 
         val marioId = contactDao.insertContact(
             ContactEntity(
@@ -96,14 +86,15 @@ class DatabaseSeeder @Inject constructor(
                 lastName = "Rossi",
                 displayName = "Mario Rossi",
                 phone = "+393401234567",
-                normalizedPhone = "393401234567",
+                normalizedPhone = "+393401234567",
                 email = "mario.rossi@example.it",
                 company = "Rossi Termoidraulica",
-                birthday = today.toString(), // Birthday today for demo purposes
+                birthday = today.toString(), // Compleanno OGGI
                 groupId = workGroupId,
                 source = "MANUAL",
                 notes = "Cliente importante",
                 status = ContactStatus.ACTIVE,
+                isBirthdayMonitored = true,
                 lastContactDate = LocalDateTime.now().minusDays(5),
                 marketingConsent = true,
                 privacyConsent = true,
@@ -116,14 +107,15 @@ class DatabaseSeeder @Inject constructor(
                 lastName = "Bianchi",
                 displayName = "Giulia Bianchi",
                 phone = "+393339876543",
-                normalizedPhone = "393339876543",
+                normalizedPhone = "+393339876543",
                 email = "giulia.b@email.it",
                 company = "",
-                birthday = today.minusMonths(2).toString(),
+                birthday = tomorrow.toString(), // Compleanno DOMANI
                 groupId = familyGroupId,
                 source = "MANUAL",
                 notes = "Sorella",
                 status = ContactStatus.ACTIVE,
+                isBirthdayMonitored = true,
                 lastContactDate = LocalDateTime.now().minusDays(1),
                 marketingConsent = true,
                 privacyConsent = true,
@@ -136,56 +128,17 @@ class DatabaseSeeder @Inject constructor(
                 lastName = "Verdi",
                 displayName = "Luca Verdi",
                 phone = "+393281122334",
-                normalizedPhone = "393281122334",
+                normalizedPhone = "+393281122334",
                 email = "luca.verdi@posta.it",
                 company = "Verdi Tech",
-                birthday = today.plusDays(2).toString(), // Birthday in 2 days
+                birthday = today.plusMonths(1).toString(),
                 groupId = friendsGroupId,
                 source = "MANUAL",
-                notes = "Compagno di università",
+                notes = "Compagno di università - Monitoraggio Disattivato",
                 status = ContactStatus.ACTIVE,
+                isBirthdayMonitored = false, // Monitoraggio disattivato
                 lastContactDate = LocalDateTime.now().minusMonths(1),
                 marketingConsent = false,
-                privacyConsent = true,
-            ),
-        )
-
-        val elenaId = contactDao.insertContact(
-            ContactEntity(
-                firstName = "Elena",
-                lastName = "Gialli",
-                displayName = "Elena Gialli",
-                phone = "+393475566778",
-                normalizedPhone = "393475566778",
-                email = "elena.g@vip.it",
-                company = "Luxury Living",
-                birthday = today.plusDays(10).toString(),
-                groupId = vipGroupId,
-                source = "MANUAL",
-                notes = "Contatto VIP per eventi",
-                status = ContactStatus.ACTIVE,
-                lastContactDate = LocalDateTime.now().minusWeeks(2),
-                marketingConsent = true,
-                privacyConsent = true,
-            ),
-        )
-
-        val marcoId = contactDao.insertContact(
-            ContactEntity(
-                firstName = "Marco",
-                lastName = "Bruni",
-                displayName = "Marco Bruni",
-                phone = "+393201122334",
-                normalizedPhone = "393201122334",
-                email = "m.bruni@sport.it",
-                company = "Palestra Fit",
-                birthday = today.minusDays(5).toString(),
-                groupId = sportGroupId,
-                source = "MANUAL",
-                notes = "Allenatore",
-                status = ContactStatus.ACTIVE,
-                lastContactDate = LocalDateTime.now().minusDays(3),
-                marketingConsent = true,
                 privacyConsent = true,
             ),
         )
@@ -198,102 +151,36 @@ class DatabaseSeeder @Inject constructor(
                 contactId = marioId,
                 groupId = workGroupId,
                 type = "REMINDER",
-                dueDateTime = LocalDateTime.now().plusDays(1).withHour(10).withMinute(0),
+                dueDateTime = LocalDateTime.now().plusHours(2),
                 repeatRule = null,
                 priority = 2,
                 status = TaskStatus.PENDING,
                 templateId = null,
-                sendMode = "MANUAL",
+                sendMode = "REMINDER_ONLY",
             )
         )
 
         mainDao.insertTask(
             TaskEntity(
-                title = "Chiamata di follow-up",
-                description = "Chiamare Elena per confermare la partecipazione all'evento",
-                contactId = elenaId,
-                groupId = vipGroupId,
+                title = "Reminder Compleanno Giulia",
+                description = "Preparare regalo per Giulia",
+                contactId = giuliaId,
+                groupId = familyGroupId,
                 type = "REMINDER",
-                dueDateTime = LocalDateTime.now().plusHours(4),
+                dueDateTime = LocalDateTime.now().plusDays(1).withHour(9).withMinute(0),
                 repeatRule = null,
                 priority = 1,
                 status = TaskStatus.PENDING,
-                templateId = null,
-                sendMode = "MANUAL",
-            )
-        )
-
-        mainDao.insertTask(
-            TaskEntity(
-                title = "Aggiornare catalogo",
-                description = "Aggiornare il file PDF del catalogo prodotti 2024",
-                contactId = null,
-                groupId = workGroupId,
-                type = "MANUAL",
-                dueDateTime = LocalDateTime.now().plusDays(3),
-                repeatRule = null,
-                priority = 0,
-                status = TaskStatus.PENDING,
-                templateId = null,
-                sendMode = "MANUAL",
-            )
-        )
-
-        mainDao.insertTask(
-            TaskEntity(
-                title = "Verifica Backup",
-                description = "Controllare che il backup settimanale sia stato eseguito correttamente",
-                contactId = null,
-                groupId = null,
-                type = "MANUAL",
-                dueDateTime = LocalDateTime.now().minusDays(1),
-                repeatRule = "WEEKLY",
-                priority = 1,
-                status = TaskStatus.COMPLETED,
-                templateId = null,
-                sendMode = "MANUAL",
-                completedAt = LocalDateTime.now().minusDays(1)
+                templateId = bdayFriendsTemplate,
+                sendMode = "MANUAL_WHATSAPP",
             )
         )
 
         // 5. Seed Tags
-        val tags = listOf("VIP", "Urgente", "Potenziale Cliente", "Famiglia", "Palestra")
+        val tags = listOf("Urgente", "Potenziale Cliente", "Famiglia")
         tags.forEach { tagDao.insertTag(TagEntity(it)) }
 
         tagDao.insertContactTagCrossRef(ContactTagCrossRefEntity(marioId, "Potenziale Cliente"))
-        tagDao.insertContactTagCrossRef(ContactTagCrossRefEntity(elenaId, "VIP"))
-        tagDao.insertContactTagCrossRef(ContactTagCrossRefEntity(elenaId, "Urgente"))
-        tagDao.insertContactTagCrossRef(ContactTagCrossRefEntity(marcoId, "Palestra"))
-
-        // 6. Seed Message Logs (Simulation of previous activity)
-        mainDao.insertLog(
-            MessageLogEntity(
-                contactId = marioId,
-                templateId = null,
-                taskId = null,
-                birthdayRunId = null,
-                channel = "WHATSAPP",
-                mode = "MANUAL",
-                status = MessageStatus.SENT,
-                errorMessage = null,
-                payloadPreview = "Buongiorno Mario, come concordato...",
-                sentAt = LocalDateTime.now().minusDays(5),
-            )
-        )
-
-        mainDao.insertLog(
-            MessageLogEntity(
-                contactId = giuliaId,
-                templateId = null,
-                taskId = null,
-                birthdayRunId = null,
-                channel = "WHATSAPP",
-                mode = "MANUAL",
-                status = MessageStatus.SENT,
-                errorMessage = null,
-                payloadPreview = "Ciao Giulia, come stai?",
-                sentAt = LocalDateTime.now().minusDays(1),
-            )
-        )
+        tagDao.insertContactTagCrossRef(ContactTagCrossRefEntity(giuliaId, "Famiglia"))
     }
 }

@@ -103,7 +103,10 @@ fun ImportScreen(
 
             when (val step = currentStep) {
                 is ImportViewModel.ImportStep.SelectFile -> {
-                    SelectFileStep(onFileSelected = { viewModel.loadFile(it) })
+                    SelectFileStep(
+                        onFileSelected = { viewModel.loadFile(it) },
+                        onImportFromPhone = { viewModel.importFromSystem() }
+                    )
                 }
 
                 is ImportViewModel.ImportStep.PreviewAndMapping -> {
@@ -156,11 +159,19 @@ fun ImportScreen(
 }
 
 @Composable
-fun SelectFileStep(onFileSelected: (Uri) -> Unit) {
+fun SelectFileStep(onFileSelected: (Uri) -> Unit, onImportFromPhone: () -> Unit) {
     val launcher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.OpenDocument()
     ) { uri: Uri? ->
         uri?.let { onFileSelected(it) }
+    }
+
+    val permissionLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.RequestPermission()
+    ) { isGranted: Boolean ->
+        if (isGranted) {
+            onImportFromPhone()
+        }
     }
 
     Column(
@@ -177,22 +188,42 @@ fun SelectFileStep(onFileSelected: (Uri) -> Unit) {
         Spacer(modifier = Modifier.height(16.dp))
         Text(
             stringResource(id = R.string.select_file),
-            style = MaterialTheme.typography.bodyLarge
+            style = MaterialTheme.typography.bodyLarge,
+            textAlign = androidx.compose.ui.text.style.TextAlign.Center,
+            modifier = Modifier.padding(horizontal = 32.dp)
         )
         Spacer(modifier = Modifier.height(24.dp))
-        Button(onClick = {
-            launcher.launch(
-                arrayOf(
-                    "text/comma-separated-values",
-                    "text/csv",
-                    "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-                    "application/json",
-                    "text/xml",
-                    "application/xml"
+        Button(
+            onClick = {
+                launcher.launch(
+                    arrayOf(
+                        "text/comma-separated-values",
+                        "text/csv",
+                        "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                        "application/json",
+                        "text/xml",
+                        "application/xml"
+                    )
                 )
-            )
-        }) {
+            },
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 32.dp)
+        ) {
             Text(stringResource(id = R.string.pick_file))
+        }
+
+        Spacer(modifier = Modifier.height(12.dp))
+
+        OutlinedButton(
+            onClick = {
+                permissionLauncher.launch(android.Manifest.permission.READ_CONTACTS)
+            },
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 32.dp)
+        ) {
+            Text(stringResource(id = R.string.import_from_phone))
         }
     }
 }

@@ -24,10 +24,12 @@ class BirthdayWorker @AssistedInject constructor(
     @Assisted params: WorkerParameters,
     private val birthdayScanner: BirthdayScanner,
     private val mainRepository: MainRepositoryImpl,
+    private val settingsDataStore: com.onlyreminder.app.data.settings.SettingsDataStore
 ) : CoroutineWorker(context, params) {
 
     override suspend fun doWork(): Result {
         val today = LocalDate.now()
+        val tomorrow = today.plusDays(1)
         val dateStr = today.format(DateTimeFormatter.ISO_LOCAL_DATE)
 
         // Mark previous runs as NOT_REVIEWED if they are still PENDING
@@ -38,81 +40,79 @@ class BirthdayWorker @AssistedInject constructor(
             }
         }
 
-        // Check if run already exists for today
-        if (allRuns.any { it.date == dateStr }) {
+        val contactsToday = birthdayScanner.findBirthdaysForDate(today)
+        val contactsTomorrow = birthdayScanner.findBirthdaysForDate(tomorrow)
+        
+        val allRelevantContacts = (contactsToday + contactsTomorrow).distinctBy { it.id }
+
+        if (allRelevantContacts.isEmpty()) {
             return Result.success()
         }
 
-        val allContactsToday = birthdayScanner.findBirthdaysForDate(today)
-        if (allContactsToday.isEmpty()) {
-            return Result.success()
-        }
-
-        // Filter contacts that are actually covered by an active birthday task
-        // If no tasks are defined, we scan ALL contacts (Evolution: make it easy for users)
-        val activeBirthdayTasks =
-            mainRepository.getTasksByStatus(com.onlyreminder.app.domain.model.TaskStatus.PENDING)
-                .first()
-                .filter { it.type == "BIRTHDAY" }
-
-        val contacts = if (activeBirthdayTasks.isEmpty()) {
-            allContactsToday
-        } else {
-            allContactsToday.filter { contact ->
-                activeBirthdayTasks.any { task ->
-                    task.contactId == contact.id || (task.groupId != null && contact.groupId == task.groupId)
-                }
-            }
-        }
-
-        if (contacts.isEmpty()) {
-            return Result.success()
-        }
-
-        // Get default template for birthday
+        // Get template for birthday
         val templates = mainRepository.getAllTemplates().first()
-        val defaultTemplate =
-            templates.find { it.isDefault && it.name.contains("Birthday", ignoreCase = true) }
+        val templateId = settingsDataStore.birthdayTemplateId.first()
+        val appLanguage = settingsDataStore.language.first()
+
+        val selectedTemplate = if (templateId != null) {
+            templates.find { it.id == templateId }
+        } else {
+            // Fallback: Default birthday template matching app language, or any default birthday template
+            templates.find { it.isDefault && it.language.equals(appLanguage, ignoreCase = true) && it.name.contains("Birthday", ignoreCase = true) }
+                ?: templates.find { it.isDefault && it.name.contains("Birthday", ignoreCase = true) }
+                ?: templates.find { it.language.equals(appLanguage, ignoreCase = true) && it.name.contains("Birthday", ignoreCase = true) }
                 ?: templates.find { it.name.contains("Birthday", ignoreCase = true) }
+        }
 
         val templateEngine = TemplateEngine()
 
-        val runId = mainRepository.createBirthdayRun(
-            BirthdayRunEntity(
-                date = dateStr,
-                status = BirthdayRunStatus.PENDING,
-                totalFound = contacts.size,
-                totalSelected = contacts.size,
-                totalSkipped = 0,
-                totalSent = 0,
-                totalFailed = 0
-            )
-        )
-
-        contacts.forEach { contact ->
-            val message = if (defaultTemplate != null) {
-                templateEngine.render(defaultTemplate.body, contact)
-            } else {
-                "Happy Birthday ${contact.firstName}!"
-            }
-
-            mainRepository.addRunItem(
-                BirthdayRunItemEntity(
-                    birthdayRunId = runId,
-                    contactId = contact.id,
-                    status = BirthdayItemStatus.PENDING,
-                    generatedMessagePreview = message,
-                    errorMessage = null
+        // Check if run already exists for today, if so, we might update it or skip
+        val existingRun = allRuns.find { it.date == dateStr }
+        val runId = if (existingRun != null) {
+            existingRun.id
+        } else {
+            mainRepository.createBirthdayRun(
+                BirthdayRunEntity(
+                    date = dateStr,
+                    status = BirthdayRunStatus.PENDING,
+                    totalFound = allRelevantContacts.size,
+                    totalSelected = allRelevantContacts.size,
+                    totalSkipped = 0,
+                    totalSent = 0,
+                    totalFailed = 0
                 )
             )
+        }
+
+        val existingItems = mainRepository.getItemsForRun(runId).first()
+        val existingContactIds = existingItems.map { it.contactId }.toSet()
+
+        allRelevantContacts.forEach { contact ->
+            if (!existingContactIds.contains(contact.id)) {
+                val message = if (selectedTemplate != null) {
+                    templateEngine.render(selectedTemplate.body, contact)
+                } else {
+                    "Happy Birthday ${contact.firstName}!"
+                }
+
+                mainRepository.addRunItem(
+                    BirthdayRunItemEntity(
+                        birthdayRunId = runId,
+                        contactId = contact.id,
+                        status = BirthdayItemStatus.PENDING,
+                        generatedMessagePreview = message,
+                        errorMessage = null
+                    )
+                )
+            }
         }
 
         // Notification
         val notificationHelper = NotificationHelper(applicationContext)
         notificationHelper.showTaskNotification(
-            taskId = 999999 + runId, // Use a special range for birthday runs
-            title = "Birthday Review Required",
-            message = "Today there are ${contacts.size} birthday contacts to review."
+            taskId = 999999 + runId,
+            title = "OnlyReminder: Birthday Check",
+            message = "Today/Tomorrow: ${allRelevantContacts.size} birthdays found."
         )
 
         return Result.success()

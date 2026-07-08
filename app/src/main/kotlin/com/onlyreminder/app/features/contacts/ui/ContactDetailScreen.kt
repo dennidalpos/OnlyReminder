@@ -39,6 +39,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SuggestionChip
 import androidx.compose.material3.Surface
+import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -175,6 +176,41 @@ fun ContactDetailScreen(
                     label = stringResource(id = R.string.birthday),
                     value = c.birthday ?: stringResource(id = R.string.not_set),
                 )
+
+                // Birthday Monitoring Toggle
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(vertical = 8.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Icon(
+                            imageVector = Icons.Default.Cake,
+                            contentDescription = null,
+                            tint = if (c.isBirthdayMonitored) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.outline,
+                            modifier = Modifier.size(24.dp)
+                        )
+                        Spacer(modifier = Modifier.width(16.dp))
+                        Column {
+                            Text(
+                                text = stringResource(id = R.string.birthday_monitoring),
+                                style = MaterialTheme.typography.bodyLarge,
+                                fontWeight = FontWeight.Medium
+                            )
+                            Text(
+                                text = if (c.isBirthdayMonitored) stringResource(R.string.monitoring_enabled) else stringResource(R.string.monitoring_disabled),
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.secondary
+                            )
+                        }
+                    }
+                    Switch(
+                        checked = c.isBirthdayMonitored,
+                        onCheckedChange = { viewModel.toggleBirthdayMonitoring() }
+                    )
+                }
                 DetailItem(
                     icon = Icons.Default.Group,
                     label = stringResource(id = R.string.group),

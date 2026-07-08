@@ -31,7 +31,7 @@ sealed interface Route {
     data object Tasks : Route
 
     @Serializable
-    data class TaskEdit(val id: Long? = null, val contactId: Long? = null) : Route
+    data class TaskEdit(val id: Long? = null, val contactId: Long? = null, val groupId: Long? = null) : Route
 
     @Serializable
     data object Templates : Route

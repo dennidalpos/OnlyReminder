@@ -49,6 +49,7 @@ interface ContactDao {
         SELECT * FROM contacts 
         WHERE birthday IS NOT NULL 
         AND strftime('%m-%d', birthday) = :monthDay
+        AND isBirthdayMonitored = 1
     """
     )
     suspend fun getContactsWithBirthdayOn(monthDay: String): List<ContactEntity>

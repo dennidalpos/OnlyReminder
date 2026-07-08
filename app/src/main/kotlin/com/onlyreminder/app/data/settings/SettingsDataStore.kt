@@ -31,6 +31,9 @@ class SettingsDataStore @Inject constructor(
         val ONBOARDING_COMPLETED = booleanPreferencesKey("onboarding_completed")
         val SEND_MODE = stringPreferencesKey("send_mode")
         val BACKUP_FOLDER_URI = stringPreferencesKey("backup_folder_uri")
+        val NORMALIZE_PHONE = booleanPreferencesKey("normalize_phone")
+        val LAST_BACKUP_TIME = stringPreferencesKey("last_backup_time")
+        val BIRTHDAY_TEMPLATE_ID = intPreferencesKey("birthday_template_id")
 
         // WhatsApp API Settings (Encrypted by EncryptedPrefs usually, but for UI state we might use DataStore for non-sensitive ones)
         val WA_BUSINESS_ACCOUNT_ID = stringPreferencesKey("wa_business_account_id")
@@ -51,6 +54,9 @@ class SettingsDataStore @Inject constructor(
         dataStore.data.map { it[Keys.ONBOARDING_COMPLETED] ?: false }
     val sendMode: Flow<String> = dataStore.data.map { it[Keys.SEND_MODE] ?: "REMINDER_ONLY" }
     val backupFolderUri: Flow<String?> = dataStore.data.map { it[Keys.BACKUP_FOLDER_URI] }
+    val normalizePhone: Flow<Boolean> = dataStore.data.map { it[Keys.NORMALIZE_PHONE] ?: true }
+    val lastBackupTime: Flow<String?> = dataStore.data.map { it[Keys.LAST_BACKUP_TIME] }
+    val birthdayTemplateId: Flow<Long?> = dataStore.data.map { it[Keys.BIRTHDAY_TEMPLATE_ID]?.toLong() }
 
     suspend fun setOnboardingCompleted(completed: Boolean) {
         dataStore.edit { it[Keys.ONBOARDING_COMPLETED] = completed }
@@ -62,6 +68,10 @@ class SettingsDataStore @Inject constructor(
 
     suspend fun setBackupFolderUri(uri: String) {
         dataStore.edit { it[Keys.BACKUP_FOLDER_URI] = uri }
+    }
+
+    suspend fun setNormalizePhone(normalize: Boolean) {
+        dataStore.edit { it[Keys.NORMALIZE_PHONE] = normalize }
     }
 
     suspend fun updateLanguage(language: String) {
@@ -82,5 +92,16 @@ class SettingsDataStore @Inject constructor(
 
     suspend fun updateBackupRetentionCount(count: Int) {
         dataStore.edit { it[Keys.BACKUP_RETENTION_COUNT] = count }
+    }
+
+    suspend fun updateLastBackupTime(time: String) {
+        dataStore.edit { it[Keys.LAST_BACKUP_TIME] = time }
+    }
+
+    suspend fun setBirthdayTemplateId(id: Long?) {
+        dataStore.edit {
+            if (id == null) it.remove(Keys.BIRTHDAY_TEMPLATE_ID)
+            else it[Keys.BIRTHDAY_TEMPLATE_ID] = id.toInt()
+        }
     }
 }

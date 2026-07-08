@@ -3,7 +3,6 @@ package com.onlyreminder.app.features.settings.ui
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -17,13 +16,18 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import androidx.compose.material3.TimePicker
+import androidx.compose.material3.rememberTimePickerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
@@ -33,17 +37,26 @@ import androidx.navigation.NavController
 import com.onlyreminder.app.R
 import com.onlyreminder.app.core.navigation.Route
 import com.onlyreminder.app.core.ui.components.OnlyReminderTopBar
+import java.time.LocalTime
+import java.time.format.DateTimeFormatter
 
+@OptIn(androidx.compose.material3.ExperimentalMaterial3Api::class)
 @Composable
 fun SettingsScreen(
     navController: NavController,
     viewModel: SettingsViewModel = hiltViewModel(),
 ) {
     val language by viewModel.language.collectAsState()
-    val sendMode by viewModel.sendMode.collectAsState()
     val countryCode by viewModel.defaultCountryCode.collectAsState()
     val notificationTime by viewModel.birthdayNotificationTime.collectAsState()
     val backupUri by viewModel.backupFolderUri.collectAsState()
+    val normalizePhone by viewModel.normalizePhone.collectAsState()
+    val templates by viewModel.templates.collectAsState()
+    val birthdayTemplateId by viewModel.birthdayTemplateId.collectAsState()
+
+    var showTimePicker by remember { mutableStateOf(false) }
+    var showCountryPicker by remember { mutableStateOf(false) }
+    var showTemplatePicker by remember { mutableStateOf(false) }
 
     Scaffold(
         topBar = {
@@ -90,53 +103,42 @@ fun SettingsScreen(
             )
 
             ListItem(
-                headlineContent = { Text(stringResource(id = R.string.default_country_code)) },
-                supportingContent = { Text(countryCode) },
+                headlineContent = { Text(stringResource(id = R.string.normalize_phone_label)) },
+                supportingContent = { Text(stringResource(id = R.string.normalize_phone_desc)) },
                 trailingContent = {
-                    // Simplified: toggle between +39 and +1
-                    TextButton(onClick = { viewModel.setDefaultCountryCode(if (countryCode == "+39") "+1" else "+39") }) {
-                        Text(stringResource(id = R.string.toggle))
-                    }
+                    Switch(
+                        checked = normalizePhone,
+                        onCheckedChange = { viewModel.setNormalizePhone(it) })
                 }
             )
+
+            if (normalizePhone) {
+                ListItem(
+                    headlineContent = { Text(stringResource(id = R.string.default_country_code)) },
+                    supportingContent = { Text(countryCode) },
+                    trailingContent = {
+                        TextButton(onClick = { showCountryPicker = true }) {
+                            Text(stringResource(id = R.string.change))
+                        }
+                    }
+                )
+            }
 
             HorizontalDivider()
             Text(
-                stringResource(id = R.string.sending_mode_header),
+                stringResource(id = R.string.security_title),
                 style = MaterialTheme.typography.titleMedium
             )
 
-            Column {
-                val modes = listOf(
-                    "REMINDER_ONLY" to stringResource(R.string.send_mode_reminder_only),
-                    "MANUAL_WA" to stringResource(R.string.send_mode_manual_wa),
-                    "WA_API" to stringResource(R.string.send_mode_wa_api)
-                )
-                modes.forEach { (mode, label) ->
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        RadioButton(
-                            selected = sendMode == mode,
-                            onClick = { viewModel.setSendMode(mode) })
-                        Text(label, modifier = Modifier.padding(start = 8.dp))
-                    }
+            ListItem(
+                headlineContent = { Text(stringResource(id = R.string.change_pin)) },
+                trailingContent = {
+                    Icon(Icons.Default.ChevronRight, contentDescription = null)
+                },
+                modifier = Modifier.clickable { 
+                    navController.navigate(Route.Security)
                 }
-            }
-
-            if (sendMode == "WA_API") {
-                ListItem(
-                    headlineContent = { Text(stringResource(R.string.config_wa_api)) },
-                    supportingContent = { Text(stringResource(R.string.config_wa_api_desc)) },
-                    trailingContent = {
-                        Icon(Icons.Default.ChevronRight, contentDescription = null)
-                    },
-                    modifier = Modifier
-                        .padding(start = 16.dp)
-                        .clickable { navController.navigate(Route.WhatsAppApi) }
-                )
-            }
+            )
 
             HorizontalDivider()
             Text(
@@ -146,7 +148,33 @@ fun SettingsScreen(
 
             ListItem(
                 headlineContent = { Text(stringResource(id = R.string.notification_time)) },
-                supportingContent = { Text(notificationTime) }
+                supportingContent = { Text(notificationTime) },
+                trailingContent = {
+                    TextButton(onClick = { showTimePicker = true }) {
+                        Text(stringResource(id = R.string.change))
+                    }
+                }
+            )
+
+            val selectedTemplate = templates.find { it.id == birthdayTemplateId }
+            ListItem(
+                headlineContent = { Text(stringResource(id = R.string.birthday_template)) },
+                supportingContent = { 
+                    Text(selectedTemplate?.name ?: stringResource(id = R.string.not_set)) 
+                },
+                trailingContent = {
+                    TextButton(onClick = { showTemplatePicker = true }) {
+                        Text(stringResource(id = R.string.change))
+                    }
+                }
+            )
+
+            ListItem(
+                headlineContent = { Text(stringResource(id = R.string.templates_title)) },
+                trailingContent = {
+                    Icon(Icons.Default.ChevronRight, contentDescription = null)
+                },
+                modifier = Modifier.clickable { navController.navigate(Route.Templates) }
             )
 
             HorizontalDivider()
@@ -171,5 +199,94 @@ fun SettingsScreen(
                 }
             )
         }
+    }
+
+    if (showTimePicker) {
+        val currentTime = try { LocalTime.parse(notificationTime) } catch(e: Exception) { LocalTime.of(9, 0) }
+        val timePickerState = rememberTimePickerState(
+            initialHour = currentTime.hour,
+            initialMinute = currentTime.minute
+        )
+
+        androidx.compose.material3.AlertDialog(
+            onDismissRequest = { showTimePicker = false },
+            confirmButton = {
+                TextButton(onClick = {
+                    val newTime = LocalTime.of(timePickerState.hour, timePickerState.minute)
+                        .format(DateTimeFormatter.ofPattern("HH:mm"))
+                    viewModel.setBirthdayNotificationTime(newTime)
+                    showTimePicker = false
+                }) {
+                    Text(stringResource(id = R.string.ok))
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { showTimePicker = false }) {
+                    Text(stringResource(id = R.string.cancel))
+                }
+            },
+            text = {
+                TimePicker(state = timePickerState)
+            }
+        )
+    }
+
+    if (showCountryPicker) {
+        val countries = com.onlyreminder.app.core.security.SecurityUtils.countryCodes
+        androidx.compose.material3.AlertDialog(
+            onDismissRequest = { showCountryPicker = false },
+            title = { Text(stringResource(id = R.string.select_country_code)) },
+            text = {
+                Column(modifier = Modifier.verticalScroll(rememberScrollState())) {
+                    countries.forEach { country ->
+                        ListItem(
+                            headlineContent = { Text("${country.code} (${country.name})") },
+                            modifier = Modifier.clickable {
+                                viewModel.setDefaultCountryCode(country.code)
+                                showCountryPicker = false
+                            }
+                        )
+                    }
+                }
+            },
+            confirmButton = {
+                TextButton(onClick = { showCountryPicker = false }) {
+                    Text(stringResource(id = R.string.cancel))
+                }
+            }
+        )
+    }
+
+    if (showTemplatePicker) {
+        androidx.compose.material3.AlertDialog(
+            onDismissRequest = { showTemplatePicker = false },
+            title = { Text(stringResource(id = R.string.select_template)) },
+            text = {
+                Column(modifier = Modifier.verticalScroll(rememberScrollState())) {
+                    ListItem(
+                        headlineContent = { Text(stringResource(id = R.string.none)) },
+                        modifier = Modifier.clickable {
+                            viewModel.setBirthdayTemplateId(null)
+                            showTemplatePicker = false
+                        }
+                    )
+                    templates.forEach { template ->
+                        ListItem(
+                            headlineContent = { Text(template.name) },
+                            supportingContent = { Text(template.language) },
+                            modifier = Modifier.clickable {
+                                viewModel.setBirthdayTemplateId(template.id)
+                                showTemplatePicker = false
+                            }
+                        )
+                    }
+                }
+            },
+            confirmButton = {
+                TextButton(onClick = { showTemplatePicker = false }) {
+                    Text(stringResource(id = R.string.cancel))
+                }
+            }
+        )
     }
 }

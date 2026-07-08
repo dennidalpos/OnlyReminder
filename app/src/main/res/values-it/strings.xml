@@ -4,6 +4,9 @@
     <string name="welcome_message">Benvenuto in OnlyReminder</string>
     <string name="welcome_description">Gestisci la tua rete professionale, tieni traccia dei compleanni e invia messaggi personalizzati in modo sicuro e privato.</string>
     <string name="next">Avanti</string>
+    <string name="birthday_monitoring">Monitoraggio Compleanno</string>
+    <string name="monitoring_enabled">Attivo</string>
+    <string name="monitoring_disabled">Disattivato</string>
     <string name="back">Indietro</string>
     <string name="finish">Fine</string>
     <string name="language_selection">Lingua</string>
@@ -103,6 +106,8 @@
     <!-- Step 08 & 09: Importazione -->
     <string name="import_contacts">Importa Contatti</string>
     <string name="import_file">Importa File</string>
+    <string name="error_reading_contacts">Errore durante la lettura dei contatti: %1$s</string>
+    <string name="import_from_phone">Importa dal Telefono</string>
     <string name="select_file">Seleziona un file (CSV, XLSX, JSON, XML) per importare i contatti</string>
     <string name="pick_file">Scegli File</string>
     <string name="map_columns">Mappa Colonne</string>
@@ -148,6 +153,12 @@
     <string name="sending_mode_header">Modalità Invio</string>
     <string name="birthdays_header">Compleanni</string>
     <string name="notification_time">Orario Notifiche</string>
+    <string name="birthday_template">Template Compleanno</string>
+    <string name="select_template">Seleziona Template</string>
+    <string name="normalize_phone_label">Normalizza Numeri di Telefono</string>
+    <string name="normalize_phone_desc">Aggiungi automaticamente il prefisso e pulisci il formato</string>
+    <string name="select_country_code">Seleziona Prefisso Internazionale</string>
+    <string name="change_pin">Cambia PIN</string>
     <string name="backup_header">Backup</string>
     <string name="backup_location">Posizione Backup</string>
     <string name="select">Seleziona</string>
@@ -253,7 +264,10 @@
     <string name="start_by_adding_contacts">Inizia aggiungendo dei contatti.</string>
     <string name="saved_contacts_count_new">Hai %1$d contatti salvati.</string>
     <string name="pending_tasks_summary">Hai %1$d attività da completare oggi.</string>
-    <string name="birthdays_today_count">Oggi compiono gli anni %1$d contatti!</string>
+    <string name="birthdays_today_count">Oggi: %1$d</string>
+    <string name="birthdays_tomorrow_count">Domani: %1$d</string>
+    <string name="backup_required_title">Backup Consigliato</string>
+    <string name="backup_required_desc">I tuoi dati non sono stati salvati di recente. Proteggili dalla cancellazione accidentale.</string>
     <string name="report_finale">Report Finale</string>
     <string name="summary">Riepilogo</string>
     <string name="total_found">Totale Trovati</string>

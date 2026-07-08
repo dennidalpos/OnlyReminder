@@ -20,6 +20,7 @@ import javax.inject.Inject
 @HiltViewModel
 class ContactEditViewModel @Inject constructor(
     private val repository: ContactRepositoryImpl,
+    private val settingsDataStore: com.onlyreminder.app.data.settings.SettingsDataStore,
     savedStateHandle: SavedStateHandle
 ) : ViewModel() {
 
@@ -105,6 +106,17 @@ class ContactEditViewModel @Inject constructor(
         _uiState.value = _uiState.value.copy(tags = value)
     }
 
+    private fun normalizePhone(phone: String, defaultCode: String): String {
+        var clean = phone.replace(Regex("[\\s\\-\\(\\)]"), "")
+        if (clean.startsWith("00")) {
+            clean = "+" + clean.substring(2)
+        }
+        if (!clean.startsWith("+") && clean.isNotEmpty()) {
+            clean = "$defaultCode$clean"
+        }
+        return clean
+    }
+
     fun saveContact(onSuccess: () -> Unit) {
         val state = _uiState.value
         if (state.displayName.isBlank()) {
@@ -113,13 +125,22 @@ class ContactEditViewModel @Inject constructor(
         }
 
         viewModelScope.launch {
+            val normalize = settingsDataStore.normalizePhone.first()
+            val countryCode = settingsDataStore.defaultCountryCode.first()
+            
+            val normalizedPhone = if (normalize) {
+                normalizePhone(state.phone, countryCode)
+            } else {
+                state.phone
+            }
+
             val contact = ContactEntity(
                 id = contactId ?: 0,
                 firstName = state.firstName,
                 lastName = state.lastName,
                 displayName = state.displayName,
                 phone = state.phone,
-                normalizedPhone = state.phone, // Simplified for now
+                normalizedPhone = normalizedPhone,
                 email = state.email,
                 company = state.company,
                 birthday = state.birthday.ifBlank { null },

@@ -90,6 +90,15 @@ fun SecurityScreen(
 
             if (isPinSet) {
                 ListItem(
+                    headlineContent = { Text(stringResource(id = R.string.change_pin)) },
+                    trailingContent = {
+                        TextButton(onClick = { showPinDialog = true }) {
+                            Text(stringResource(id = R.string.change))
+                        }
+                    }
+                )
+
+                ListItem(
                     headlineContent = { Text(stringResource(id = R.string.biometric_enable)) },
                     trailingContent = {
                         Switch(

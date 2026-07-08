@@ -15,6 +15,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Backup
 import androidx.compose.material.icons.filled.Description
 import androidx.compose.material.icons.filled.Group
 import androidx.compose.material.icons.filled.NotificationsActive
@@ -89,13 +90,18 @@ fun HomeScreen(
             SummarySection(uiState.contactCount, uiState.upcomingBirthdays.size)
 
             // 2. Urgent Action (Review)
-            if (uiState.birthdayReviewRequired) {
+            if (uiState.birthdaysTodayCount > 0 || uiState.birthdaysTomorrowCount > 0) {
                 UrgentActionCard(
                     title = stringResource(R.string.birthday_review_title),
-                    description = if (uiState.birthdaysTodayCount > 0)
-                        stringResource(R.string.birthdays_today_count, uiState.birthdaysTodayCount)
-                    else
-                        stringResource(R.string.new_birthdays_to_review),
+                    description = buildString {
+                        if (uiState.birthdaysTodayCount > 0) {
+                            append(stringResource(R.string.birthdays_today_count, uiState.birthdaysTodayCount))
+                        }
+                        if (uiState.birthdaysTomorrowCount > 0) {
+                            if (isNotEmpty()) append(" • ")
+                            append(stringResource(R.string.birthdays_tomorrow_count, uiState.birthdaysTomorrowCount))
+                        }
+                    },
                     icon = Icons.Default.NotificationsActive,
                     onClick = { navController.navigate(Route.BirthdayReview) }
                 )
@@ -110,6 +116,15 @@ fun HomeScreen(
                     ),
                     icon = Icons.Default.Task,
                     onClick = { navController.navigate(Route.Tasks) }
+                )
+            }
+
+            if (uiState.showBackupWarning) {
+                UrgentActionCard(
+                    title = stringResource(R.string.backup_required_title),
+                    description = stringResource(R.string.backup_required_desc),
+                    icon = Icons.Default.Backup,
+                    onClick = { navController.navigate(Route.Backup) }
                 )
             }
 

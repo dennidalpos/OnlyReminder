@@ -31,7 +31,7 @@ import com.onlyreminder.app.data.database.entities.TemplateEntity
         BirthdayRunItemEntity::class,
         MessageLogEntity::class,
     ],
-    version = 1,
+    version = 2,
     exportSchema = false
 )
 @TypeConverters(Converters::class)

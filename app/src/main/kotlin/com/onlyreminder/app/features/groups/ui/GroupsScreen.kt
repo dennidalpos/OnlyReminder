@@ -10,6 +10,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.Assignment
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.filled.Delete
@@ -133,7 +134,8 @@ fun GroupsScreen(
                         },
                         onLongClick = { viewModel.toggleGroupSelection(group.id) },
                         onEdit = { navController.navigate(Route.GroupEdit(group.id)) },
-                        onDelete = { viewModel.deleteGroup(group) }
+                        onDelete = { viewModel.deleteGroup(group) },
+                        onCreateTask = { navController.navigate(Route.TaskEdit(groupId = group.id)) }
                     )
                     HorizontalDivider(modifier = Modifier.padding(horizontal = 16.dp))
                 }
@@ -179,7 +181,8 @@ fun GroupItem(
     onClick: () -> Unit,
     onLongClick: () -> Unit,
     onEdit: () -> Unit,
-    onDelete: () -> Unit
+    onDelete: () -> Unit,
+    onCreateTask: () -> Unit
 ) {
     ListItem(
         headlineContent = { Text(text = group.name) },
@@ -196,6 +199,12 @@ fun GroupItem(
         trailingContent = {
             if (!isSelectionMode) {
                 Row {
+                    IconButton(onClick = onCreateTask) {
+                        Icon(
+                            imageVector = Icons.AutoMirrored.Filled.Assignment,
+                            contentDescription = stringResource(id = R.string.create_task)
+                        )
+                    }
                     IconButton(onClick = onEdit) {
                         Icon(
                             imageVector = Icons.Default.Edit,

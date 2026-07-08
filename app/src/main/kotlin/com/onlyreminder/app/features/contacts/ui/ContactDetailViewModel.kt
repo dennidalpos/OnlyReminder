@@ -72,6 +72,16 @@ class ContactDetailViewModel @Inject constructor(
         }
     }
 
+    fun toggleBirthdayMonitoring() {
+        viewModelScope.launch {
+            _contact.value?.let { current ->
+                val updated = current.copy(isBirthdayMonitored = !current.isBirthdayMonitored)
+                repository.updateContact(updated)
+                _contact.value = updated
+            }
+        }
+    }
+
     fun openWhatsApp(context: android.content.Context) {
         val c = _contact.value ?: return
         whatsappManager.openWhatsAppChat(context, c.phone, "Hi ${c.firstName}, how are you?")

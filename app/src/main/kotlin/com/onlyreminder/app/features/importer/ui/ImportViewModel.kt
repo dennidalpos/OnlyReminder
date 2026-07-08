@@ -33,7 +33,8 @@ import javax.inject.Inject
 class ImportViewModel @Inject constructor(
     @ApplicationContext private val context: Context,
     private val repository: ContactRepositoryImpl,
-    private val backupManager: com.onlyreminder.app.features.backup.domain.BackupManager
+    private val backupManager: com.onlyreminder.app.features.backup.domain.BackupManager,
+    private val settingsDataStore: com.onlyreminder.app.data.settings.SettingsDataStore
 ) : ViewModel() {
 
     private val csvParser = CsvParser()
@@ -59,6 +60,77 @@ class ImportViewModel @Inject constructor(
 
     private val _error = MutableStateFlow<UiText?>(null)
     val error = _error.asStateFlow()
+
+    fun importFromSystem() {
+        viewModelScope.launch {
+            _isLoading.value = true
+            _error.value = null
+            try {
+                val normalize = settingsDataStore.normalizePhone.first()
+                val countryCode = settingsDataStore.defaultCountryCode.first()
+                
+                val contacts = withContext(Dispatchers.IO) {
+                    val systemContacts = mutableListOf<ImportContact>()
+                    val contentResolver = context.contentResolver
+                    val cursor = contentResolver.query(
+                        android.provider.ContactsContract.CommonDataKinds.Phone.CONTENT_URI,
+                        null, null, null, null
+                    )
+                    cursor?.use {
+                        val nameIdx = it.getColumnIndex(android.provider.ContactsContract.CommonDataKinds.Phone.DISPLAY_NAME)
+                        val phoneIdx = it.getColumnIndex(android.provider.ContactsContract.CommonDataKinds.Phone.NUMBER)
+                        val idIdx = it.getColumnIndex(android.provider.ContactsContract.CommonDataKinds.Phone.CONTACT_ID)
+
+                        var count = 0
+                        while (it.moveToNext()) {
+                            if (BuildConfig.FLAVOR == "demo" && count >= 10) break
+                            
+                            val name = it.getString(nameIdx) ?: ""
+                            val phone = it.getString(phoneIdx) ?: ""
+                            val contactId = it.getString(idIdx)
+                            
+                            // ... existing code ...
+                            var birthday: String? = null
+                            val bDayCursor = contentResolver.query(
+                                android.provider.ContactsContract.Data.CONTENT_URI,
+                                arrayOf(android.provider.ContactsContract.CommonDataKinds.Event.START_DATE),
+                                "${android.provider.ContactsContract.Data.CONTACT_ID} = ? AND ${android.provider.ContactsContract.Data.MIMETYPE} = ? AND ${android.provider.ContactsContract.CommonDataKinds.Event.TYPE} = ?",
+                                arrayOf(contactId, android.provider.ContactsContract.CommonDataKinds.Event.CONTENT_ITEM_TYPE, android.provider.ContactsContract.CommonDataKinds.Event.TYPE_BIRTHDAY.toString()),
+                                null
+                            )
+                            bDayCursor?.use { bc ->
+                                if (bc.moveToFirst()) {
+                                    birthday = bc.getString(0)
+                                }
+                            }
+
+                            systemContacts.add(
+                                validateAndNormalize(
+                                    ImportContact(
+                                        displayName = name,
+                                        phone = phone,
+                                        birthday = birthday,
+                                        source = "System Contacts"
+                                    ),
+                                    normalize,
+                                    countryCode
+                                )
+                            )
+                            count++
+                        }
+                    }
+                    systemContacts
+                }
+                
+                val finalContacts = detectDuplicates(contacts)
+                _currentStep.value = ImportStep.ValidationAndDeduplication(finalContacts)
+            } catch (e: Exception) {
+                _error.value = UiText.StringResource(R.string.error_reading_contacts, e.message ?: "")
+            } finally {
+                _isLoading.value = false
+            }
+        }
+    }
 
     fun loadFile(uri: Uri) {
         viewModelScope.launch {
@@ -135,6 +207,9 @@ class ImportViewModel @Inject constructor(
         viewModelScope.launch {
             _isLoading.value = true
             try {
+                val normalize = settingsDataStore.normalizePhone.first()
+                val countryCode = settingsDataStore.defaultCountryCode.first()
+                
                 val contacts = withContext(Dispatchers.Default) {
                     val header = rows.firstOrNull()
                     val dataRows = if (header != null) rows.drop(1) else emptyList()
@@ -187,7 +262,7 @@ class ImportViewModel @Inject constructor(
                         }
 
                         // Normalization & Validation
-                        validateAndNormalize(importContact)
+                        validateAndNormalize(importContact, normalize, countryCode)
                     }
                 }
 
@@ -203,27 +278,31 @@ class ImportViewModel @Inject constructor(
         }
     }
 
-    private fun validateAndNormalize(contact: ImportContact): ImportContact {
+    private fun validateAndNormalize(
+        contact: ImportContact,
+        normalize: Boolean,
+        countryCode: String
+    ): ImportContact {
         val errors = mutableListOf<ImportError>()
-        val normalizedPhone = normalizePhone(contact.phone)
+        val finalPhone = if (normalize) normalizePhone(contact.phone, countryCode) else contact.phone
 
         if (contact.displayName.isBlank()) errors.add(ImportError.MISSING_DISPLAY_NAME)
         if (contact.phone.isBlank()) errors.add(ImportError.MISSING_PHONE_NUMBER)
 
         return contact.copy(
-            phone = normalizedPhone,
+            phone = finalPhone,
             isValid = errors.isEmpty(),
             validationErrors = errors
         )
     }
 
-    private fun normalizePhone(phone: String): String {
+    private fun normalizePhone(phone: String, defaultCode: String): String {
         var clean = phone.replace(Regex("[\\s\\-\\(\\)]"), "")
         if (clean.startsWith("00")) {
             clean = "+" + clean.substring(2)
         }
         if (!clean.startsWith("+") && clean.isNotEmpty()) {
-            clean = "+39$clean"
+            clean = "$defaultCode$clean"
         }
         return clean
     }

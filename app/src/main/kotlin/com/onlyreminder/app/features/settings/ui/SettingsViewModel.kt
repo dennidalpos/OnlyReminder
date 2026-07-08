@@ -11,8 +11,13 @@ import javax.inject.Inject
 
 @HiltViewModel
 class SettingsViewModel @Inject constructor(
-    private val settingsDataStore: SettingsDataStore
+    private val settingsDataStore: SettingsDataStore,
+    private val taskScheduler: com.onlyreminder.app.core.notifications.TaskScheduler,
+    private val mainRepository: com.onlyreminder.app.data.repository.MainRepositoryImpl
 ) : ViewModel() {
+
+    val templates = mainRepository.getAllTemplates()
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
 
     val language =
         settingsDataStore.language.stateIn(viewModelScope, SharingStarted.WhileSubscribed(), "en")
@@ -36,6 +41,16 @@ class SettingsViewModel @Inject constructor(
         SharingStarted.WhileSubscribed(),
         null
     )
+    val normalizePhone = settingsDataStore.normalizePhone.stateIn(
+        viewModelScope,
+        SharingStarted.WhileSubscribed(),
+        true
+    )
+    val birthdayTemplateId = settingsDataStore.birthdayTemplateId.stateIn(
+        viewModelScope,
+        SharingStarted.WhileSubscribed(),
+        null
+    )
 
     fun setLanguage(lang: String) {
         viewModelScope.launch { settingsDataStore.updateLanguage(lang) }
@@ -50,10 +65,21 @@ class SettingsViewModel @Inject constructor(
     }
 
     fun setBirthdayNotificationTime(time: String) {
-        viewModelScope.launch { settingsDataStore.updateBirthdayNotificationTime(time) }
+        viewModelScope.launch { 
+            settingsDataStore.updateBirthdayNotificationTime(time)
+            taskScheduler.rescheduleBirthdayWorker(time)
+        }
     }
 
     fun setBackupFolder(uri: String) {
         viewModelScope.launch { settingsDataStore.setBackupFolderUri(uri) }
+    }
+
+    fun setNormalizePhone(normalize: Boolean) {
+        viewModelScope.launch { settingsDataStore.setNormalizePhone(normalize) }
+    }
+
+    fun setBirthdayTemplateId(id: Long?) {
+        viewModelScope.launch { settingsDataStore.setBirthdayTemplateId(id) }
     }
 }
