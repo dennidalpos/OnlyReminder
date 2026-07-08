@@ -69,7 +69,7 @@ class MainActivity : ComponentActivity() {
                         val startDestination =
                             if (onboardingCompleted) Route.Home else Route.Onboarding
                         MainScreen(
-                            startDestination = startDestination
+                            startDestination = startDestination,
                         )
                     }
                 }

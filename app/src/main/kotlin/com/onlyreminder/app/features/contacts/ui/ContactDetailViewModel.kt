@@ -18,7 +18,7 @@ import javax.inject.Inject
 class ContactDetailViewModel @Inject constructor(
     private val repository: MainRepository,
     private val whatsappManager: WhatsAppManualManager,
-    savedStateHandle: SavedStateHandle
+    savedStateHandle: SavedStateHandle,
 ) : ViewModel() {
 
     private val contactId: Long = checkNotNull(savedStateHandle["id"])

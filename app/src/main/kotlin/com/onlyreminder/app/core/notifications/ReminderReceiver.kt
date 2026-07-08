@@ -25,7 +25,7 @@ class ReminderReceiver : BroadcastReceiver() {
 
         CoroutineScope(Dispatchers.IO).launch {
             val task = repository.getTaskById(taskId)
-            if (task != null && (task.status == TaskStatus.PENDING)) {
+            if ((task != null) && (task.status == TaskStatus.PENDING)) {
                 notificationHelper.showTaskNotification(
                     taskId = task.id,
                     title = context.getString(com.onlyreminder.app.R.string.reminder_notification_title, task.title),

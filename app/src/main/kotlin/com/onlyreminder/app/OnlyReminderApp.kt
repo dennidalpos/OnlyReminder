@@ -9,7 +9,6 @@ import androidx.work.WorkManager
 import com.onlyreminder.app.core.notifications.TaskScheduler
 import com.onlyreminder.app.data.database.DatabaseSeeder
 import com.onlyreminder.app.data.settings.SettingsDataStore
-import com.onlyreminder.app.R
 import dagger.hilt.android.HiltAndroidApp
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers

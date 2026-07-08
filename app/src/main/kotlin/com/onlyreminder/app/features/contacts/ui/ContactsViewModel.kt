@@ -26,7 +26,7 @@ import javax.inject.Inject
 @HiltViewModel
 class ContactsViewModel @Inject constructor(
     private val repository: MainRepository,
-    private val taskScheduler: com.onlyreminder.app.core.notifications.TaskScheduler
+    private val taskScheduler: com.onlyreminder.app.core.notifications.TaskScheduler,
 ) : ViewModel() {
 
     private val _searchQuery = MutableStateFlow("")
@@ -62,17 +62,17 @@ class ContactsViewModel @Inject constructor(
         if (params.tag != null) {
             repository.getContactsByTag(params.tag).map { list ->
                 list.filter {
-                    (params.query.isEmpty() || it.displayName.contains(
+                    ((params.query.isEmpty() || it.displayName.contains(
                         params.query,
                         ignoreCase = true
-                    ) || it.phone.contains(params.query)) &&
+                    ) || it.phone.contains(params.query))) &&
                             (params.groupId == null || it.groupId == params.groupId) &&
                             (params.status == null || it.status == params.status)
                 }
             }
         } else {
             repository.searchContacts(
-                query = if (params.query.isEmpty()) null else params.query,
+                query = params.query.ifEmpty { null },
                 groupId = params.groupId,
                 status = params.status
             )
@@ -130,7 +130,7 @@ class ContactsViewModel @Inject constructor(
     }
 
     fun selectAllContacts() {
-        _selectedContactIds.value = contacts.value.map { it.id }.toSet()
+        _selectedContactIds.value = contacts.value.asSequence().map { it.id }.toSet()
     }
 
     fun clearSelection() {
@@ -185,18 +185,6 @@ class ContactsViewModel @Inject constructor(
                 taskScheduler.scheduleTask(task.copy(id = savedId))
             }
             clearSelection()
-        }
-    }
-
-    fun archiveContact(contact: ContactEntity) {
-        viewModelScope.launch {
-            repository.archiveContact(contact.id)
-        }
-    }
-
-    fun deleteContact(contact: ContactEntity) {
-        viewModelScope.launch {
-            repository.hardDeleteContact(contact)
         }
     }
 }

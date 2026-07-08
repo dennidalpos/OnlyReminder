@@ -24,13 +24,13 @@ data class HomeUiState(
     val pendingTasks: List<TaskEntity> = emptyList(),
     val birthdayReviewRequired: Boolean = false,
     val sendMode: SendMode = SendMode.REMINDER_ONLY,
-    val showBackupWarning: Boolean = false
+    val showBackupWarning: Boolean = false,
 )
 
 @HiltViewModel
 class HomeViewModel @Inject constructor(
     repository: MainRepository,
-    private val settingsDataStore: SettingsDataStore
+    settingsDataStore: SettingsDataStore,
 ) : ViewModel() {
 
     @Suppress("UNCHECKED_CAST")
@@ -40,7 +40,7 @@ class HomeViewModel @Inject constructor(
         repository.getAllBirthdayRuns(),
         settingsDataStore.sendMode,
         settingsDataStore.lastBackupTime,
-        settingsDataStore.showBackupBanner
+        settingsDataStore.showBackupBanner,
     ) { args ->
         val contacts = args[0] as List<ContactEntity>
         val tasks = args[1] as List<TaskEntity>
@@ -63,19 +63,19 @@ class HomeViewModel @Inject constructor(
 
         HomeUiState(
             contactCount = contacts.size,
-            upcomingBirthdays = monitoredContacts.filter { isBirthdaySoon(it.birthday, today) }.take(5),
+            upcomingBirthdays = monitoredContacts.asSequence().filter { isBirthdaySoon(it.birthday, today) }.take(5).toList(),
             birthdaysTodayCount = birthdaysToday.size,
             birthdaysTomorrowCount = birthdaysTomorrow.size,
             pendingTasks = tasks,
             birthdayReviewRequired = birthdayRuns.any { it.status == com.onlyreminder.app.domain.model.BirthdayRunStatus.PENDING },
             sendMode = sendMode,
-            showBackupWarning = showBackupBannerSetting && contacts.isNotEmpty() && backupWarning
+            showBackupWarning = showBackupBannerSetting && contacts.isNotEmpty() && backupWarning,
         )
     }
         .stateIn(
             scope = viewModelScope,
             started = SharingStarted.WhileSubscribed(5000),
-            initialValue = HomeUiState()
+            initialValue = HomeUiState(),
         )
 
     private fun isBirthdayOn(birthday: String?, date: java.time.LocalDate): Boolean {
@@ -94,7 +94,7 @@ class HomeViewModel @Inject constructor(
             val bDate = java.time.LocalDate.parse(birthday)
             val birthdayThisYear = bDate.withYear(today.year)
             val diff = java.time.temporal.ChronoUnit.DAYS.between(today, birthdayThisYear)
-            diff in 1..7
+            (diff.toInt() in 1..7)
         } catch (_: Exception) {
             false
         }

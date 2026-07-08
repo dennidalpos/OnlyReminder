@@ -21,7 +21,7 @@ import javax.inject.Inject
 class ContactEditViewModel @Inject constructor(
     private val repository: ContactRepositoryImpl,
     private val settingsDataStore: com.onlyreminder.app.data.settings.SettingsDataStore,
-    savedStateHandle: SavedStateHandle
+    savedStateHandle: SavedStateHandle,
 ) : ViewModel() {
 
     private val contactId: Long? = savedStateHandle["id"]
@@ -38,9 +38,7 @@ class ContactEditViewModel @Inject constructor(
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
 
     init {
-        if (contactId != null) {
-            loadContact(contactId)
-        }
+        contactId?.let { loadContact(it) }
     }
 
     private fun loadContact(id: Long) {
@@ -107,7 +105,7 @@ class ContactEditViewModel @Inject constructor(
     }
 
     private fun normalizePhone(phone: String, defaultCode: String): String {
-        var clean = phone.replace(Regex("[\\s\\-\\(\\)]"), "")
+        var clean = phone.replace(Regex("[\\s\\-()]"), "")
         if (clean.startsWith("00")) {
             clean = "+" + clean.substring(2)
         }
@@ -159,7 +157,7 @@ class ContactEditViewModel @Inject constructor(
             }
 
             // Save tags
-            val tagList = state.tags.split(",").map { it.trim() }.filter { it.isNotEmpty() }
+            val tagList = state.tags.split(",").asSequence().map { it.trim() }.filter { it.isNotEmpty() }.toList()
             repository.updateContactTags(id, tagList)
 
             onSuccess()

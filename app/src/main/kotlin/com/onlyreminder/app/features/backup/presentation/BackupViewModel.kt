@@ -16,10 +16,10 @@ import javax.inject.Inject
 @HiltViewModel
 class BackupViewModel @Inject constructor(
     private val backupManager: BackupManager,
-    private val settingsDataStore: com.onlyreminder.app.data.settings.SettingsDataStore
+    private val settingsDataStore: com.onlyreminder.app.data.settings.SettingsDataStore,
 ) : ViewModel() {
 
-    private val _isLoading = MutableStateFlow(false)
+    private val _isLoading = MutableStateFlow(value = false)
     val isLoading: StateFlow<Boolean> = _isLoading.asStateFlow()
 
     private val _status = MutableStateFlow<UiText?>(null)

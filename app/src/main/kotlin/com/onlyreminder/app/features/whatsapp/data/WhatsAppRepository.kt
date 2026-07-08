@@ -9,7 +9,7 @@ import javax.inject.Singleton
 @Singleton
 class WhatsAppRepository @Inject constructor(
     private val apiService: WhatsAppApiService,
-    @param:SecurePrefs private val sharedPreferences: SharedPreferences
+    @param:SecurePrefs private val sharedPreferences: SharedPreferences,
 ) {
     fun getPhoneId() = sharedPreferences.getString("wa_phone_id", "") ?: ""
     fun getToken() = sharedPreferences.getString("wa_token", "") ?: ""
@@ -42,7 +42,7 @@ class WhatsAppRepository @Inject constructor(
         return try {
             val response = apiService.sendMessage(phoneId, "Bearer $token", request)
             response.isSuccessful
-        } catch (e: Exception) {
+        } catch (_: Exception) {
             false
         }
     }
@@ -58,7 +58,7 @@ class WhatsAppRepository @Inject constructor(
         return try {
             val response = apiService.sendMessage(phoneId, "Bearer $token", request)
             response.isSuccessful
-        } catch (e: Exception) {
+        } catch (_: Exception) {
             false
         }
     }
