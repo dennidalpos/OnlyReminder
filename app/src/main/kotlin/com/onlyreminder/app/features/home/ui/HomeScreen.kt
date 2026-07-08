@@ -225,6 +225,11 @@ fun ManagementSection(navController: NavController) {
             onClick = { navController.navigate(Route.Groups) }
         )
         ManagementRow(
+            title = stringResource(R.string.tasks_title),
+            icon = Icons.Default.Task,
+            onClick = { navController.navigate(Route.Tasks) }
+        )
+        ManagementRow(
             title = stringResource(R.string.templates_title),
             icon = Icons.Default.Description,
             onClick = { navController.navigate(Route.Templates) }

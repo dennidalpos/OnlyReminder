@@ -1,3 +1,5 @@
 <resources>
     <string name="app_name">OnlyReminder Demo</string>
+    <string name="onboarding_title">Setup OnlyReminder Demo</string>
+    <string name="welcome_message">Welcome to OnlyReminder Demo</string>
 </resources>
