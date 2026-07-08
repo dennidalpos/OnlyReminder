@@ -35,7 +35,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.onlyreminder.app.R
 import com.onlyreminder.app.core.ui.components.ConfirmationDialog
@@ -45,7 +45,7 @@ import com.onlyreminder.app.features.whatsapp.presentation.WhatsAppApiViewModel
 @Composable
 fun WhatsAppApiScreen(
     navController: NavController,
-    viewModel: WhatsAppApiViewModel = hiltViewModel()
+    viewModel: WhatsAppApiViewModel = hiltViewModel(),
 ) {
     val phoneId by viewModel.phoneNumberId.collectAsState()
     val token by viewModel.accessToken.collectAsState()
@@ -56,8 +56,8 @@ fun WhatsAppApiScreen(
     var tempToken by remember { mutableStateOf(token) }
     var tempTemplate by remember { mutableStateOf(template) }
 
-    var showBackDialog by remember { mutableStateOf(false) }
-    val hasChanges = tempPhoneId != phoneId || tempToken != token || tempTemplate != template
+    var showBackDialog by remember { mutableStateOf(value = false) }
+    val hasChanges = (tempPhoneId != phoneId) || (tempToken != token) || (tempTemplate != template)
 
     val onBack = {
         if (hasChanges) {
@@ -185,8 +185,7 @@ fun WhatsAppApiScreen(
                     showBackDialog = false
                     navController.navigateUp()
                 },
-                onDismiss = { showBackDialog = false }
-            )
+            ) { showBackDialog = false }
         }
     }
 }

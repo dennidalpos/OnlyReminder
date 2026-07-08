@@ -2,7 +2,6 @@ package com.onlyreminder.app.features.whatsapp.presentation
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.onlyreminder.app.data.database.entities.ContactEntity
 import com.onlyreminder.app.features.whatsapp.data.WhatsAppRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -13,7 +12,7 @@ import javax.inject.Inject
 
 @HiltViewModel
 class WhatsAppApiViewModel @Inject constructor(
-    private val repository: WhatsAppRepository
+    private val repository: WhatsAppRepository,
 ) : ViewModel() {
 
     private val _phoneNumberId = MutableStateFlow(repository.getPhoneId())
@@ -25,7 +24,7 @@ class WhatsAppApiViewModel @Inject constructor(
     private val _templateName = MutableStateFlow(repository.getTemplateName())
     val templateName: StateFlow<String> = _templateName.asStateFlow()
 
-    private val _isSending = MutableStateFlow(false)
+    private val _isSending = MutableStateFlow(value = false)
     val isSending: StateFlow<Boolean> = _isSending.asStateFlow()
 
     fun updateConfig(phoneId: String, token: String, template: String) {
@@ -33,14 +32,6 @@ class WhatsAppApiViewModel @Inject constructor(
         _accessToken.value = token
         _templateName.value = template
         repository.updateConfig(phoneId, token, template)
-    }
-
-    fun sendMessage(contact: ContactEntity) {
-        viewModelScope.launch {
-            _isSending.value = true
-            repository.sendMessage(contact)
-            _isSending.value = false
-        }
     }
 
     fun testConnection() {

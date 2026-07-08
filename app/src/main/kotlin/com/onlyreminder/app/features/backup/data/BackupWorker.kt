@@ -4,7 +4,6 @@ import android.content.Context
 import android.content.SharedPreferences
 import androidx.hilt.work.HiltWorker
 import androidx.work.CoroutineWorker
-import androidx.work.ListenableWorker
 import androidx.work.WorkerParameters
 import com.onlyreminder.app.core.security.SecurePrefs
 import com.onlyreminder.app.features.backup.domain.BackupManager
@@ -19,20 +18,16 @@ class BackupWorker @AssistedInject constructor(
     @param:SecurePrefs private val sharedPreferences: SharedPreferences,
 ) : CoroutineWorker(context, params) {
 
-    override suspend fun doWork(): ListenableWorker.Result {
+    override suspend fun doWork(): Result {
         val password = sharedPreferences.getString("backup_password", null)
-
-        if (password == null) {
-            // Scheduled backup requires a password to be set in settings
-            return ListenableWorker.Result.failure()
-        }
+            ?: return Result.failure()
 
         val file = backupManager.createBackup(password)
 
         return if (file != null) {
-            ListenableWorker.Result.success()
+            Result.success()
         } else {
-            ListenableWorker.Result.retry()
+            Result.retry()
         }
     }
 }

@@ -36,7 +36,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.onlyreminder.app.R
 import com.onlyreminder.app.core.ui.components.OnlyReminderTopBar
@@ -145,7 +145,7 @@ fun BackupScreen(
             title = {
                 Text(
                     if (isRestoreMode) stringResource(id = R.string.backup_restore_password_title)
-                    else stringResource(id = R.string.backup_create_password_title)
+                    else stringResource(id = R.string.backup_create_password_title),
                 )
             },
             text = {

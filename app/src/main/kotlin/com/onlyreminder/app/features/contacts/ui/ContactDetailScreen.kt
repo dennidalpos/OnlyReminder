@@ -54,7 +54,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.onlyreminder.app.R
 import com.onlyreminder.app.core.navigation.Route
@@ -83,7 +83,7 @@ fun ContactDetailScreen(
                     IconButton(onClick = { navController.navigateUp() }) {
                         Icon(
                             imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                            contentDescription = stringResource(id = R.string.back)
+                            contentDescription = stringResource(id = R.string.back),
                         )
                     }
                 },
@@ -95,7 +95,7 @@ fun ContactDetailScreen(
                     ) {
                         Icon(
                             imageVector = Icons.Default.Edit,
-                            contentDescription = stringResource(id = R.string.edit)
+                            contentDescription = stringResource(id = R.string.edit),
                         )
                     }
                     IconButton(
@@ -103,7 +103,7 @@ fun ContactDetailScreen(
                     ) {
                         Icon(
                             imageVector = Icons.Default.Delete,
-                            contentDescription = stringResource(id = R.string.delete)
+                            contentDescription = stringResource(id = R.string.delete),
                         )
                     }
                 },
@@ -156,7 +156,7 @@ fun ContactDetailScreen(
                 DetailItem(
                     icon = Icons.Default.Phone,
                     label = stringResource(id = R.string.phone),
-                    value = c.phone
+                    value = c.phone,
                 )
                 if (c.normalizedPhone.isNotEmpty() && (c.normalizedPhone != c.phone)) {
                     DetailItem(
@@ -168,7 +168,7 @@ fun ContactDetailScreen(
                 DetailItem(
                     icon = Icons.Default.Email,
                     label = stringResource(id = R.string.email),
-                    value = c.email
+                    value = c.email,
                 )
                 DetailItem(
                     icon = Icons.Default.Cake,
@@ -178,18 +178,18 @@ fun ContactDetailScreen(
                 DetailItem(
                     icon = Icons.Default.Group,
                     label = stringResource(id = R.string.group),
-                    value = group?.name ?: stringResource(id = R.string.none)
+                    value = group?.name ?: stringResource(id = R.string.none),
                 )
 
                 if (tags.isNotEmpty()) {
                     Spacer(modifier = Modifier.height(16.dp))
                     Text(
                         text = stringResource(id = R.string.tags),
-                        style = MaterialTheme.typography.labelLarge
+                        style = MaterialTheme.typography.labelLarge,
                     )
                     FlowRow(
                         modifier = Modifier.padding(vertical = 8.dp),
-                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                        horizontalArrangement = Arrangement.spacedBy(8.dp),
                     ) {
                         tags.forEach { tag ->
                             SuggestionChip(onClick = { }, label = { Text(tag.name) })
@@ -219,17 +219,15 @@ fun ContactDetailScreen(
                 DetailAction(
                     label = stringResource(id = R.string.create_task),
                     icon = Icons.AutoMirrored.Filled.Assignment,
-                    onClick = {
-                        navController.navigate(Route.TaskEdit(contactId = c.id))
-                    }
-                )
+                ) {
+                    navController.navigate(Route.TaskEdit(contactId = c.id))
+                }
                 DetailAction(
                     label = stringResource(id = R.string.send_wa),
                     icon = Icons.AutoMirrored.Filled.Send,
-                    onClick = {
-                        viewModel.openWhatsApp(context)
-                    }
-                )
+                ) {
+                    viewModel.openWhatsApp(context)
+                }
 
                 if (c.status != ContactStatus.ARCHIVED) {
                     Button(
@@ -302,7 +300,7 @@ fun DetailItem(icon: ImageVector, label: String, value: String) {
 
 @Composable
 fun DetailAction(label: String, icon: ImageVector, onClick: () -> Unit) {
-    androidx.compose.material3.Surface(
+    Surface(
         onClick = onClick,
         modifier = Modifier.fillMaxWidth(),
         color = Color.Transparent

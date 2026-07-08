@@ -37,7 +37,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
-import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.onlyreminder.app.R
 import com.onlyreminder.app.core.navigation.Route
@@ -61,7 +61,7 @@ fun OnboardingScreen(
                         IconButton(onClick = { viewModel.prevStep() }) {
                             Icon(
                                 imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                                contentDescription = "Back"
+                                contentDescription = stringResource(id = R.string.back)
                             )
                         }
                     }
@@ -150,12 +150,12 @@ fun LanguageStep(currentLanguage: String, onLanguageSelected: (String) -> Unit) 
         FilterChip(
             selected = currentLanguage == "en",
             onClick = { onLanguageSelected("en") },
-            label = { Text("English") }
+            label = { Text(stringResource(id = R.string.english)) }
         )
         FilterChip(
             selected = currentLanguage == "it",
             onClick = { onLanguageSelected("it") },
-            label = { Text("Italiano") }
+            label = { Text(stringResource(id = R.string.italian)) }
         )
     }
 }
@@ -169,7 +169,7 @@ fun SecurityStep(isPinSet: Boolean, onPinSet: (String) -> Unit) {
         TextField(
             value = pin,
             onValueChange = { if (it.all { c -> c.isDigit() } && it.length <= 4) pin = it },
-            label = { Text("Set 4-digit PIN") },
+            label = { Text(stringResource(id = R.string.set_pin_label)) },
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.NumberPassword),
             visualTransformation = PasswordVisualTransformation(),
             modifier = Modifier.fillMaxWidth()
@@ -180,11 +180,11 @@ fun SecurityStep(isPinSet: Boolean, onPinSet: (String) -> Unit) {
             enabled = pin.length == 4,
             modifier = Modifier.fillMaxWidth()
         ) {
-            Text("Save PIN")
+            Text(stringResource(id = R.string.save_pin))
         }
     } else {
         Text(
-            "PIN is set!",
+            stringResource(id = R.string.pin_is_set),
             style = MaterialTheme.typography.bodyLarge,
             color = MaterialTheme.colorScheme.primary
         )

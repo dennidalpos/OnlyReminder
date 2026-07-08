@@ -7,6 +7,10 @@
 -dontwarn org.apache.batik.**
 -dontwarn org.apache.poi.**
 -dontwarn org.osgi.framework.**
+-dontwarn com.github.luben.zstd.**
+-dontwarn javax.xml.stream.**
+-dontwarn net.sf.saxon.**
+-dontwarn org.apache.xmlbeans.**
 
 # Support for Tink / Security-Crypto
 -dontwarn com.google.errorprone.annotations.**

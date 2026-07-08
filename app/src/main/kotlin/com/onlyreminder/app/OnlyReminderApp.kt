@@ -18,12 +18,6 @@ import javax.inject.Inject
 @HiltAndroidApp
 class OnlyReminderApp : Application(), Configuration.Provider {
 
-    companion object {
-        init {
-            System.loadLibrary("sqlcipher")
-        }
-    }
-
     @Inject
     lateinit var workerFactory: HiltWorkerFactory
 

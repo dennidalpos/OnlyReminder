@@ -33,8 +33,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
-import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
+import androidx.compose.ui.res.stringResource
+import com.onlyreminder.app.R
 import com.onlyreminder.app.core.ui.components.DestructiveConfirmationDialog
 import com.onlyreminder.app.core.ui.components.OnlyReminderTopBar
 
@@ -54,12 +56,12 @@ fun SecurityScreen(
     Scaffold(
         topBar = {
             OnlyReminderTopBar(
-                title = "Security",
+                title = stringResource(id = R.string.security_title),
                 navigationIcon = {
                     IconButton(onClick = { navController.navigateUp() }) {
                         Icon(
                             imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                            contentDescription = "Back"
+                            contentDescription = stringResource(id = R.string.back)
                         )
                     }
                 }
@@ -74,8 +76,8 @@ fun SecurityScreen(
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
             ListItem(
-                headlineContent = { Text("App Lock (PIN)") },
-                supportingContent = { Text(if (isPinSet) "Enabled" else "Disabled") },
+                headlineContent = { Text(stringResource(id = R.string.app_lock_enable)) },
+                supportingContent = { Text(if (isPinSet) stringResource(id = R.string.enabled) else stringResource(id = R.string.disabled)) },
                 trailingContent = {
                     Switch(
                         checked = isPinSet,
@@ -88,7 +90,7 @@ fun SecurityScreen(
 
             if (isPinSet) {
                 ListItem(
-                    headlineContent = { Text("Biometric Authentication") },
+                    headlineContent = { Text(stringResource(id = R.string.biometric_enable)) },
                     trailingContent = {
                         Switch(
                             checked = isBiometricEnabled,
@@ -97,14 +99,14 @@ fun SecurityScreen(
                     }
                 )
 
-                Text(text = "Auto-lock timeout", style = MaterialTheme.typography.labelLarge)
+                Text(text = stringResource(id = R.string.auto_lock_timeout), style = MaterialTheme.typography.labelLarge)
                 val timeouts = listOf(0, 1, 5, 15)
                 Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                     timeouts.forEach { minutes ->
                         FilterChip(
                             selected = autoLockTimeout == minutes,
                             onClick = { viewModel.setAutoLockTimeout(minutes) },
-                            label = { Text(if (minutes == 0) "Immediate" else "$minutes min") }
+                            label = { Text(if (minutes == 0) stringResource(id = R.string.immediate) else stringResource(id = R.string.minutes_format, minutes)) }
                         )
                     }
                 }
@@ -117,21 +119,21 @@ fun SecurityScreen(
                 colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.error),
                 modifier = Modifier.fillMaxWidth()
             ) {
-                Text("Wipe Security Data")
+                Text(stringResource(id = R.string.wipe_security_data))
             }
         }
 
         if (showPinDialog) {
             AlertDialog(
                 onDismissRequest = { showPinDialog = false },
-                title = { Text("Set PIN") },
+                title = { Text(stringResource(id = R.string.set_pin)) },
                 text = {
                     TextField(
                         value = pinInput,
                         onValueChange = {
                             if (it.all { char -> char.isDigit() } && it.length <= 4) pinInput = it
                         },
-                        label = { Text("Enter 4-digit PIN") },
+                        label = { Text(stringResource(id = R.string.enter_pin_label)) },
                         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.NumberPassword),
                         visualTransformation = PasswordVisualTransformation()
                     )
@@ -146,12 +148,12 @@ fun SecurityScreen(
                             }
                         }
                     ) {
-                        Text("Save")
+                        Text(stringResource(id = R.string.save))
                     }
                 },
                 dismissButton = {
                     TextButton(onClick = { showPinDialog = false }) {
-                        Text("Cancel")
+                        Text(stringResource(id = R.string.cancel))
                     }
                 }
             )
@@ -159,9 +161,9 @@ fun SecurityScreen(
 
         if (showWipeDialog) {
             DestructiveConfirmationDialog(
-                title = "Wipe Security Data?",
-                message = "This will disable PIN and biometric lock. This action cannot be undone.",
-                confirmText = "Wipe",
+                title = stringResource(id = R.string.wipe_security_data_confirm_title),
+                message = stringResource(id = R.string.wipe_security_data_confirm_msg),
+                confirmText = stringResource(id = R.string.wipe),
                 onConfirm = {
                     viewModel.wipeData()
                     showWipeDialog = false

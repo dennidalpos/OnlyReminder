@@ -258,4 +258,18 @@
     <string name="summary">Summary</string>
     <string name="total_found">Total Found</string>
     <string name="details">Details</string>
+    <string name="pin_is_set">PIN is set!</string>
+    <string name="set_pin_label">Set 4-digit PIN</string>
+    <string name="save_pin">Save PIN</string>
+    <string name="enter_pin_label">Enter 4-digit PIN</string>
+    <string name="wipe_security_data">Wipe Security Data</string>
+    <string name="set_pin">Set PIN</string>
+    <string name="enabled">Enabled</string>
+    <string name="disabled">Disabled</string>
+    <string name="auto_lock_timeout">Auto-lock timeout</string>
+    <string name="immediate">Immediate</string>
+    <string name="minutes_format">%1$d min</string>
+    <string name="wipe_security_data_confirm_title">Wipe Security Data?</string>
+    <string name="wipe_security_data_confirm_msg">This will disable PIN and biometric lock. This action cannot be undone.</string>
+    <string name="wipe">Wipe</string>
 </resources>

@@ -258,4 +258,18 @@
     <string name="summary">Riepilogo</string>
     <string name="total_found">Totale Trovati</string>
     <string name="details">Dettagli</string>
+    <string name="pin_is_set">PIN impostato!</string>
+    <string name="set_pin_label">Imposta PIN di 4 cifre</string>
+    <string name="save_pin">Salva PIN</string>
+    <string name="enter_pin_label">Inserisci PIN di 4 cifre</string>
+    <string name="wipe_security_data">Cancella Dati Sicurezza</string>
+    <string name="set_pin">Imposta PIN</string>
+    <string name="enabled">Attivato</string>
+    <string name="disabled">Disattivato</string>
+    <string name="auto_lock_timeout">Timeout blocco automatico</string>
+    <string name="immediate">Immediato</string>
+    <string name="minutes_format">%1$d min</string>
+    <string name="wipe_security_data_confirm_title">Cancellare dati sicurezza?</string>
+    <string name="wipe_security_data_confirm_msg">Questo disabiliterà il PIN e il blocco biometrico. L\'azione non può essere annullata.</string>
+    <string name="wipe">Cancella</string>
 </resources>

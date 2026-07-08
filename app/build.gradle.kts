@@ -1,5 +1,9 @@
+import java.util.Properties
+import java.io.FileInputStream
+
 plugins {
     alias(libs.plugins.android.application)
+    alias(libs.plugins.kotlinAndroidPlugin)
     alias(libs.plugins.hilt.android)
     alias(libs.plugins.ksp)
     alias(libs.plugins.kotlin.serialization)
@@ -8,12 +12,12 @@ plugins {
 
 android {
     namespace = "com.onlyreminder.app"
-    compileSdk = 37
+    compileSdk = 35
 
     defaultConfig {
         applicationId = "com.onlyreminder.app"
         minSdk = 26
-        targetSdk = 37
+        targetSdk = 35
         versionCode = 2
         versionName = "1.1.0"
 
@@ -36,8 +40,27 @@ android {
         }
     }
 
+    val keystorePropertiesFile = rootProject.file("keystore/onlyreminder-release-key.properties")
+    val keystoreProperties = Properties()
+    if (keystorePropertiesFile.exists()) {
+        keystoreProperties.load(FileInputStream(keystorePropertiesFile))
+    }
+
     signingConfigs {
         create("release") {
+            if (keystorePropertiesFile.exists()) {
+                storeFile = rootProject.file(keystoreProperties["storeFile"] as String)
+                storePassword = keystoreProperties["storePassword"] as String
+                keyAlias = keystoreProperties["keyAlias"] as String
+                keyPassword = keystoreProperties["keyPassword"] as String
+            } else {
+                // Fallback to debug if release properties are missing
+                val debugSigningConfig = getByName("debug")
+                storeFile = debugSigningConfig.storeFile
+                storePassword = debugSigningConfig.storePassword
+                keyAlias = debugSigningConfig.keyAlias
+                keyPassword = debugSigningConfig.keyPassword
+            }
         }
     }
 
@@ -55,6 +78,9 @@ android {
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_17
         targetCompatibility = JavaVersion.VERSION_17
+    }
+    kotlinOptions {
+        jvmTarget = "17"
     }
     buildFeatures {
         compose = true

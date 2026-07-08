@@ -1,11 +1,12 @@
 package com.onlyreminder.app
 
-import androidx.compose.ui.test.junit4.v2.createAndroidComposeRule
+import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import androidx.test.platform.app.InstrumentationRegistry
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -53,7 +54,7 @@ class NavigationTest {
             val label = composeTestRule.activity.getString(itemRes)
             composeTestRule.onNodeWithText(label).performClick()
             composeTestRule.waitForIdle()
-            androidx.test.platform.app.InstrumentationRegistry.getInstrumentation()
+            InstrumentationRegistry.getInstrumentation()
                 .sendKeyDownUpSync(android.view.KeyEvent.KEYCODE_BACK)
             composeTestRule.waitForIdle()
         }
@@ -64,7 +65,7 @@ class NavigationTest {
         composeTestRule.waitForIdle()
 
         // Return to Home
-        androidx.test.platform.app.InstrumentationRegistry.getInstrumentation()
+        InstrumentationRegistry.getInstrumentation()
             .sendKeyDownUpSync(android.view.KeyEvent.KEYCODE_BACK)
         composeTestRule.waitForIdle()
     }

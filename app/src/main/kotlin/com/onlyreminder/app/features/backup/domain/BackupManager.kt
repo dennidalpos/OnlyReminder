@@ -87,7 +87,11 @@ class BackupManager @Inject constructor(
                 val writer = outputStream.bufferedWriter()
                 writer.write("FirstName,LastName,DisplayName,Phone,Email,Company,Birthday,Notes\n")
                 contacts.forEach { c ->
-                    writer.write("${c.firstName},${c.lastName},${c.displayName},${c.phone},${c.email},${c.company},${c.birthday},${c.notes}\n")
+                    val row = listOf(
+                        c.firstName, c.lastName, c.displayName, c.phone,
+                        c.email, c.company, c.birthday ?: "", c.notes
+                    ).joinToString(",") { "\"${it.replace("\"", "\"\"")}\"" }
+                    writer.write("$row\n")
                 }
                 writer.flush()
             }
